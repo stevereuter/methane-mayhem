@@ -1,0 +1,11 @@
+{
+    "name": "basic-template",
+    "description": "Project basic-template",
+    "toolkit": "basic",
+    "sources": ["src/main.bas"],
+    "build": "release",
+    "definitions": [],
+    "includes": [],
+    "args": [],
+    "compiler": ""
+}
