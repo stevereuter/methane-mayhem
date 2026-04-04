@@ -1,5 +1,5 @@
 # main game loop, use for loop as it's faster than goto
-for gl=zr to lm
+for gl=. to lm
     print gl;",";
 
     # set over to true (-1) to end game, or false (0) to keep going
