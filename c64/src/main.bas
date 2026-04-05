@@ -20,8 +20,6 @@ gameStart:
 # load game
 #include "gameLoad.bas"
 
-end
-
 # main loop
 #include "gameLoop.bas"
 
