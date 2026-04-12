@@ -22,29 +22,36 @@ ci(2)=12
 ci(3)=11
 ci(4)=12
 ci(5)=15
-pp=0
-dim pa(56,4)
-px=88
-xo=px
-py=66
-poke 53248, px
-poke 53249, py
+# pointer color
+pc=0
+# x position
+xp=88
+# x right side
+xr=xp
+# y position
+yp=66
+# new x position
+nx=0
+# new y position
+ny=0
+poke 53248, xp
+poke 53249, yp
 # use right side for sprite 1
 poke 53264, peek(53264) or 2
 poke 53250, 48
 poke 53251, 98
-
-lt=ti
+# time difference
+td=ti
 # main game loop, use for loop as it's faster than goto
 for gl=. to lm
     # game loop can be used as a counter for things like score multiplier, or to trigger events at certain points in the game
-    # pulse color of main sprite
-    lt=ti-lt
-    if lt<=10 then keyboardHandler
-    pp=pp+1: lt=ti
-    if pp>5 then pp=0
-    poke 53287, ci(pp)
-    poke 53288, ci(pp)
+    # pulse color of main sprites
+    td=ti-td
+    if td<=10 then keyboardHandler
+    pc=pc+1: td=ti
+    if pc>5 then pc=0
+    poke 53287, ci(pc)
+    poke 53288, ci(pc)
 
     keyboardHandler:
     get in$
@@ -56,8 +63,8 @@ for gl=. to lm
     if in$="4" then poke 53251, 170
 
     # play area positioning, 24x24 cells in an 8x7 grid
-    nx=px
-    ny=py
+    nx=xp
+    ny=yp
     if in$="w" then ny=ny-24
     if in$="s" then ny=ny+24
     if in$="a" then nx=nx-24
@@ -68,15 +75,15 @@ for gl=. to lm
     if nx>256 then gameLoopDone
     if ny>210 then gameLoopDone
 
-    px=nx
-    if px>255 then xo=px-256
-    py=ny
+    xp=nx
+    if xp>255 then xr=xp-256
+    yp=ny
 
     # Set X position
-    if px<256 then poke 53248, px: poke 53264, peek(53264) and 254
-    if px>255 then poke 53248, xo: poke 53264, peek(53264) or 1
+    if xp<256 then poke 53248, xp: poke 53264, peek(53264) and 254
+    if xp>255 then poke 53248, xr: poke 53264, peek(53264) or 1
     # Set Y position
-    poke 53249, py
+    poke 53249, yp
 
 
     # set over to true (-1) to end game, or false (0) to keep going
