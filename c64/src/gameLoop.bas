@@ -40,11 +40,13 @@ for gl=. to lm
     # game loop can be used as a counter for things like score multiplier, or to trigger events at certain points in the game
     # pulse color of main sprite
     lt=ti-lt
-    if lt>10 then pp=pp+1: lt=ti
+    if lt<=10 then keyboardHandler
+    pp=pp+1: lt=ti
     if pp>5 then pp=0
     poke 53287, ci(pp)
     poke 53288, ci(pp)
 
+    keyboardHandler:
     get in$
     if in$="" then gameLoopDone
     # selecting a tool to use
