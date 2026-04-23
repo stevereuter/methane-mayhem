@@ -29,9 +29,8 @@ print r1$;
 
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
-for i=. to 2
+for i=1 to 3
     tx$=bt$(i)
     bi=int(rnd(.)*56)
     gosub writeGameBoardTileSub
-    x=0:y=i+3:tx$=str$(bi):gosub writeTextSub
 next
