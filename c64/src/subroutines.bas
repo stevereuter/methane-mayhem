@@ -10,7 +10,7 @@ return
 
 # write to game board convert index bi to x,y
 writeGameBoardTileSub:
-    x=8 + int(bi/7)*3
-    y=2 + int(bi/7)*3
+    x=8 + (bi-int(bi/8)*8)*3
+    y=2 + int(bi/8)*3
     gosub writeTextSub
 return
