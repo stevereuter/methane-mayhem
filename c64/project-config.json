@@ -1,6 +1,6 @@
 {
-    "name": "basic-template",
-    "description": "Project basic-template",
+    "name": "Methane Mayhem",
+    "description": "Commodore 64 puzzle game where you connect pipes to complete a connection and stop the methane from escaping!",
     "toolkit": "basic",
     "sources": ["src/main.bas"],
     "build": "release",
