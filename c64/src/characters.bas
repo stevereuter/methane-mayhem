@@ -9,7 +9,7 @@ poke 53272, 48
 poke 648, 204
 
 print "{clr}methane mayhem v###VERSION### c64"
-print "{down}<c>2026 steviesaurus dev"
+print "{down}(c)2026 steviesaurus dev"
 print "{down}steviesaurus-dev.itch.io"
 
 # add custom characters from data.bas

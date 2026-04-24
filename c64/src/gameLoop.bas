@@ -40,52 +40,23 @@ poke 53249, yp
 poke 53264, peek(53264) or 2
 poke 53250, 48
 poke 53251, 98
-# time difference
+# time difference 0-9, is reset at 10 giffies
 td=ti
 # main game loop, use for loop as it's faster than goto
 for gl=. to lm
-    # game loop can be used as a counter for things like score multiplier, or to trigger events at certain points in the game
-    # pulse color of main sprites
-    td=ti-td
-    if td<=10 then keyboardHandler
-    pc=pc+1: td=ti
-    if pc>5 then pc=0
-    poke 53287, ci(pc)
-    poke 53288, ci(pc)
-
-    keyboardHandler:
+    gosub animateSelectorSub
+    # TODO: may have to convert this to ASC as we will need enter and function keys
     get in$
     if in$="" then gameLoopDone
     # selecting a tool to use
-    if in$="1" then poke 53251, 98
-    if in$="2" then poke 53251, 122
-    if in$="3" then poke 53251, 146
-    if in$="4" then poke 53251, 170
+    gosub itemSelectorHandlerSub
+    # selecting a cell on the board
+    gosub boardSelectorHandlerSub
+    # TODO: handle item placement here, will need to check if it's available for the current selected item
 
-    # play area positioning, 24x24 cells in an 8x7 grid
-    nx=xp
-    ny=yp
-    if in$="w" then ny=ny-24
-    if in$="s" then ny=ny+24
-    if in$="a" then nx=nx-24
-    if in$="d" then nx=nx+24
+    # TODO: handle win condition logic
 
-    if nx<88 then gameLoopDone
-    if ny<66 then gameLoopDone
-    if nx>256 then gameLoopDone
-    if ny>210 then gameLoopDone
-
-    xp=nx
-    if xp>255 then xr=xp-256
-    yp=ny
-
-    # Set X position
-    if xp<256 then poke 53248, xp: poke 53264, peek(53264) and 254
-    if xp>255 then poke 53248, xr: poke 53264, peek(53264) or 1
-    # Set Y position
-    poke 53249, yp
-
-
+    # TODO: handle game over logic
     # set over to true (-1) to end game, or false (0) to keep going
     ov=0
     # if game over, set loop to max to end game
@@ -94,5 +65,6 @@ for gl=. to lm
 
     gameLoopDone:
     # best to set it back to 0 (use -1 as next will increment) once reached to prevent the game from ending
+    # TODO: need to determine if we are going to use the index for anything
     if gl=5 then gl=-1
 next
