@@ -1,10 +1,14 @@
 # subroutines.bas
 
-# write tx$ to x,y
-writeTextSub:
+locateCursorSub:
     poke 211, x
     poke 214, y
     sys 58732
+return
+
+# write tx$ to x,y
+writeTextSub:
+    gosub locateCursorSub
     print tx$;
 return
 
@@ -40,9 +44,13 @@ itemSelectorHandlerSub:
     # selecting a tool to use
     # TODO: probably better to just update the selected item here then update the sprite based on that index
     # TODO: need to add function keys for selecting the items too
+    # 49 or 133
     if in$="1" then poke 53251, 98: si=0
+    # 50 or 134
     if in$="2" then poke 53251, 122: si=1
+    # 51 or 135
     if in$="3" then poke 53251, 146: si=2
+    # 52 or 136
     if in$="4" then poke 53251, 170: si=3
 return
 
@@ -53,10 +61,11 @@ boardSelectorHandlerSub:
     nx=xp
     ny=yp
     # TODO: we should try to wire up the joystick to see if it is responsive enough
-    if in$="w" then ny=ny-24
-    if in$="s" then ny=ny+24
-    if in$="a" then nx=nx-24
-    if in$="d" then nx=nx+24
+    di=0
+    if in$="w" then ny=ny-24:di=-8
+    if in$="s" then ny=ny+24:di=8
+    if in$="a" then nx=nx-24:di=-1
+    if in$="d" then nx=nx+24:di=1
     # TODO: need to add the enter key for using/placing the item selected
 
     if nx<88 then boardSelectorHandlerDone
@@ -64,6 +73,7 @@ boardSelectorHandlerSub:
     if nx>256 then boardSelectorHandlerDone
     if ny>210 then boardSelectorHandlerDone
 
+    bi=bi+di
     xp=nx
     if xp>255 then xr=xp-256
     yp=ny
@@ -74,4 +84,40 @@ boardSelectorHandlerSub:
     # Set Y position
     poke 53249, yp
     boardSelectorHandlerDone:
+return
+
+# place item handler
+placeItemHandlerSub:
+    if in<>13 then placeItemHandlerDone
+    # TODO: need to validate
+    if si<>0 then utilityHandler
+
+    # pile hander
+    tx$=bt$(it(si))
+    gosub writeGameBoardTileSub
+    gb(bi)=it(si)
+    GOSUB feedItemHandlerSub
+    goto placeItemHandlerDone
+
+    # utility handler
+    utilityHandler:
+    
+    
+    placeItemHandlerDone:
+return
+
+# feed item handler
+feedItemHandlerSub:
+    it(0)=fd
+    tx$=bt$(fd)
+    gosub writeItemSub
+    fd=int(rnd(.)*6)+1
+    gosub writeFeederHandlerSub
+RETURN
+
+# write feeder handler
+writeFeederHandlerSub:
+    x=35:y=2
+    tx$=bt$(fd)
+    gosub writeTextSub
 return

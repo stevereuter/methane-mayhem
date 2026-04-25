@@ -42,17 +42,21 @@ poke 53250, 48
 poke 53251, 98
 # time difference 0-9, is reset at 10 giffies
 td=ti
+bi=0
+si=0
 # main game loop, use for loop as it's faster than goto
 for gl=. to lm
     gosub animateSelectorSub
     # TODO: may have to convert this to ASC as we will need enter and function keys
     get in$
     if in$="" then gameLoopDone
+    in=asc(in$)
     # selecting a tool to use
     gosub itemSelectorHandlerSub
     # selecting a cell on the board
     gosub boardSelectorHandlerSub
     # TODO: handle item placement here, will need to check if it's available for the current selected item
+    gosub placeItemHandlerSub
 
     # TODO: handle win condition logic
 
