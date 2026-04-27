@@ -19,13 +19,6 @@ writeGameBoardTileSub:
     gosub writeTextSub
 return
 
-# write to items sidebar convert location (si selected item) (0,1,2,3) to x,y
-writeItemSub:
-    x=35
-    y=6 + si*3
-    gosub writeTextSub
-return
-
 # animate selectors
 animateSelectorSub:
     # TODO: we may be able to use the game index here if it has no other use
@@ -56,23 +49,23 @@ return
 
 # board selector handler
 boardSelectorHandlerSub:
-    # TODO: need to update the board index (bi), probably better to do this first and calculate the new sprite x,y based on that
     # play area positioning, 24x24 cells in an 8x7 grid
     nx=xp
     ny=yp
     # TODO: we should try to wire up the joystick to see if it is responsive enough
+    # direction
     di=0
     if in$="w" then ny=ny-24:di=-8
     if in$="s" then ny=ny+24:di=8
     if in$="a" then nx=nx-24:di=-1
     if in$="d" then nx=nx+24:di=1
-    # TODO: need to add the enter key for using/placing the item selected
 
     if nx<88 then boardSelectorHandlerDone
     if ny<66 then boardSelectorHandlerDone
     if nx>256 then boardSelectorHandlerDone
     if ny>210 then boardSelectorHandlerDone
 
+    # update board index based on direction
     bi=bi+di
     xp=nx
     if xp>255 then xr=xp-256
@@ -96,7 +89,7 @@ placeItemHandlerSub:
     tx$=bt$(it(si))
     gosub writeGameBoardTileSub
     gb(bi)=it(si)
-    GOSUB feedItemHandlerSub
+    gosub feedItemHandlerSub
     goto placeItemHandlerDone
 
     # utility handler
@@ -106,17 +99,24 @@ placeItemHandlerSub:
     placeItemHandlerDone:
 return
 
-# feed item handler
+# feed item handler, move item from feeder to sidebar and replace
 feedItemHandlerSub:
     it(0)=fd
     tx$=bt$(fd)
     gosub writeItemSub
-    fd=int(rnd(.)*6)+1
     gosub writeFeederHandlerSub
-RETURN
+return
 
-# write feeder handler
+# write to items sidebar, convert location (si selected item) (0,1,2,3) to x,y
+writeItemSub:
+    x=35
+    y=6 + si*3
+    gosub writeTextSub
+return
+
+# write feeder handler, select random item and write to feeder area
 writeFeederHandlerSub:
+    fd=int(rnd(.)*6)+1
     x=35:y=2
     tx$=bt$(fd)
     gosub writeTextSub

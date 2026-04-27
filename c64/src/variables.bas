@@ -1,6 +1,11 @@
 # variables
 # start with the most important ones in the main game loop
 x=.:y=.
+# game board values: pipe ends, cow, tree, rock,
+up=1:rt=2:dn=4:lt=8:cw=16:tr=32:rk=64:
+# effects: burning, growing, invincible, destroy, move, blocked
+br=128:gr=256:iv=512:dy=1024:mv=2048:bl=4096
+# NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
 # game loop, over, board index, selected item, direction
 gl=.:ov=.:bi=.:si=.:di=.:fd=.
 
@@ -16,7 +21,7 @@ dim it(4)
 dim bt$(13)
 
 # seed any array data here if needed
-# TODO: sync pipe indexes
+# TODO: create a cross reference for items and their attributes
 # empty
 bt$(0)="   {down}{left}{left}{left}   {down}{left}{left}{left}   "
 # pipe horizontal

@@ -1,7 +1,7 @@
 # Start sprite writing
 
 # Sprite data must live in RAM inside the active VIC bank.
-# Using 51200 ($C800) keeps it in Bank 3 and avoids VIC register space at $D000.
+# Using 51200 keeps it in Bank 3.
 for i=51200 to 51262
     read c
     poke i,c
