@@ -99,6 +99,20 @@ placeItemHandlerSub:
     placeItemHandlerDone:
 return
 
+# pipe connection handler
+pipeConnectionHandlerSub:
+    # TODO: add all of the logic for testing the newly added pipe
+    # TODO: need to define variables to use for current, existing, start, and end
+    # if not connecting exit
+    # if connected to end, connect and set as end
+    # if replacing end and still connected, set as connected
+    # if replacing end and not connected, set end to the pipe that was originally connected
+    # if replacing connected one that isn't the end
+    # - go to the end and loop backward un-connecting until we get to un-connected pipe (this one)
+    # - if connected, set as connected and end
+    # - else, set end to the pipe that was originally connected
+return
+
 # feed item handler, move item from feeder to sidebar and replace
 feedItemHandlerSub:
     it(0)=fd
