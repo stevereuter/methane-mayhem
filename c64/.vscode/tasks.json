@@ -1,13 +1,22 @@
 {
     "tasks": [
         {
-            "type": "vs64",
-            "action": "build",
+            "type": "shell",
+            "command": "bash",
+            "args": ["./build-versioned.sh"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "label": "build project"
+            "label": "build project (versioned)"
+        },
+        {
+            "type": "vs64",
+            "action": "build",
+            "label": "build project (vs64 raw)"
         }
     ]
 }

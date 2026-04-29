@@ -43,8 +43,13 @@ jobs:
                   rm -rf dist-web
                   cp -R web dist-web
 
-                  sed -i "s/###VERSION###/${{ steps.version.outputs.version }}/g" dist-web/index.html
-                  sed -i "s/###VERSION###/${{ steps.version.outputs.version }}/g" dist-web/scripts/index.mjs
+                  if grep -R -q "{version}" dist-web; then
+                    grep -R -l "{version}" dist-web | while read -r f; do
+                      sed -i "s/{version}/${{ steps.version.outputs.version }}/g" "$f"
+                    done
+                  else
+                    echo "No {version} placeholders found in web files."
+                  fi
 
             - name: Build web zip name
               id: zip

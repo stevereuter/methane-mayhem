@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Methane Mayhem - Versioning and Packaging Script
-# This script handles version replacement and package creation
+# This script generates versioned build inputs and package artifacts.
 
 set -e
 
@@ -17,31 +17,13 @@ fi
 
 # Build the C64 project with version injection
 echo "🔨 Building C64 project..."
+bash "c64/build-versioned.sh"
 
-# Temporarily inject version for build
-sed -i.bak "s/###VERSION###/$VERSION/g" "c64/src/characters.bas"
-
-# Use Python compiler to rebuild (from VS64 extension)
-PYTHON_EXE="$HOME/.vscode/extensions/rosc.vs64-2.6.2/resources/python/python.exe"
-BC_EXE="$HOME/.vscode/extensions/rosc.vs64-2.6.2/tools/bc.py"
-
-if [ -f "$PYTHON_EXE" ] && [ -f "$BC_EXE" ]; then
-    "$PYTHON_EXE" "$BC_EXE" --crunch --map "c64/build/The Methane Mayhem.bmap" \
-        -I "c64" -I "c64/build" \
-        -o "c64/build/The Methane Mayhem.prg" "c64/src/main.bas"
-else
-    echo "❌ Error: VS64 extension tools not found at $PYTHON_EXE"
-    mv "c64/src/characters.bas.bak" "c64/src/characters.bas"
-    exit 1
-fi
-
-# Restore original source file
-mv "c64/src/characters.bas.bak" "c64/src/characters.bas"
+PRG_FILE="c64/build/Methane Mayhem.prg"
 
 # Create d64 image from the PRG file
 echo "💾 Creating d64 image..."
-PRG_FILE="c64/build/The Methane Mayhem.prg"
-D64_FILE="c64/build/The Methane Mayhem.d64"
+D64_FILE="c64/build/Methane Mayhem.d64"
 
 if [ ! -f "$PRG_FILE" ]; then
     echo "❌ Error: PRG file not found at $PRG_FILE"
@@ -60,12 +42,11 @@ ZIP_FILE="c64/build/methane-mayhem-v${VERSION}.zip"
 rm -f "$ZIP_FILE"
 
 # Use PowerShell to create zip (works on Windows)
-powershell -Command "Compress-Archive -Path 'c64/build/The Methane Mayhem.prg', 'c64/build/The Methane Mayhem.d64', 'assets/manual.png', 'readme.txt' -DestinationPath '$ZIP_FILE' -Force"
+powershell -Command "Compress-Archive -Path 'c64/build/Methane Mayhem.prg', 'c64/build/Methane Mayhem.d64', 'readme.txt' -DestinationPath '$ZIP_FILE' -Force"
 
 echo ""
 echo "✅ Packaging complete!"
 echo "📦 Created: $ZIP_FILE"
-echo "   - The Methane Mayhem.prg"
-echo "   - The Methane Mayhem.d64"
-echo "   - assets/manual.png"
+echo "   - Methane Mayhem.prg"
+echo "   - Methane Mayhem.d64"
 echo "   - readme.txt"

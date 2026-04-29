@@ -29,6 +29,23 @@ Release packaging uses a hybrid process:
 - **Manual for C64** (local build tools required)
 - **Automated for Web** (GitHub Actions on release publish)
 
+#### C64 Build (Versioned, Non-Mutating)
+
+Default C64 builds now run through `c64/build-versioned.sh`.
+
+What this does:
+
+- Reads the version from `config.json`
+- Replaces `{version}` placeholders into generated files under `c64/build/generated/`
+- Compiles from generated sources so files in `c64/src/` are never modified
+
+Current placeholders are in:
+
+- `c64/src/splash.bas`
+- `c64/src/characters.bas`
+
+The default VS Code build task in `c64/.vscode/tasks.json` is set to run this wrapper.
+
 #### C64 Package (Manual)
 
 Run the packaging script from the project root:
@@ -39,7 +56,7 @@ bash package.sh
 
 This script will:
 
-- Build the PRG and inject the version from `config.json` during the build
+- Run `c64/build-versioned.sh` to build a versioned PRG from generated inputs
 - Create a d64 disk image using VICE's c1541 tool
 - Package both the PRG and d64 files into `methane-mayhem-vX.X.X.zip`
 
@@ -48,7 +65,7 @@ Output files are created in `c64/build/`.
 Requirements:
 
 - VICE tools installed (`c1541`)
-- VS64 extension tools available locally (as referenced in `package.sh`)
+- VS64 extension tools available locally (resolved by `c64/build-versioned.sh`)
 
 #### Web Package + Pages (Automated)
 
@@ -61,9 +78,7 @@ Trigger:
 Behavior:
 
 - Reads version from `config.json`
-- Replaces `###VERSION###` in:
-    - `web/index.html`
-    - `web/scripts/index.mjs`
+- Replaces `{version}` in any matching file inside copied `dist-web/` content
 - Creates a web zip named `<repo>-web-vX.X.X.zip`
 - Uploads that zip to the same GitHub Release as an asset
 - Deploys the same processed web output to GitHub Pages
@@ -78,6 +93,22 @@ GitHub setup required:
 1. Run `bash package.sh` locally and keep the generated C64 zip.
 2. Create/publish a GitHub release and upload the C64 zip asset.
 3. The release workflow automatically adds the web zip asset and deploys GitHub Pages.
+
+#### Porting This To Template Repo
+
+When copying this workflow to a template project, copy/update these pieces together:
+
+1. `c64/build-versioned.sh`
+2. `c64/.vscode/tasks.json` default build task
+3. `package.sh` (call into `c64/build-versioned.sh`)
+4. `{version}` placeholders in any BASIC and web files
+5. `.github/workflows/release-web.yml` placeholder replacement step
+
+Quick verification after porting:
+
+1. Run C64 default build task and confirm PRG is produced in `c64/build/`.
+2. Confirm version text appears in emulator output.
+3. Run `bash package.sh` and confirm zip + d64 output.
 
 ## History
 

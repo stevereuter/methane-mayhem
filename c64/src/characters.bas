@@ -8,9 +8,7 @@ poke 53272, 48
 # Tell BASIC the screen moved
 poke 648, 204
 
-print "{clr}methane mayhem v###VERSION### c64"
-print "{down}(c)2026 steviesaurus dev"
-print "{down}steviesaurus-dev.itch.io"
+#include "splash.bas"
 
 # add custom characters from data.bas
 for i=49152 to 49152+(256*8)-1
