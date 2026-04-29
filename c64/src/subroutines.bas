@@ -104,6 +104,7 @@ pipeConnectionHandlerSub:
     # TODO: add all of the logic for testing the newly added pipe
     # TODO: need to define variables to use for current, existing, start, and end
     # if not connecting exit
+    # if pipe is replace the same pipe, exit
     # if connected to end, connect and set as end
     # if replacing end and still connected, set as connected
     # if replacing end and not connected, set end to the pipe that was originally connected
@@ -111,6 +112,9 @@ pipeConnectionHandlerSub:
     # - go to the end and loop backward un-connecting until we get to un-connected pipe (this one)
     # - if connected, set as connected and end
     # - else, set end to the pipe that was originally connected
+
+    # if is end but is also connecter to another pipe, loop up to find the new end
+    # if pipe is connected, check if it is connected to the end, winning condition
 return
 
 # feed item handler, move item from feeder to sidebar and replace
