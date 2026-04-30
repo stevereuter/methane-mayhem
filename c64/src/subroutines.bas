@@ -12,10 +12,10 @@ writeTextSub:
     print tx$;
 return
 
-# write to game board convert index (boardIndex) to x,y
+# write to game board convert index (@boardIndex) to x,y
 writeGameBoardTileSub:
-    x=8 + (boardIndex-int(boardIndex/8)*8)*3
-    y=2 + int(boardIndex/8)*3
+    x=8 + (@boardIndex-int(@boardIndex/8)*8)*3
+    y=2 + int(@boardIndex/8)*3
     gosub writeTextSub
 return
 
@@ -36,15 +36,15 @@ return
 itemSelectorHandlerSub:
     # selecting a tool to use
     # TODO: probably better to just update the selected item here then update the sprite based on that index
-    # TODO: need to add function keys for selecting the items too
+    # TODO: need to add function keys for selecting the @items too
     # 49 or 133
-    if in$="1" then poke 53251, 98: selectedItem=0
+    if in$="1" then poke 53251, 98: @selectedItem=0
     # 50 or 134
-    if in$="2" then poke 53251, 122: selectedItem=1
+    if in$="2" then poke 53251, 122: @selectedItem=1
     # 51 or 135
-    if in$="3" then poke 53251, 146: selectedItem=2
+    if in$="3" then poke 53251, 146: @selectedItem=2
     # 52 or 136
-    if in$="4" then poke 53251, 170: selectedItem=3
+    if in$="4" then poke 53251, 170: @selectedItem=3
 return
 
 # board selector handler
@@ -53,20 +53,20 @@ boardSelectorHandlerSub:
     nx=xp
     ny=yp
     # TODO: we should try to wire up the joystick to see if it is responsive enough
-    # direction
-    direction=0
-    if in$="w" then ny=ny-24:direction=-8
-    if in$="s" then ny=ny+24:direction=8
-    if in$="a" then nx=nx-24:direction=-1
-    if in$="d" then nx=nx+24:direction=1
+    # @direction
+    @direction=0
+    if in$="w" then ny=ny-24:@direction=-8
+    if in$="s" then ny=ny+24:@direction=8
+    if in$="a" then nx=nx-24:@direction=-1
+    if in$="d" then nx=nx+24:@direction=1
 
     if nx<88 then boardSelectorHandlerDone
     if ny<66 then boardSelectorHandlerDone
     if nx>256 then boardSelectorHandlerDone
     if ny>210 then boardSelectorHandlerDone
 
-    # update board index based on direction
-    boardIndex=boardIndex+direction
+    # update board index based on @direction
+    @boardIndex=@boardIndex+@direction
     xp=nx
     if xp>255 then xr=xp-256
     yp=ny
@@ -83,12 +83,12 @@ return
 placeItemHandlerSub:
     if in<>13 then placeItemHandlerDone
     # TODO: need to validate
-    if selectedItem<>0 then utilityHandler
+    if @selectedItem<>0 then utilityHandler
 
     # pile hander
-    tx$=boardTiles$(items(selectedItem))
+    tx$=@boardTiles$(@items(@selectedItem))
     gosub writeGameBoardTileSub
-    gameBoard(boardIndex)=items(selectedItem)
+    @gameBoard(@boardIndex)=@items(@selectedItem)
     gosub feedItemHandlerSub
     goto placeItemHandlerDone
 
@@ -119,23 +119,23 @@ return
 
 # feed item handler, move item from feeder to sidebar and replace
 feedItemHandlerSub:
-    items(0)=nextItemFeeder
-    tx$=boardTiles$(nextItemFeeder)
+    @items(0)=@nextItemFeeder
+    tx$=@boardTiles$(@nextItemFeeder)
     gosub writeItemSub
     gosub writeFeederHandlerSub
 return
 
-# write to items sidebar, convert location (selectedItem selected item) (0,1,2,3) to x,y
+# write to @items sidebar, convert location (@selectedItem selected item) (0,1,2,3) to x,y
 writeItemSub:
     x=35
-    y=6 + selectedItem*3
+    y=6 + @selectedItem*3
     gosub writeTextSub
 return
 
 # write feeder handler, select random item and write to feeder area
 writeFeederHandlerSub:
-    nextItemFeeder=int(rnd(.)*6)+1
+    @nextItemFeeder=int(rnd(.)*6)+1
     x=35:y=2
-    tx$=boardTiles$(nextItemFeeder)
+    tx$=@boardTiles$(@nextItemFeeder)
     gosub writeTextSub
 return

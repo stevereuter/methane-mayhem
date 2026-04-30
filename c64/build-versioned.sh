@@ -68,11 +68,11 @@ done
 if [ -f "$PYTHON_EXE" ]; then
     "$PYTHON_EXE" "$SCRIPT_DIR/tools/apply_aliases.py" "$GENERATED_DIR"
 else
-    if grep -qE "@[a-z][A-Za-z0-9]*([$%])?[[:space:]]*(=|\\()" "$GENERATED_DIR"/*.generated.bas; then
-        echo "Error: alias declarations found, but Python alias preprocessor runtime is unavailable." >&2
+    if grep -qE "@[a-z][A-Za-z0-9]*([$%])?" "$GENERATED_DIR"/*.generated.bas; then
+        echo "Error: @aliases found, but Python alias preprocessor runtime is unavailable." >&2
         exit 1
     fi
-    echo "Python runtime not found; skipping alias preprocessing (no alias declarations detected)."
+    echo "Python runtime not found; skipping alias preprocessing (no @aliases detected)."
 fi
 
 # Keep canonical splash filename available for nested includes that still

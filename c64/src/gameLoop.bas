@@ -42,14 +42,14 @@ poke 53250, 48
 poke 53251, 98
 # time difference 0-9, is reset at 10 giffies
 td=ti
-boardIndex=0
-selectedItem=0
+@boardIndex=0
+@selectedItem=0
 # main game loop, use for loop as it's faster than goto
-for gameLoop=. to lm
+for @gameLoop=. to lm
     gosub animateSelectorSub
     # TODO: may have to convert this to ASC as we will need enter and function keys
     get in$
-    if in$="" then gameLoopDone
+    if in$="" then @gameLoopDone
     in=asc(in$)
     # selecting a tool to use
     gosub itemSelectorHandlerSub
@@ -62,13 +62,13 @@ for gameLoop=. to lm
 
     # TODO: handle game over logic
     # set over to true (-1) to end game, or false (0) to keep going
-    isGameOver=0
+    @isGameOver=0
     # if game over, set loop to max to end game
-    if isGameOver then gameLoop=lm:goto gameLoopDone
+    if @isGameOver then @gameLoop=lm:goto @gameLoopDone
 
 
-    gameLoopDone:
+    @gameLoopDone:
     # best to set it back to 0 (use -1 as next will increment) once reached to prevent the game from ending
     # TODO: need to determine if we are going to use the index for anything
-    if gameLoop=5 then gameLoop=-1
+    if @gameLoop=5 then @gameLoop=-1
 next

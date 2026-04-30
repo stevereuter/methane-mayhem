@@ -21,49 +21,29 @@ def main() -> int:
         print("No generated BASIC files found for alias processing.")
         return 0
 
-    declaration_pattern = re.compile(
-        r"@([a-z][A-Za-z0-9]*[$%]?)(?=\s*(?:=|\())"
-    )
-    declaration_order: list[str] = []
-    declaration_locations: dict[str, str] = {}
-    label_locations: dict[str, str] = {}
+    alias_order_keys: list[str] = []
+    alias_first_seen: dict[str, str] = {}
+    alias_canonical_name: dict[str, str] = {}
 
     for file_path in generated_files:
         lines = file_path.read_text(encoding="utf-8").splitlines()
         for idx, line in enumerate(lines, 1):
-            label = extract_label_name(line)
-            if label:
-                label_key = label.lower()
-                if label_key not in label_locations:
-                    label_locations[label_key] = f"{file_path.name}:{idx}"
+            for token in tokenize_line(line):
+                if not token.startswith("@"):
+                    continue
 
-            for m in declaration_pattern.finditer(line):
-                alias = m.group(1)
-                loc = f"{file_path.name}:{idx}"
-                existing = declaration_locations.get(alias)
+                alias = token[1:]
+                if not alias:
+                    continue
 
-                if existing and existing != loc:
-                    print(
-                        f"Duplicate alias declaration '{alias}' at {loc}; first seen at {existing}",
-                        file=sys.stderr,
-                    )
-                    return 1
+                alias_key = alias.lower()
+                if alias_key not in alias_first_seen:
+                    alias_first_seen[alias_key] = f"{file_path.name}:{idx}"
+                    alias_canonical_name[alias_key] = alias
+                    alias_order_keys.append(alias_key)
 
-                if not existing:
-                    alias_key = alias.rstrip("$%").lower()
-                    label_loc = label_locations.get(alias_key)
-                    if label_loc:
-                        print(
-                            f"Alias '{alias}' at {loc} collides with label '{alias_key}:' at {label_loc}",
-                            file=sys.stderr,
-                        )
-                        return 1
-
-                    declaration_locations[alias] = loc
-                    declaration_order.append(alias)
-
-    if not declaration_order:
-        print("No alias declarations found.")
+    if not alias_order_keys:
+        print("No @aliases found.")
         return 0
 
     reserved_roots: set[str] = set()
@@ -79,7 +59,8 @@ def main() -> int:
     alias_map: dict[str, str] = {}
     pool = build_root_pool()
 
-    for alias in declaration_order:
+    for alias_key in alias_order_keys:
+        alias = alias_canonical_name[alias_key]
         assigned_root = None
         for root in pool:
             if root not in reserved_roots:
@@ -95,7 +76,7 @@ def main() -> int:
             return 1
 
         suffix = alias[-1] if alias.endswith("$") or alias.endswith("%") else ""
-        alias_map[alias] = f"{assigned_root}{suffix}"
+        alias_map[alias_key] = f"{assigned_root}{suffix}"
 
     for file_path in generated_files:
         lines = file_path.read_text(encoding="utf-8").splitlines()
@@ -103,10 +84,12 @@ def main() -> int:
         file_path.write_text("\n".join(out_lines) + "\n", encoding="utf-8")
 
     map_output_path = generated_dir / "alias-map.json"
-    map_output = {alias: alias_map[alias] for alias in declaration_order}
+    map_output = {
+        alias_canonical_name[k]: alias_map[k] for k in alias_order_keys
+    }
     map_output_path.write_text(json.dumps(map_output, indent=2) + "\n", encoding="utf-8")
 
-    print(f"Applied {len(declaration_order)} alias mappings.")
+    print(f"Applied {len(alias_order_keys)} alias mappings.")
     print(f"Wrote alias map: {map_output_path}")
     return 0
 
@@ -120,17 +103,6 @@ def build_root_pool() -> list[str]:
 def variable_root(name: str) -> str:
     no_suffix = re.sub(r"[$%]$", "", name)
     return no_suffix[:2].upper()
-
-
-def extract_label_name(line: str) -> str | None:
-    if line.lstrip().startswith("#"):
-        return None
-
-    match = re.match(r"^\s*([A-Za-z][A-Za-z0-9]*)\s*:", line)
-    if not match:
-        return None
-
-    return match.group(1)
 
 
 def replace_aliases_in_line(line: str, alias_map: dict[str, str]) -> str:
@@ -165,9 +137,9 @@ def replace_aliases_in_line(line: str, alias_map: dict[str, str]) -> str:
 
                 if token.startswith("@"):
                     name = token[1:]
-                    out.append(alias_map.get(name, token))
+                    out.append(alias_map.get(name.lower(), token))
                 else:
-                    out.append(alias_map.get(token, token))
+                    out.append(token)
 
                 i = next_i
                 continue
