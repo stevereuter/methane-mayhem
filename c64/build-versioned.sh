@@ -29,37 +29,57 @@ fi
 
 GENERATED_DIR="$SCRIPT_DIR/build/generated"
 GENERATED_MAIN="$GENERATED_DIR/main.generated.bas"
-GENERATED_SPLASH="$GENERATED_DIR/splash.generated.bas"
-GENERATED_CHARACTERS="$GENERATED_DIR/characters.generated.bas"
 GENERATED_SPLASH_CANONICAL="$GENERATED_DIR/splash.bas"
 
 mkdir -p "$GENERATED_DIR"
+rm -f "$GENERATED_DIR"/*.generated.bas "$GENERATED_DIR"/alias-map.json "$GENERATED_DIR"/splash.bas
 
 ESCAPED_VERSION=$(printf '%s' "$VERSION" | sed 's/[&/]/\\&/g')
 
-sed "s/{version}/$ESCAPED_VERSION/g" "$SCRIPT_DIR/src/splash.bas" > "$GENERATED_SPLASH"
-cp "$SCRIPT_DIR/src/characters.bas" "$GENERATED_CHARACTERS"
+for src_file in "$SCRIPT_DIR"/src/*.bas; do
+    name=$(basename "$src_file" .bas)
+    out_file="$GENERATED_DIR/$name.generated.bas"
+    tmp_file="$out_file.tmp"
 
-# Keep canonical filenames in generated output so nested includes like
-# #include "splash.bas" resolve to generated, versioned content.
-cp "$GENERATED_SPLASH" "$GENERATED_SPLASH_CANONICAL"
+    sed "s/{version}/$ESCAPED_VERSION/g" "$src_file" > "$tmp_file"
 
-awk '
-    {
-        if (match($0, /^#include "([^"]+)"$/, m)) {
-            f = m[1]
-            if (f == "splash.bas") {
-                print "#include \"splash.generated.bas\""
-            } else if (f == "characters.bas") {
-                print "#include \"characters.generated.bas\""
+    awk '
+        {
+            if (match($0, /^([[:space:]]*#include[[:space:]]+")([^"]+)(".*)$/, m)) {
+                include_path = m[2]
+                new_path = include_path
+
+                if (include_path ~ /^[A-Za-z0-9]+\.bas$/) {
+                    sub(/\.bas$/, ".generated.bas", new_path)
+                } else if (include_path ~ /^\.\.\/\.\.\/assets\//) {
+                    sub(/^\.\.\/\.\.\/assets\//, "../../../assets/", new_path)
+                }
+
+                print m[1] new_path m[3]
             } else {
-                print "#include \"../../src/" f "\""
+                print $0
             }
-        } else {
-            print $0
         }
-    }
-' "$SCRIPT_DIR/src/main.bas" > "$GENERATED_MAIN"
+    ' "$tmp_file" > "$out_file"
+
+    rm -f "$tmp_file"
+done
+
+if [ -f "$PYTHON_EXE" ]; then
+    "$PYTHON_EXE" "$SCRIPT_DIR/tools/apply_aliases.py" "$GENERATED_DIR"
+else
+    if grep -qE "@[a-z][A-Za-z0-9]*([$%])?[[:space:]]*(=|\\()" "$GENERATED_DIR"/*.generated.bas; then
+        echo "Error: alias declarations found, but Python alias preprocessor runtime is unavailable." >&2
+        exit 1
+    fi
+    echo "Python runtime not found; skipping alias preprocessing (no alias declarations detected)."
+fi
+
+# Keep canonical splash filename available for nested includes that still
+# reference splash.bas directly.
+if [ -f "$GENERATED_DIR/splash.generated.bas" ]; then
+    cp "$GENERATED_DIR/splash.generated.bas" "$GENERATED_SPLASH_CANONICAL"
+fi
 
 PRG_FILE="$SCRIPT_DIR/build/Methane Mayhem.prg"
 BMAP_FILE="$SCRIPT_DIR/build/Methane Mayhem.bmap"
