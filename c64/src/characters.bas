@@ -11,7 +11,7 @@ poke 648, 204
 #include "splash.bas"
 
 # add custom characters from data.bas
-for i=49152 to 49152+(256*8)-1
+for i = 49152 to 49152 + (256 * 8) - 1
     read c
-    poke i,c
+    poke i, c
 next

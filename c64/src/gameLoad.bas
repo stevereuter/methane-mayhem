@@ -33,29 +33,29 @@ print r6$;
 
 # TODO: need to fill teh pipe feeder with the next 3 random pipes, if we use a string we can just draw 3 and convert the current one below from the forth. A string will be easier to feed later, or just a move up in array
 
-x=36
-@nextItemFeeder=int(rnd(.)*6)+1
+x = 36
+@nextItemFeeder = INT(RND(.) * 6) + 1
 gosub writeFeederHandlerSub
 
 # TODO: add @items
-for @selectedItem=1 to 3
-    @items(@selectedItem)=9+@selectedItem
-    tx$=@boardTiles$(@items(@selectedItem))
+for @selectedItemIndex = 1 to 3
+    @items(@selectedItemIndex) = 9 + @selectedItemIndex
+    @printText$ = @boardTiles$(@items(@selectedItemIndex))
     gosub writeItemSub
 NEXT
 
 # TODO: temp remove, create random pipe for item sidebar
-rn=int(rnd(.)*6)+1
-tx$=@boardTiles$(rn)
-@items(0)=rn
-@selectedItem=0
+rn = INT(RND(.) * 6) + 1
+@printText$ = @boardTiles$(rn)
+@items(0) = rn
+@selectedItemIndex = 0
 gosub writeItemSub
 
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
-for i=7 to 9
-    tx$=@boardTiles$(i)
-    @boardIndex=int(rnd(.)*56)
+for i = 7 to 9
+    @printText$ = @boardTiles$(i)
+    @boardIndex = INT(RND(.) * 56)
     gosub writeGameBoardTileSub
 next
 
