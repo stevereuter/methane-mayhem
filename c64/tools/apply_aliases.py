@@ -46,7 +46,8 @@ def main() -> int:
         print("No @aliases found.")
         return 0
 
-    reserved_roots: set[str] = set()
+    # C64 BASIC system variables that must never be used as alias targets.
+    reserved_roots: set[str] = {"TI", "ST"}
     for file_path in generated_files:
         lines = file_path.read_text(encoding="utf-8").splitlines()
         for line in lines:
