@@ -1,27 +1,57 @@
 # variables
 # start with the most important ones in the main game loop
-x = . : y = .
+LET x = .
+LET y = .
 # game board types
-@empty = . : @connected = 1 : @pipeUp = 2 : @pipeRight = 4 : @pipeDown = 8 : @pipeLeft = 16 : @cow = 32 : @tree = 64 : @rock = 128
-# effects
-@burning = 256 : @growing = 512 : @invincible = 1024 : @destroy = 2048 : @move = 4096 : @blocked = 8192 : @highPercent = 16384 : @unused = 32768
+LET @empty = .
+LET @connected = 1
+LET @pipeUp = 2
+LET @pipeRight = 4
+LET @pipeDown = 8
+LET @pipeLeft = 16
+LET @cow = 32
+LET @tree = 64
+LET @rock = 128
+# effects, 
+LET @burning = 256
+LET @growing = 512
+LET @invincible = 1024
+LET @destroy = 2048
+LET @move = 4096
+LET @blocked = 8192
+LET @highPercent = 16384
+# NOTE: there is no 16th bit as that is used for the sign in C64 BASIC
 # NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
 
-@gameLoop = . : @isGameOver = . : @boardIndex = . : @selectedItemIndex = . : @direction = . : @nextItemFeeder = .
+LET @gameLoop = .
+LET @isGameOver = .
+LET @boardIndex = .
+LET @selectedItemIndex = .
+LET @direction = .
+LET @nextItemFeeder = .
 
 # NOTE: will also need events: cows moving, trees spawning, fire spreading, rocks falling (meteors), add panic to cows near fire or death (higher chance of moving), alien cows spawning (delivered by UFO if taken in the past)
 
 # NOTE: going to need a cross reference array for all items and their images
 
-@loopMax = 100
+let @printText$ = ""
+let @loopMax = 100
 
 # arrays
+dim @colorPulse(6)
 # game board, 8x7 grid for 56 total cells
 dim @gameBoard(56)
 # items
 dim @items(4)
 # board tiles
 dim @boardTiles$(13)
+
+@colorPulse(0) = 1
+@colorPulse(1) = 15
+@colorPulse(2) = 12
+@colorPulse(3) = 11
+@colorPulse(4) = 12
+@colorPulse(5) = 15
 
 # all item images
 # TODO: create a cross reference for items and their attributes

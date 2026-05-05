@@ -75,6 +75,8 @@ else
     echo "Python runtime not found; skipping alias preprocessing (no @aliases detected)."
 fi
 
+"$PYTHON_EXE" "$SCRIPT_DIR/tools/join_let_lines.py" "$GENERATED_DIR" 76
+
 # Keep canonical splash filename available for nested includes that still
 # reference splash.bas directly.
 if [ -f "$GENERATED_DIR/splash.generated.bas" ]; then

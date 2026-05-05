@@ -15,13 +15,7 @@
 # 3	cyan
 # 14 light blue
 # 6	blue
-dim @colorPulse(6)
-@colorPulse(0) = 1
-@colorPulse(1) = 15
-@colorPulse(2) = 12
-@colorPulse(3) = 11
-@colorPulse(4) = 12
-@colorPulse(5) = 15
+
 # pointer color
 @colorPulsePointer = 0
 # x position
