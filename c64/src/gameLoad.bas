@@ -37,26 +37,34 @@ x = 36
 @nextItemFeeder = INT(RND(.) * 6) + 1
 gosub writeFeederHandlerSub
 
-# TODO: add @items
-for @selectedItemIndex = 1 to 3
-    @items(@selectedItemIndex) = 9 + @selectedItemIndex
-    @printText$ = @boardTiles$(@items(@selectedItemIndex))
+# TODO: add @itemSidebar
+for @itemSidebarIndex = 1 to 3
+    @itemSidebar(@itemSidebarIndex) = 9 + @itemSidebarIndex
+    @printText$ = @boardTiles$(@itemSidebar(@itemSidebarIndex))
     gosub writeItemSub
 NEXT
 
 # TODO: temp remove, create random pipe for item sidebar
 rn = INT(RND(.) * 6) + 1
 @printText$ = @boardTiles$(rn)
-@items(0) = rn
-@selectedItemIndex = 0
+@itemSidebar(0) = rn
+@itemSidebarIndex = 0
 gosub writeItemSub
 
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
-for i = 7 to 9
-    @printText$ = @boardTiles$(i)
+for @selectedItem = 7 to 9
     @boardIndex = INT(RND(.) * 56)
     gosub writeGameBoardTileSub
 next
 
-# TODO: need the random start and end points
+@startPosition = INT(RND(.) * 7) * 8
+@endPosition = INT(RND(.) * 7) * 8 + 7
+@selectedItem = 13
+@boardIndex = @startPosition
+gosub writeGameBoardTileSub
+@gameBoard(@startPosition) = .
+@selectedItem = 14
+@boardIndex = @endPosition
+gosub writeGameBoardTileSub
+@gameBoard(@endPosition) = .

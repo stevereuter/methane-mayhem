@@ -1,9 +1,27 @@
 # subroutines.bas
 
-locateCursorSub:
-    poke 211, x
-    poke 214, y
-    sys 58732
+# write @selectedItem to game board convert @boardIndex to x,y
+writeGameBoardTileSub:
+    x=8 + (@boardIndex - INT(@boardIndex / 8) * 8) * 3
+    y=2 + INT(@boardIndex / 8) * 3
+    @gameBoard(@boardIndex) = @items(@selectedItem)
+    gosub locateCursorSub
+    print @boardTiles$(@selectedItem);
+return
+
+# write to @itemSidebar sidebar, convert location (@itemSidebarIndex selected item) (0,1,2,3) to x,y
+writeItemSub:
+    x = 35
+    y = 6 + @itemSidebarIndex * 3
+    gosub writeTextSub
+return
+
+# write feeder handler, select random item and write to feeder area
+writeFeederHandlerSub:
+    @nextItemFeeder = INT(RND(.) * 6) + 1
+    x = 35 : y = 2
+    @printText$ = @boardTiles$(@nextItemFeeder)
+    gosub writeTextSub
 return
 
 # write @printText$ to x,y
@@ -12,11 +30,11 @@ writeTextSub:
     print @printText$;
 return
 
-# write to game board convert index (@boardIndex) to x,y
-writeGameBoardTileSub:
-    x=8 + (@boardIndex - INT(@boardIndex / 8) * 8) * 3
-    y=2 + INT(@boardIndex / 8) * 3
-    gosub writeTextSub
+# set cursor position to x,y
+locateCursorSub:
+    poke 211, x
+    poke 214, y
+    sys 58732
 return
 
 # animate selectors
@@ -25,7 +43,8 @@ animateSelectorSub:
     # pulse color of main sprites
     @timeDifference= TI - @timeDifference
     if @timeDifference <= 10 then animateSelectorDone
-    @colorPulsePointer = @colorPulsePointer + 1 : @timeDifference = TI
+    @colorPulsePointer = @colorPulsePointer + 1
+    @timeDifference = TI
     if @colorPulsePointer > 5 then @colorPulsePointer = 0
     poke 53287, @colorPulse(@colorPulsePointer)
     poke 53288, @colorPulse(@colorPulsePointer)
@@ -36,15 +55,15 @@ return
 itemSelectorHandlerSub:
     # selecting a tool to use
     # TODO: probably better to just update the selected item here then update the sprite based on that index
-    # TODO: need to add function keys for selecting the @items too
+    # TODO: need to add function keys for selecting the @itemSidebar too
     # 49 or 133
-    if @keyInput$ = "1" then poke 53251, 98 : @selectedItemIndex = 0
+    if @keyInput$ = "1" then poke 53251, 98 : @itemSidebarIndex = 0
     # 50 or 134
-    if @keyInput$ = "2" then poke 53251, 122 : @selectedItemIndex = 1
+    if @keyInput$ = "2" then poke 53251, 122 : @itemSidebarIndex = 1
     # 51 or 135
-    if @keyInput$ = "3" then poke 53251, 146 : @selectedItemIndex = 2
+    if @keyInput$ = "3" then poke 53251, 146 : @itemSidebarIndex = 2
     # 52 or 136
-    if @keyInput$ = "4" then poke 53251, 170 : @selectedItemIndex = 3
+    if @keyInput$ = "4" then poke 53251, 170 : @itemSidebarIndex = 3
 return
 
 # board selector handler
@@ -81,25 +100,39 @@ return
 
 # place item handler
 placeItemHandlerSub:
-    if @keyInputAsc <> 13 then placeItemHandlerDone
-    # TODO: need to validate
-    if @selectedItemIndex <> @empty then utilityHandler
+    gosub clearLogSub
 
-    @selectedItem = @items(@selectedItemIndex)
+    if @keyInputAsc <> 13 then placeItemHandlerDone
+    if @itemSidebarIndex <> . then utilityHandler
+
+    @selectedItem = @itemSidebar(@itemSidebarIndex)
     @previousItem = @gameBoard(@boardIndex)
 
+    if @selectedItem = @previousItem then feedNextItemHandler
+    if @previousItem = @empty then placePipeHandler
+    if @previousItem < @cow then placePipeHandler
+
+    @printText$ = "blocked"
+    gosub writeLogSub
+    goto placeItemHandlerDone
+
     # pile hander
-    @printText$ = @boardTiles$(@selectedItem)
+    placePipeHandler:
     gosub writeGameBoardTileSub
     @gameBoard(@boardIndex) = @selectedItem
-    gosub feedItemHandlerSub
     gosub pipeConnectionHandlerSub
+    feedNextItemHandler:
+    gosub feedItemHandlerSub
 
     goto placeItemHandlerDone
 
     # utility handler
     utilityHandler:
+    # if axe remove tree
+    # if giddy up move cow
+    # if blocked add
     
+    # empty the item sidebar slot
     
     placeItemHandlerDone:
 return
@@ -108,8 +141,6 @@ return
 pipeConnectionHandlerSub:
     # TODO: add all of the logic for testing the newly added pipe
     # TODO: need to define variables to use for current, existing, start, and end
-    # if pipe is replace the same pipe, exit
-    if @selectedItem = @previousItem then pipeConnectionHandlerEnd
     # if not connecting exit
     # if connected to end, connect and set as end
     # if replacing end and still connected, set as connected
@@ -126,23 +157,19 @@ return
 
 # feed item handler, move item from feeder to sidebar and replace
 feedItemHandlerSub:
-    @items(0) = @nextItemFeeder
+    @itemSidebar(0) = @nextItemFeeder
     @printText$ = @boardTiles$(@nextItemFeeder)
     gosub writeItemSub
     gosub writeFeederHandlerSub
 return
 
-# write to @items sidebar, convert location (@selectedItemIndex selected item) (0,1,2,3) to x,y
-writeItemSub:
-    x = 35
-    y = 6 + @selectedItemIndex * 3
-    gosub writeTextSub
+writeLogSub:
+    gosub clearLogSub
+    gosub locateCursorSub
+    print @printText$;
 return
 
-# write feeder handler, select random item and write to feeder area
-writeFeederHandlerSub:
-    @nextItemFeeder = INT(RND(.) * 6) + 1
-    x = 35 : y = 2
-    @printText$ = @boardTiles$(@nextItemFeeder)
-    gosub writeTextSub
+clearLogSub:
+    x=7 : y=24 : gosub locateCursorSub
+    print "{black}                          ";
 return
