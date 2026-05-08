@@ -54,17 +54,17 @@ gosub writeItemSub
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
 for @selectedItem = 7 to 9
-    @boardIndex = INT(RND(.) * 56)
+    @currentPlayerPostision = INT(RND(.) * 56)
     gosub writeGameBoardTileSub
 next
 
-@startPosition = INT(RND(.) * 7) * 8
-@endPosition = INT(RND(.) * 7) * 8 + 7
+@connectionStartPosition = INT(RND(.) * 7) * 8
+@connectionEndPosition = INT(RND(.) * 7) * 8 + 7
 @selectedItem = 13
-@boardIndex = @startPosition
+@currentPlayerPostision = @connectionStartPosition
 gosub writeGameBoardTileSub
-@gameBoard(@startPosition) = .
+@gameBoard(@connectionStartPosition) = .
 @selectedItem = 14
-@boardIndex = @endPosition
+@currentPlayerPostision = @connectionEndPosition
 gosub writeGameBoardTileSub
-@gameBoard(@endPosition) = .
+@gameBoard(@connectionEndPosition) = .

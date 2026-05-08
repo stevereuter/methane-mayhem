@@ -36,7 +36,7 @@ poke 53250, 48
 poke 53251, 98
 # time difference 0-9, is reset at 10 giffies
 @timeDifference = TI
-@boardIndex = 0
+@currentPlayerPostision = 0
 @itemSidebarIndex = 0
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax

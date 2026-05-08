@@ -1,10 +1,10 @@
 # subroutines.bas
 
-# write @selectedItem to game board convert @boardIndex to x,y
+# write @selectedItem to game board convert @currentPlayerPostision to x,y
 writeGameBoardTileSub:
-    x=8 + (@boardIndex - INT(@boardIndex / 8) * 8) * 3
-    y=2 + INT(@boardIndex / 8) * 3
-    @gameBoard(@boardIndex) = @items(@selectedItem)
+    x=8 + (@currentPlayerPostision - INT(@currentPlayerPostision / 8) * 8) * 3
+    y=2 + INT(@currentPlayerPostision / 8) * 3
+    @gameBoard(@currentPlayerPostision) = @items(@selectedItem)
     gosub locateCursorSub
     print @boardTiles$(@selectedItem);
 return
@@ -85,7 +85,7 @@ boardSelectorHandlerSub:
     if @newPositionY > 210 then boardSelectorHandlerDone
 
     # update board index based on direction
-    @boardIndex = @boardIndex + @direction
+    @currentPlayerPostision = @currentPlayerPostision + @direction
     @positionX = @newPositionX
     if @positionX > 255 then @sidebarX = @positionX - 256
     @positionY = @newPositionY
@@ -106,7 +106,7 @@ placeItemHandlerSub:
     if @itemSidebarIndex <> . then utilityHandler
 
     @selectedItem = @itemSidebar(@itemSidebarIndex)
-    @previousItem = @gameBoard(@boardIndex)
+    @previousItem = @gameBoard(@currentPlayerPostision)
 
     if @selectedItem = @previousItem then feedNextItemHandler
     if @previousItem = @empty then placePipeHandler
@@ -116,14 +116,13 @@ placeItemHandlerSub:
     gosub writeLogSub
     goto placeItemHandlerDone
 
-    # pile hander
+    # pipe handler
     placePipeHandler:
     gosub writeGameBoardTileSub
-    @gameBoard(@boardIndex) = @selectedItem
+    @gameBoard(@currentPlayerPostision) = @selectedItem
     gosub pipeConnectionHandlerSub
     feedNextItemHandler:
     gosub feedItemHandlerSub
-
     goto placeItemHandlerDone
 
     # utility handler
@@ -141,6 +140,7 @@ return
 pipeConnectionHandlerSub:
     # TODO: add all of the logic for testing the newly added pipe
     # TODO: need to define variables to use for current, existing, start, and end
+    # TODO: first we need to determine if the 2 ends connect to anything
     # if not connecting exit
     # if connected to end, connect and set as end
     # if replacing end and still connected, set as connected

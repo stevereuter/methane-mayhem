@@ -23,12 +23,13 @@ LET @highPercent = 16384
 # NOTE: there is no 16th bit as that is used for the sign in C64 BASIC
 # NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
 
-let @startPosition = .
-let @endPosition = .
+let @connectionStartPosition = .
+let @connectionEndPosition = .
+let @connectedEndPosition = -1
 
 LET @gameLoop = .
 LET @isGameOver = .
-LET @boardIndex = .
+LET @currentPlayerPostision = .
 LET @itemSidebarIndex = .
 LET @direction = .
 LET @nextItemFeeder = .
