@@ -119,8 +119,8 @@ placeItemHandlerSub:
     # pipe handler
     placePipeHandler:
     gosub writeGameBoardTileSub
-    @gameBoard(@currentPlayerPostision) = @selectedItem
     gosub pipeConnectionHandlerSub
+    @gameBoard(@currentPlayerPostision) = @selectedItem
     feedNextItemHandler:
     gosub feedItemHandlerSub
     goto placeItemHandlerDone
@@ -138,21 +138,29 @@ return
 
 # pipe connection handler using @selectedItem and @previousItem
 pipeConnectionHandlerSub:
-    # TODO: add all of the logic for testing the newly added pipe
-    # TODO: need to define variables to use for current, existing, start, and end
-    # TODO: first we need to determine if the 2 ends connect to anything
-    # if not connecting exit
-    # if connected to end, connect and set as end
-    # if replacing end and still connected, set as connected
-    # if replacing end and not connected, set end to the pipe that was originally connected
-    # if replacing connected one that isn't the end
-    # - go to the end and loop backward un-connecting until we get to un-connected pipe (this one)
-    # - if connected, set as connected and end
-    # - else, set end to the pipe that was originally connected
+    @printText$ = "Checking connections..." : gosub writeLogSub
+    # loop from begining to see if we reach the end
+    @requiredConnection = @pipeLeft
+    @checkIndex = @connectionStartPosition
+    # FIXME: this loop is not working and always exits after the first check
+    for i =. to 55
+        m = i
+        @checkTile = @gameBoard(@checkIndex)
+        # check if not connect
+        if (@checkTile and @requiredConnection) = . then i = 55 : goto pipeConnectionHandlerSubEndLoop
+        # get next required connection
+        if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeUp : @checkIndex = @checkIndex - 8
+        if (@checkTile and @pipeDown) = @pipeDown then if (@requiredConnection and @pipeDown) = . then @requiredConnection = @pipeDown : @checkIndex = @checkIndex + 8
+        if (@checkTile and @pipeLeft) = @pipeLeft then if (@requiredConnection and @pipeLeft) = . then @requiredConnection = @pipeLeft : @checkIndex = @checkIndex - 1
+        if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeRight : @checkIndex = @checkIndex + 1
+        # check if complete
+        if i = @connectionEndPosition then if @requiredConnection = @pipeRight then @isComplete = -1 : i = 55
 
-    # if is end but is also connecter to another pipe, loop up to find the new end
-    # if pipe is connected, check if it is connected to the end, winning condition
-    pipeConnectionHandlerEnd:
+        pipeConnectionHandlerSubEndLoop:
+    next
+    @printText$ = "Not complete" + str$(m)
+    if @isComplete then @printText$ = "Connection complete!"
+    gosub writeLogSub
 return
 
 # feed item handler, move item from feeder to sidebar and replace
