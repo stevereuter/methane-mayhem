@@ -34,37 +34,37 @@ print r6$;
 # TODO: need to fill teh pipe feeder with the next 3 random pipes, if we use a string we can just draw 3 and convert the current one below from the forth. A string will be easier to feed later, or just a move up in array
 
 x = 36
-@nextItemFeeder = INT(RND(.) * 6) + 1
-gosub writeFeederHandlerSub
+gosub generateNextItemSub
 
-# TODO: add @itemSidebar
-for @itemSidebarIndex = 1 to 3
-    @itemSidebar(@itemSidebarIndex) = 9 + @itemSidebarIndex
-    @printText$ = @boardTiles$(@itemSidebar(@itemSidebarIndex))
+# TODO: add @gameSidebar
+for @selectedSidebarIndex = 1 to 3
+    @selectedItemKey = 9 + @selectedSidebarIndex
+    @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
+    @printText$ = @itemTiles$(@selectedItemKey)
     gosub writeItemSub
 NEXT
 
 # TODO: temp remove, create random pipe for item sidebar
-rn = INT(RND(.) * 6) + 1
-@printText$ = @boardTiles$(rn)
-@itemSidebar(0) = rn
-@itemSidebarIndex = 0
+@selectedSidebarIndex = .
+@selectedItemKey = INT(RND(.) * 6) + 1
+@gameSidebar(@selectedSidebarIndex) = @selectedItemKey
+@printText$ = @itemTiles$(@selectedItemKey)
 gosub writeItemSub
 
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
-for @selectedItem = 7 to 9
+for @selectedItemKey = 7 to 9
     @currentPlayerPostision = INT(RND(.) * 56)
     gosub writeGameBoardTileSub
 next
 
 @connectionStartPosition = INT(RND(.) * 7) * 8
 @connectionEndPosition = INT(RND(.) * 7) * 8 + 7
-@selectedItem = 13
+@selectedItemKey = 13
 @currentPlayerPostision = @connectionStartPosition
 gosub writeGameBoardTileSub
 @gameBoard(@connectionStartPosition) = .
-@selectedItem = 14
+@selectedItemKey = 14
 @currentPlayerPostision = @connectionEndPosition
 gosub writeGameBoardTileSub
 @gameBoard(@connectionEndPosition) = .

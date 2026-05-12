@@ -1,26 +1,19 @@
 # subroutines.bas
 
-# write @selectedItem to game board convert @currentPlayerPostision to x,y
+# write @selectedItemKey to game board convert @currentPlayerPostision to x,y
 writeGameBoardTileSub:
     x=8 + (@currentPlayerPostision - INT(@currentPlayerPostision / 8) * 8) * 3
     y=2 + INT(@currentPlayerPostision / 8) * 3
-    @gameBoard(@currentPlayerPostision) = @items(@selectedItem)
+    @gameBoard(@currentPlayerPostision) = @itemValues(@selectedItemKey)
     gosub locateCursorSub
-    print @boardTiles$(@selectedItem);
+    # FIXME: need the item index here not the item value
+    print @itemTiles$(@selectedItemKey);
 return
 
-# write to @itemSidebar sidebar, convert location (@itemSidebarIndex selected item) (0,1,2,3) to x,y
+# write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
 writeItemSub:
     x = 35
-    y = 6 + @itemSidebarIndex * 3
-    gosub writeTextSub
-return
-
-# write feeder handler, select random item and write to feeder area
-writeFeederHandlerSub:
-    @nextItemFeeder = INT(RND(.) * 6) + 1
-    x = 35 : y = 2
-    @printText$ = @boardTiles$(@nextItemFeeder)
+    y = 6 + @selectedSidebarIndex * 3
     gosub writeTextSub
 return
 
@@ -55,15 +48,15 @@ return
 itemSelectorHandlerSub:
     # selecting a tool to use
     # TODO: probably better to just update the selected item here then update the sprite based on that index
-    # TODO: need to add function keys for selecting the @itemSidebar too
+    # TODO: need to add function keys for selecting the @gameSidebar too
     # 49 or 133
-    if @keyInput$ = "1" then poke 53251, 98 : @itemSidebarIndex = 0
+    if @keyInput$ = "1" then poke 53251, 98 : @selectedSidebarIndex = 0
     # 50 or 134
-    if @keyInput$ = "2" then poke 53251, 122 : @itemSidebarIndex = 1
+    if @keyInput$ = "2" then poke 53251, 122 : @selectedSidebarIndex = 1
     # 51 or 135
-    if @keyInput$ = "3" then poke 53251, 146 : @itemSidebarIndex = 2
+    if @keyInput$ = "3" then poke 53251, 146 : @selectedSidebarIndex = 2
     # 52 or 136
-    if @keyInput$ = "4" then poke 53251, 170 : @itemSidebarIndex = 3
+    if @keyInput$ = "4" then poke 53251, 170 : @selectedSidebarIndex = 3
 return
 
 # board selector handler
@@ -103,9 +96,10 @@ placeItemHandlerSub:
     gosub clearLogSub
 
     if @keyInputAsc <> 13 then placeItemHandlerDone
-    if @itemSidebarIndex <> . then utilityHandler
+    if @selectedSidebarIndex <> . then utilityHandler
 
-    @selectedItem = @itemSidebar(@itemSidebarIndex)
+    @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
+    @selectedItem = @itemValues(@selectedItemKey)
     @previousItem = @gameBoard(@currentPlayerPostision)
 
     if @selectedItem = @previousItem then feedNextItemHandler
@@ -119,10 +113,10 @@ placeItemHandlerSub:
     # pipe handler
     placePipeHandler:
     gosub writeGameBoardTileSub
-    gosub pipeConnectionHandlerSub
     @gameBoard(@currentPlayerPostision) = @selectedItem
+    gosub pipeConnectionHandlerSub
     feedNextItemHandler:
-    gosub feedItemHandlerSub
+    gosub nextItemHandlerSub
     goto placeItemHandlerDone
 
     # utility handler
@@ -136,39 +130,54 @@ placeItemHandlerSub:
     placeItemHandlerDone:
 return
 
-# pipe connection handler using @selectedItem and @previousItem
+# pipe connection handler
 pipeConnectionHandlerSub:
-    @printText$ = "Checking connections..." : gosub writeLogSub
     # loop from begining to see if we reach the end
     @requiredConnection = @pipeLeft
     @checkIndex = @connectionStartPosition
-    # FIXME: this loop is not working and always exits after the first check
+    @printText$ = "Checking connections..." : gosub writeLogSub
     for i =. to 55
-        m = i
         @checkTile = @gameBoard(@checkIndex)
+        
         # check if not connect
-        if (@checkTile and @requiredConnection) = . then i = 55 : goto pipeConnectionHandlerSubEndLoop
-        # get next required connection
-        if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeUp : @checkIndex = @checkIndex - 8
-        if (@checkTile and @pipeDown) = @pipeDown then if (@requiredConnection and @pipeDown) = . then @requiredConnection = @pipeDown : @checkIndex = @checkIndex + 8
-        if (@checkTile and @pipeLeft) = @pipeLeft then if (@requiredConnection and @pipeLeft) = . then @requiredConnection = @pipeLeft : @checkIndex = @checkIndex - 1
-        if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeRight : @checkIndex = @checkIndex + 1
+        if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if i = @connectionEndPosition then if @requiredConnection = @pipeRight then @isComplete = -1 : i = 55
+        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @isComplete = -1 : i = 55 : goto endValidateGameBoardBounds
 
-        pipeConnectionHandlerSubEndLoop:
+        # get next required connection
+        if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @checkIndex - 8 : goto validateGameBoardBounds
+        if (@checkTile and @pipeDown) = @pipeDown then if (@requiredConnection and @pipeDown) = . then @requiredConnection = @pipeUp : @nextIndex = @checkIndex + 8 : goto validateGameBoardBounds
+        if (@checkTile and @pipeLeft) = @pipeLeft then if (@requiredConnection and @pipeLeft) = . then @requiredConnection = @pipeRight : @nextIndex = @checkIndex - 1 : goto validateGameBoardBounds
+        if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeLeft : @nextIndex = @checkIndex + 1
+
+        validateGameBoardBounds:
+        if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
+        if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
+        @column = @checkIndex - INT(@checkIndex / 8) * 8
+        if @column = 0 then if @nextIndex = @checkIndex - 1 then i = 55 : goto endValidateGameBoardBounds
+        if @column = 7 then if @nextIndex = @checkIndex + 1 then i = 55 : goto endValidateGameBoardBounds
+
+        @checkIndex = @nextIndex
+        endValidateGameBoardBounds:
     next
-    @printText$ = "Not complete" + str$(m)
-    if @isComplete then @printText$ = "Connection complete!"
-    gosub writeLogSub
+    gosub clearLogSub
+    if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub
 return
 
 # feed item handler, move item from feeder to sidebar and replace
-feedItemHandlerSub:
-    @itemSidebar(0) = @nextItemFeeder
-    @printText$ = @boardTiles$(@nextItemFeeder)
+nextItemHandlerSub:
+    @gameSidebar(0) = @nextItemKey
+    @printText$ = @itemTiles$(@nextItemKey)
     gosub writeItemSub
-    gosub writeFeederHandlerSub
+    gosub generateNextItemSub
+return
+
+# write feeder handler, select random item and write to feeder area
+generateNextItemSub:
+    @nextItemKey = INT(RND(.) * 6) + 1
+    x = 35 : y = 2
+    @printText$ = @itemTiles$(@nextItemKey)
+    gosub writeTextSub
 return
 
 writeLogSub:

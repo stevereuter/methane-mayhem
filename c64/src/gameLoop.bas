@@ -37,7 +37,7 @@ poke 53251, 98
 # time difference 0-9, is reset at 10 giffies
 @timeDifference = TI
 @currentPlayerPostision = 0
-@itemSidebarIndex = 0
+@selectedSidebarIndex = 0
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
     gosub animateSelectorSub

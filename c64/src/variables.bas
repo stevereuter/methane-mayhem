@@ -4,38 +4,43 @@ LET x = .
 LET y = .
 # game board types
 LET @empty = .
-LET @connected = 1 : rem no longer used
-LET @pipeUp = 2
-LET @pipeRight = 4
-LET @pipeDown = 8
-LET @pipeLeft = 16
-LET @cow = 32
-LET @tree = 64
-LET @rock = 128
+LET @pipeUp = 1
+LET @pipeRight = 2
+LET @pipeDown = 4
+LET @pipeLeft = 8
+LET @cow = 16
+LET @tree = 32
+LET @rock = 64
 # effects, 
-LET @burning = 256
-LET @growing = 512
-LET @invincible = 1024
-LET @destroy = 2048
-LET @move = 4096
-LET @blocked = 8192
-LET @highPercent = 16384
+LET @burning = 128
+LET @growing = 256
+LET @invincible = 512
+LET @destroy = 1024
+LET @move = 2048
+LET @blocked = 4096
+LET @highPercent = 8192
+let @unused = 16384
 # NOTE: there is no 16th bit as that is used for the sign in C64 BASIC
 # NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
 
 let @checkIndex = .
+let @nextIndex = .
 let @checkTile = .
 let @requiredConnection = .
+let @column = .
 let @connectionStartPosition = .
 let @connectionEndPosition = .
 let @isComplete = .
+let @selectedItemKey = .
+let @selectedItem = .
+let @previousItem = .
 
 LET @gameLoop = .
 LET @isGameOver = .
 LET @currentPlayerPostision = .
-LET @itemSidebarIndex = .
+LET @selectedSidebarIndex = .
 LET @direction = .
-LET @nextItemFeeder = .
+LET @nextItemKey = .
 
 # NOTE: will also need events: cows moving, trees spawning, fire spreading, rocks falling (meteors), add panic to cows near fire or death (higher chance of moving), alien cows spawning (delivered by UFO if taken in the past)
 
@@ -48,11 +53,11 @@ let @loopMax = 100
 dim @colorPulse(6)
 # game board, 8x7 grid for 56 total cells
 dim @gameBoard(56)
-dim @itemSidebar(4)
+dim @gameSidebar(4)
 # items
-dim @items(15)
+dim @itemValues(15)
 # board tiles
-dim @boardTiles$(15)
+dim @itemTiles$(15)
 
 @colorPulse(0) = 1
 @colorPulse(1) = 15
@@ -64,47 +69,51 @@ dim @boardTiles$(15)
 # all item images
 # TODO: create a cross reference for items and their attributes
 # empty
-@boardTiles$(0) = "   {down}{left}{left}{left}   {down}{left}{left}{left}   "
-@items(0) = @empty
+@itemTiles$(0) = "   {down}{3 left}   {down}{3 left}   "
+@itemValues(0) = @empty
 # pipe vertical
-@boardTiles$(1) = "{lightgrey} {36} {down}{left}{left}{left} {36} {down}{left}{left}{left} {36} "
-@items(1) = @pipeUp + @pipeDown
+@itemTiles$(1) = "{lightgrey} {36} {down}{3 left} {36} {down}{3 left} {36} "
+@itemValues(1) = @pipeUp + @pipeDown
 # pipe horizontal
-@boardTiles$(2) = "{lightgrey}   {down}{left}{left}{left}{35}{35}{35}{down}{left}{left}{left}   "
-@items(2) = @pipeLeft + @pipeRight
+@itemTiles$(2) = "{lightgrey}   {down}{3 left}{35}{35}{35}{down}{3 left}   "
+@itemValues(2) = @pipeLeft + @pipeRight
 # pipe corner down right
-@boardTiles$(3) = "{lightgrey}   {down}{left}{left}{left} {39}{35}{down}{left}{left}{left} {36} "
-@items(3) = @pipeDown + @pipeRight
+@itemTiles$(3) = "{lightgrey}   {down}{3 left} {39}{35}{down}{3 left} {36} "
+@itemValues(3) = @pipeDown + @pipeRight
 # pipe corner down left
-@boardTiles$(4) = "{lightgrey}   {down}{left}{left}{left}{35}{64} {down}{left}{left}{left} {36} "
-@items(4) = @pipeDown + @pipeLeft
+@itemTiles$(4) = "{lightgrey}   {down}{3 left}{35}{64} {down}{3 left} {36} "
+@itemValues(4) = @pipeDown + @pipeLeft
 # pipe corner up right
-@boardTiles$(5) = "{lightgrey} {36} {down}{left}{left}{left} {37}{35}{down}{left}{left}{left}   "
-@items(5) = @pipeUp + @pipeRight
+@itemTiles$(5) = "{lightgrey} {36} {down}{3 left} {37}{35}{down}{3 left}   "
+@itemValues(5) = @pipeUp + @pipeRight
 # pipe corner up left
-@boardTiles$(6) = "{lightgrey} {36} {down}{left}{left}{left}{35}{38} {down}{left}{left}{left}   "
-@items(6) = @pipeUp + @pipeLeft
+@itemTiles$(6) = "{lightgrey} {36} {down}{3 left}{35}{38} {down}{3 left}   "
+@itemValues(6) = @pipeUp + @pipeLeft
 # tree
-@boardTiles$(7) = "{green}{192}{193}{194}{down}{left}{left}{left}{208}{209}{210}{down}{left}{left}{left}{160}{161}{162}"
-@items(7) = @tree
+@itemTiles$(7) = "{green}{192}{193}{194}{down}{3 left}{208}{209}{210}{down}{3 left}{160}{161}{162}"
+@itemValues(7) = @tree
 # cow
-@boardTiles$(8) = "{white}{195}{196}{197}{down}{left}{left}{left}{211}{212}{213}{down}{left}{left}{left}{163}{164}{165}"
-@items(8) = @cow
+@itemTiles$(8) = "{white}{195}{196}{197}{down}{3 left}{211}{212}{213}{down}{3 left}{163}{164}{165}"
+@itemValues(8) = @cow
 # rock
-@boardTiles$(9) = "{darkgrey}{198}{199}{200}{down}{left}{left}{left}{214}{215}{216}{down}{left}{left}{left}{166}{167}{168}"
-@items(9) = @rock
+@itemTiles$(9) = "{darkgrey}{198}{199}{200}{down}{3 left}{214}{215}{216}{down}{3 left}{166}{167}{168}"
+@itemValues(9) = @rock
 # giddy up
-@boardTiles$(10) = "{yellow}{201}{202}{32}{down}{left}{left}{left}{217}{218}{219}{down}{left}{left}{left}{32}{170}{171}"
-@items(10) = @move + @cow
+@itemTiles$(10) = "{yellow}{201}{202}{32}{down}{3 left}{217}{218}{219}{down}{3 left}{32}{170}{171}"
+@itemValues(10) = @move + @cow
 # cone
-@boardTiles$(11) = "{orange}{32}{205}{32}{down}{left}{left}{left}{220}{221}{222}{down}{left}{left}{left}{172}{173}{174}"
-@items(11) = @blocked + @cow + @tree
+@itemTiles$(11) = "{orange}{32}{205}{32}{down}{3 left}{220}{221}{222}{down}{3 left}{172}{173}{174}"
+@itemValues(11) = @blocked + @cow + @tree
 # axe
-@boardTiles$(12) = "{red}{32}{58}{59}{down}{left}{left}{left}{32}{60}{32}{down}{left}{left}{left}{32}{61}{32}"
-@items(12) = @destroy + @tree
+@itemTiles$(12) = "{red}{32}{58}{59}{down}{3 left}{32}{60}{32}{down}{3 left}{32}{61}{32}"
+@itemValues(12) = @destroy + @tree
 
-@boardTiles$(13) = "{lightgrey}{down}{left}{35}"
-@boardTiles$(14) = "{lightgrey}{down}{right}{right}{right}{35}"
+# start
+@itemTiles$(13) = "{lightgrey}{down}{left}{35}"
+@itemValues(13) = .
+# end
+@itemTiles$(14) = "{lightgrey}{down}{3 right}{35}"
+@itemValues(14) = .
 # TODO: items to add: pick axe (destroy rock), dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows), shovel? (move rock)
 
 
