@@ -1,24 +1,24 @@
 # variables
 # start with the most important ones in the main game loop
-LET x = .
-LET y = .
+let x = .
+let y = .
 # game board types
-LET @empty = .
-LET @pipeUp = 1
-LET @pipeRight = 2
-LET @pipeDown = 4
-LET @pipeLeft = 8
-LET @cow = 16
-LET @tree = 32
-LET @rock = 64
+let @empty = .
+let @pipeUp = 1
+let @pipeRight = 2
+let @pipeDown = 4
+let @pipeLeft = 8
+let @cow = 16
+let @tree = 32
+let @rock = 64
 # effects, 
-LET @burning = 128
-LET @growing = 256
-LET @invincible = 512
-LET @destroy = 1024
-LET @move = 2048
-LET @blocked = 4096
-LET @highPercent = 8192
+let @burning = 128
+let @growing = 256
+let @invincible = 512
+let @destroy = 1024
+let @move = 2048
+let @blocked = 4096
+let @highPercent = 8192
 let @unused = 16384
 # NOTE: there is no 16th bit as that is used for the sign in C64 BASIC
 # NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
@@ -35,12 +35,12 @@ let @selectedItemKey = .
 let @selectedItem = .
 let @previousItem = .
 
-LET @gameLoop = .
-LET @isGameOver = .
-LET @currentPlayerPostision = .
-LET @selectedSidebarIndex = .
-LET @direction = .
-LET @nextItemKey = .
+let @gameLoop = .
+let @isGameOver = .
+let @currentPlayerPostision = .
+let @selectedSidebarIndex = .
+let @direction = .
+let @nextItemKey = .
 
 # NOTE: will also need events: cows moving, trees spawning, fire spreading, rocks falling (meteors), add panic to cows near fire or death (higher chance of moving), alien cows spawning (delivered by UFO if taken in the past)
 
