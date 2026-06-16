@@ -17,13 +17,26 @@ fi
 echo "Building C64 with version $VERSION"
 
 VS64_DIR=$(ls -d "$HOME"/.vscode/extensions/rosc.vs64-* 2>/dev/null | sort -V | tail -n 1)
-PYTHON_EXE="$VS64_DIR/resources/python/python.exe"
+
+# Try to find a working Python - prefer system Python on macOS
+if command -v python3 &> /dev/null; then
+    PYTHON_EXE=$(command -v python3)
+elif [ -n "$VS64_DIR" ] && [ -f "$VS64_DIR/resources/python/python.exe" ]; then
+    PYTHON_EXE="$VS64_DIR/resources/python/python.exe"
+else
+    echo "Error: Python not found" >&2
+    exit 1
+fi
+
+if [ -z "$VS64_DIR" ]; then
+    echo "Error: VS64 extension not found" >&2
+    exit 1
+fi
+
 BC_EXE="$VS64_DIR/tools/bc.py"
 
-if [ ! -f "$PYTHON_EXE" ] || [ ! -f "$BC_EXE" ]; then
-    echo "Error: VS64 extension tools not found." >&2
-    echo "Looked for python at: $PYTHON_EXE" >&2
-    echo "Looked for compiler at: $BC_EXE" >&2
+if [ ! -f "$BC_EXE" ]; then
+    echo "Error: VS64 compiler not found at: $BC_EXE" >&2
     exit 1
 fi
 
@@ -43,24 +56,10 @@ for src_file in "$SCRIPT_DIR"/src/*.bas; do
 
     sed "s/{version}/$ESCAPED_VERSION/g" "$src_file" > "$tmp_file"
 
-    awk '
-        {
-            if (match($0, /^([[:space:]]*#include[[:space:]]+")([^"]+)(".*)$/, m)) {
-                include_path = m[2]
-                new_path = include_path
-
-                if (include_path ~ /^[A-Za-z0-9]+\.bas$/) {
-                    sub(/\.bas$/, ".generated.bas", new_path)
-                } else if (include_path ~ /^\.\.\/\.\.\/assets\//) {
-                    sub(/^\.\.\/\.\.\/assets\//, "../../../assets/", new_path)
-                }
-
-                print m[1] new_path m[3]
-            } else {
-                print $0
-            }
-        }
-    ' "$tmp_file" > "$out_file"
+    # Process include directives using portable sed
+    # Convert "filename.bas" to "filename.generated.bas" in #include statements
+    sed -e 's/\(#include[[:space:]]*"\)\([A-Za-z0-9_]*\)\.bas\("\)/\1\2.generated.bas\3/g' \
+        "$tmp_file" > "$out_file"
 
     rm -f "$tmp_file"
 done
