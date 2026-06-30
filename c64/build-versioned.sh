@@ -35,6 +35,13 @@ fi
 
 BC_EXE="$VS64_DIR/tools/bc.py"
 
+# Prefer a local sibling VS64 checkout when present.
+# This allows testing compiler changes before extension marketplace updates.
+LOCAL_BC_EXE="$REPO_ROOT/../vs64/tools/bc.py"
+if [ -f "$LOCAL_BC_EXE" ]; then
+    BC_EXE="$LOCAL_BC_EXE"
+fi
+
 if [ ! -f "$BC_EXE" ]; then
     echo "Error: VS64 compiler not found at: $BC_EXE" >&2
     exit 1
@@ -64,16 +71,6 @@ for src_file in "$SCRIPT_DIR"/src/*.bas; do
     rm -f "$tmp_file"
 done
 
-if [ -f "$PYTHON_EXE" ]; then
-    "$PYTHON_EXE" "$SCRIPT_DIR/tools/apply_aliases.py" "$GENERATED_DIR"
-else
-    if grep -qE "@[a-z][A-Za-z0-9]*([$%])?" "$GENERATED_DIR"/*.generated.bas; then
-        echo "Error: @aliases found, but Python alias preprocessor runtime is unavailable." >&2
-        exit 1
-    fi
-    echo "Python runtime not found; skipping alias preprocessing (no @aliases detected)."
-fi
-
 "$PYTHON_EXE" "$SCRIPT_DIR/tools/join_let_lines.py" "$GENERATED_DIR" 76
 
 # Keep canonical splash filename available for nested includes that still
@@ -85,7 +82,7 @@ fi
 PRG_FILE="$SCRIPT_DIR/build/Methane Mayhem.prg"
 BMAP_FILE="$SCRIPT_DIR/build/Methane Mayhem.bmap"
 
-"$PYTHON_EXE" "$BC_EXE" --crunch --map "$BMAP_FILE" \
+"$PYTHON_EXE" "$BC_EXE" --crunch -a --map "$BMAP_FILE" \
     -I "$SCRIPT_DIR" -I "$SCRIPT_DIR/build" -I "$GENERATED_DIR" \
     -o "$PRG_FILE" "$GENERATED_MAIN"
 
