@@ -96,12 +96,12 @@ placeItemHandlerSub:
     gosub clearLogSub
 
     if @keyInputAsc <> 13 then placeItemHandlerDone
-    if @selectedSidebarIndex <> . then utilityHandler
 
     @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
     @selectedItem = @itemValues(@selectedItemKey)
     @previousItem = @gameBoard(@currentPlayerPostision)
 
+    if @selectedSidebarIndex <> . then utilityHandler
     if @selectedItem = @previousItem then feedNextItemHandler
     if @previousItem = @empty then placePipeHandler
     if @previousItem < @cow then placePipeHandler
@@ -121,8 +121,29 @@ placeItemHandlerSub:
 
     # utility handler
     utilityHandler:
+    # skip if the item doesn't remove
+    if (@selectedItem and @destroy) <> @destroy then moveItemHandler
+    r=-1
     # if axe remove tree
+    if (@previousItem and @selectedItem and @tree) = @tree then r=.
+    # TODO: need to add destroy rock with pick axe
+
+    if r then moveItemHandler
+
+    @gameSidebar(@selectedSidebarIndex) = @empty
+    @printText$ = @itemTiles$(@empty)
+    gosub writeItemSub
+    @selectedItemKey = @empty
+    gosub writeGameBoardTileSub
+    # reset to first item in sidebar
+    @keyInput$ = "1"
+    gosub itemSelectorHandlerSub
+
+    goto placeItemHandlerDone
+
+    moveItemHandler:
     # if giddy up move cow
+    if (@previousItem and @selectedItem and @cow) = @cow then r=.
     # if blocked add
     
     # empty the item sidebar slot

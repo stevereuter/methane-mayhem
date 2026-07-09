@@ -114,7 +114,7 @@ dim @itemTiles$(15)
 # end
 @itemTiles$(14) = "{lightgrey}{down}{3 right}{35}"
 @itemValues(14) = .
-# TODO: items to add: pick axe (destroy rock), dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows), shovel? (move rock)
+# TODO: items to add: pick axe (destroy rock), dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows)
 
 
 
