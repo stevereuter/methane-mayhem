@@ -1,5 +1,7 @@
 # load the game here
 # reset variables, load data, etc.
+x = int(rnd(.) * -9000)
+y = rnd(x)
 
 # light green background
 poke 53281, 13
@@ -37,8 +39,14 @@ x = 36
 gosub generateNextItemSub
 
 # TODO: add @gameSidebar
+dim @tempItems(5)
+@tempItems(0) = 10
+@tempItems(1) = 11
+@tempItems(2) = 12
+@tempItems(3) = 15
+@tempItems(4) = 16
 for @selectedSidebarIndex = 1 to 3
-    @selectedItemKey = 9 + @selectedSidebarIndex
+    @selectedItemKey = @tempItems(int(rnd(1) * 5))
     @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
     @printText$ = @itemTiles$(@selectedItemKey)
     gosub writeItemSub
@@ -46,7 +54,7 @@ NEXT
 
 # TODO: temp remove, create random pipe for item sidebar
 @selectedSidebarIndex = .
-@selectedItemKey = INT(RND(.) * 6) + 1
+@selectedItemKey = INT(rnd(1) * 6) + 1
 @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
 @printText$ = @itemTiles$(@selectedItemKey)
 gosub writeItemSub
@@ -54,12 +62,12 @@ gosub writeItemSub
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
 for @selectedItemKey = 7 to 9
-    @currentPlayerPostision = INT(RND(.) * 56)
+    @currentPlayerPostision = INT(rnd(1) * 56)
     gosub writeGameBoardTileSub
 next
 
-@connectionStartPosition = INT(RND(.) * 7) * 8
-@connectionEndPosition = INT(RND(.) * 7) * 8 + 7
+@connectionStartPosition = INT(rnd(1) * 7) * 8
+@connectionEndPosition = INT(rnd(1) * 7) * 8 + 7
 @selectedItemKey = 13
 @currentPlayerPostision = @connectionStartPosition
 gosub writeGameBoardTileSub

@@ -1,17 +1,19 @@
 # Start custom characters writing
-# Switch VIC to Bank 3
-poke 56576, peek(56576) and 252
+x = x + 1
+on x goto loadCharacterSet, discLoadingComplete
 
-# Set Screen to 52224 and Chars to 49152
-poke 53272, 48
+loadCharacterSet:
+    # Switch VIC to Bank 3
+    poke 56576, peek(56576) and 252
 
-# Tell BASIC the screen moved
-poke 648, 204
+    # Set Screen to 52224 and Chars to 49152
+    poke 53272, 48
 
-#include "splash.bas"
+    # Tell BASIC the screen moved
+    poke 648, 204
 
-# add custom characters from data.bas
-for i = 49152 to 49152 + (256 * 8) - 1
-    read c
-    poke i, c
-next
+    #include "splash.bas"
+    # load characterset from disk
+    load "chars", 8, 1
+
+discLoadingComplete:

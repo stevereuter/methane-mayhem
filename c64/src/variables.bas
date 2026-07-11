@@ -17,9 +17,9 @@ let @growing = 256
 let @invincible = 512
 let @destroy = 1024
 let @move = 2048
-let @blocked = 4096
+let @rotate = 4096
 let @highPercent = 8192
-let @unused = 16384
+# unused = 16384
 # NOTE: there is no 16th bit as that is used for the sign in C64 BASIC
 # NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
 
@@ -55,9 +55,9 @@ dim @colorPulse(6)
 dim @gameBoard(56)
 dim @gameSidebar(4)
 # items
-dim @itemValues(15)
+dim @itemValues(17)
 # board tiles
-dim @itemTiles$(15)
+dim @itemTiles$(17)
 
 @colorPulse(0) = 1
 @colorPulse(1) = 15
@@ -90,7 +90,7 @@ dim @itemTiles$(15)
 @itemTiles$(6) = "{lightgrey} {36} {down}{3 left}{35}{38} {down}{3 left}   "
 @itemValues(6) = @pipeUp + @pipeLeft
 # tree
-@itemTiles$(7) = "{green}{192}{193}{194}{down}{3 left}{208}{209}{210}{down}{3 left}{160}{161}{162}"
+@itemTiles$(7) = "{green}{192}{193}{194}{down}{3 left}{208}{209}{210}{down}{3 left}{160}{brn}{161}{grn}{162}"
 @itemValues(7) = @tree
 # cow
 @itemTiles$(8) = "{white}{195}{196}{197}{down}{3 left}{211}{212}{213}{down}{3 left}{163}{164}{165}"
@@ -101,11 +101,11 @@ dim @itemTiles$(15)
 # giddy up
 @itemTiles$(10) = "{yellow}{201}{202}{32}{down}{3 left}{217}{218}{219}{down}{3 left}{32}{170}{171}"
 @itemValues(10) = @move + @cow
-# cone
-@itemTiles$(11) = "{orange}{32}{205}{32}{down}{3 left}{220}{221}{222}{down}{3 left}{172}{173}{174}"
-@itemValues(11) = @blocked + @cow + @tree
+# pick axe
+@itemTiles$(11) = "{lightgrey}{62}{63}{brn}{59}{down}{3 left}{32}{60}{32}{down}{3 left}{32}{61}{32}"
+@itemValues(11) = @destroy + @rock
 # axe
-@itemTiles$(12) = "{red}{32}{58}{59}{down}{3 left}{32}{60}{32}{down}{3 left}{32}{61}{32}"
+@itemTiles$(12) = "{red}{32}{58}{brn}{59}{down}{3 left}{32}{60}{32}{down}{3 left}{32}{61}{32}"
 @itemValues(12) = @destroy + @tree
 
 # start
@@ -114,7 +114,15 @@ dim @itemTiles$(15)
 # end
 @itemTiles$(14) = "{lightgrey}{down}{3 right}{35}"
 @itemValues(14) = .
-# TODO: items to add: pick axe (destroy rock), dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows)
+
+# rotate right
+@itemTiles$(15) = "{32}{lightgrey}{205}{grn}{206}{down}{3 left}{32}{lightgrey}{221}{grn}{222}{down}{3 left}{32}{lightgrey}{173}{grn}{174}"
+@itemValues(15) = @rotate + @pipeRight
+# rotate left
+@itemTiles$(16) = "{grn}{204}{lightgrey}{205}{32}{down}{3 left}{grn}{220}{lightgrey}{221}{32}{down}{3 left}{grn}{172}{lightgrey}{173}{32}"
+@itemValues(16) = @rotate + @pipeLeft
+
+# TODO: items to add: dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows)
 
 
 

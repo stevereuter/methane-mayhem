@@ -121,32 +121,62 @@ placeItemHandlerSub:
 
     # utility handler
     utilityHandler:
+    if (@selectedItem and @rotate) = @rotate then rotateItemHandler
     # skip if the item doesn't remove
     if (@selectedItem and @destroy) <> @destroy then moveItemHandler
     r=-1
-    # if axe remove tree
+    # remove matching items
     if (@previousItem and @selectedItem and @tree) = @tree then r=.
-    # TODO: need to add destroy rock with pick axe
+    if (@previousItem and @selectedItem and @rock) = @rock then r=.
 
     if r then moveItemHandler
 
-    @gameSidebar(@selectedSidebarIndex) = @empty
-    @printText$ = @itemTiles$(@empty)
-    gosub writeItemSub
-    @selectedItemKey = @empty
-    gosub writeGameBoardTileSub
-    # reset to first item in sidebar
-    @keyInput$ = "1"
-    gosub itemSelectorHandlerSub
-
-    goto placeItemHandlerDone
+    goto removeGameBoardItem
 
     moveItemHandler:
     # if giddy up move cow
     if (@previousItem and @selectedItem and @cow) = @cow then r=.
-    # if blocked add
-    
-    # empty the item sidebar slot
+    # TODO: need to add this
+
+    goto removeGameBoardItem
+
+    # if rotate change
+    rotateItemHandler:
+    @selectedItemKey = .
+    # handle straight pipes
+    if @previousItem = @pipeUp + @pipeDown then @selectedItemKey = 2
+    if @previousItem = @pipeLeft + @pipeRight then @selectedItemKey = 1
+    if @selectedItemKey > . then rotateItemDraw
+
+    if @selectedItem = @pipeLeft then rotateLefthandler
+    # handle rotate right
+    if @previousItem = 3 then @selectedItemKey = 3
+    if @previousItem = 6 then @selectedItemKey = 4
+    if @previousItem = 12 then @selectedItemKey = 6
+    if @previousItem = 9 then @selectedItemKey = 5
+    goto rotateItemDraw
+    rotateLefthandler:
+    # handle rotate left
+    if @previousItem = 3 then @selectedItemKey = 5
+    if @previousItem = 9 then @selectedItemKey = 6
+    if @previousItem = 12 then @selectedItemKey = 4
+    if @previousItem = 6 then @selectedItemKey = 3
+
+    rotateItemDraw:
+    gosub writeGameBoardTileSub
+    goto removeSideBarItem
+
+    removeGameBoardItem:
+    @selectedItemKey = @empty
+    gosub writeGameBoardTileSub
+
+    removeSideBarItem:
+    @gameSidebar(@selectedSidebarIndex) = @empty
+    @printText$ = @itemTiles$(@empty)
+    gosub writeItemSub
+    # reset to first item in sidebar
+    @keyInput$ = "1"
+    gosub itemSelectorHandlerSub
     
     placeItemHandlerDone:
 return
@@ -195,7 +225,7 @@ return
 
 # write feeder handler, select random item and write to feeder area
 generateNextItemSub:
-    @nextItemKey = INT(RND(.) * 6) + 1
+    @nextItemKey = INT(rnd(1) * 6) + 1
     x = 35 : y = 2
     @printText$ = @itemTiles$(@nextItemKey)
     gosub writeTextSub

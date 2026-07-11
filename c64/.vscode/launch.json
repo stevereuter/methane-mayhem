@@ -5,6 +5,7 @@
             "type": "vice",
             "request": "launch",
             "name": "Launch Vice",
+            "program": "${workspaceFolder}/build/Methane Mayhem.d64",
             "preLaunchTask": "${defaultBuildTask}"
         },
         {

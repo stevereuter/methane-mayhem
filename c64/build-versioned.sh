@@ -84,9 +84,26 @@ fi
 
 PRG_FILE="$SCRIPT_DIR/build/Methane Mayhem.prg"
 BMAP_FILE="$SCRIPT_DIR/build/Methane Mayhem.bmap"
+D64_FILE="$SCRIPT_DIR/build/Methane Mayhem.d64"
 
 "$PYTHON_EXE" "$BC_EXE" --crunch --map "$BMAP_FILE" \
     -I "$SCRIPT_DIR" -I "$SCRIPT_DIR/build" -I "$GENERATED_DIR" \
     -o "$PRG_FILE" "$GENERATED_MAIN"
 
+# Build disk image so debugger can launch from D64.
+if ! command -v c1541 &> /dev/null; then
+    echo "Error: c1541 (from VICE) is required but not found" >&2
+    exit 1
+fi
+
+# Use lowercase so c1541 writes a PETSCII name BASIC can resolve by default.
+c1541 -format "methane,00" d64 "$D64_FILE" -write "$PRG_FILE" "methane"
+
+# Add configured binary assets (for example charset PRGs) to the D64 image.
+if [ -f "$SCRIPT_DIR/tools/add_config_binaries.py" ]; then
+    echo "Adding configured binaries to d64 image..."
+    "$PYTHON_EXE" "$SCRIPT_DIR/tools/add_config_binaries.py"
+fi
+
 echo "Built: $PRG_FILE"
+echo "Built: $D64_FILE"

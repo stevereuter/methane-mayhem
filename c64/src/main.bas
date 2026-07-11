@@ -1,6 +1,6 @@
 # This is the main file for the c64 game. It includes all the other files and runs the main loop.
-#include "variables.bas"
 #include "characters.bas"
+#include "variables.bas"
 #include "sprites.bas"
 
 goto gameStart
