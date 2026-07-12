@@ -59,7 +59,7 @@
 |                   | 31    | 95  |
 | space             | 32    | 32  |
 | !                 | 33    | 33  |
-| "                 | 34    | 34  |
+|                   | 34    | 34  |
 | pipe-horizontal   | 35    | 35  |
 | pipe-vertical     | 36    | 36  |
 | pipe-top-right    | 37    | 37  |
@@ -68,8 +68,8 @@
 | (                 | 40    | 40  |
 | )                 | 41    | 41  |
 |                   | 42    | 42  |
-|                   | 43    | 43  |
-|                   | 44    | 44  |
+| handle center 1   | 43    | 43  |
+| handle bottom 2   | 44    | 44  |
 | -                 | 45    | 45  |
 | .                 | 46    | 46  |
 | /                 | 47    | 47  |
@@ -83,12 +83,12 @@
 | 7                 | 55    | 55  |
 | 8                 | 56    | 56  |
 | 9                 | 57    | 57  |
-| axe 1/2           | 58    | 58  |
-| axe 1/3           | 59    | 59  |
-| axe 2/3           | 60    | 60  |
-| axe 3/3           | 61    | 61  |
-| pick 1/2          | 62    | 62  |
-| pick 2/2          | 63    | 63  |
+| axe top 2         | 58    | 58  |
+| axe top 3         | 59    | 59  |
+| handle center 2   | 60    | 60  |
+| pick top 1        | 61    | 61  |
+| pick top 2        | 62    | 62  |
+| pick top 3        | 63    | 63  |
 | hline             | 64    | 128 |
 | spade             | 65    | 129 |
 | v block 4/8       | 66    | 130 |
@@ -162,13 +162,13 @@
 | rock-1            | 134   | 198 |
 | rock-2            | 135   | 199 |
 | rock-3            | 136   | 200 |
-| giddy up          | 137   | 201 |
-| giddy up          | 138   | 202 |
-| giddy up          | 139   | 203 |
-| rotate r 1/3      | 140   | 204 |
-| wrench 1/3        | 141   | 205 |
-| rotate l 1/3      | 142   | 206 |
-| rev O             | 143   | 207 |
+| giddy up top 1    | 137   | 201 |
+| axe center 3      | 138   | 202 |
+| giddy up top 2    | 139   | 203 |
+| rotate top 1/3    | 140   | 204 |
+| rotate top 1/3    | 141   | 205 |
+| rotate top 1/3    | 142   | 206 |
+| pick center 3     | 143   | 207 |
 | tree-4            | 144   | 208 |
 | tree-5            | 145   | 209 |
 | tree-6            | 146   | 210 |
@@ -178,13 +178,13 @@
 | rock-4            | 150   | 214 |
 | rock-5            | 151   | 215 |
 | rock-6            | 152   | 216 |
-| giddy up          | 153   | 217 |
-| giddy up          | 154   | 218 |
-| giddy up          | 155   | 219 |
-| rotate r 2/3      | 156   | 220 |
-| wrench 2/3        | 157   | 221 |
-| rotate l 2/3      | 158   | 222 |
-| rev left arrow    | 159   | 223 |
+| giddy up center   | 153   | 217 |
+| giddy up center   | 154   | 218 |
+| giddy up center   | 155   | 219 |
+| rotate down       | 156   | 220 |
+| empty             | 157   | 221 |
+| rotate up         | 158   | 222 |
+| pick bottom 3     | 159   | 223 |
 | tree-7            | 160   | 160 |
 | tree-8            | 161   | 161 |
 | tree-9            | 162   | 162 |
@@ -194,13 +194,13 @@
 | rock-7            | 166   | 166 |
 | rock-8            | 167   | 167 |
 | rock-9            | 168   | 168 |
-| giddy up          | 169   | 169 |
-| giddy up          | 170   | 170 |
-| giddy up          | 171   | 171 |
-| rotate r 3/3      | 172   | 172 |
-| wrench 3/3        | 173   | 173 |
-| rotate l 3/3      | 174   | 174 |
-| rev /             | 175   | 175 |
+| giddy up bottom   | 169   | 169 |
+| giddy up bottom   | 170   | 170 |
+| giddy up bottom   | 171   | 171 |
+| rotate bottom 1/3 | 172   | 172 |
+| rotate bottom 1/3 | 173   | 173 |
+| rotate bottom 1/3 | 174   | 174 |
+| handle bottom 1   | 175   | 175 |
 | rev 0             | 176   | 176 |
 | rev 1             | 177   | 177 |
 | rev 2             | 178   | 178 |

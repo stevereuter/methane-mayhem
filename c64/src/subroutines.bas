@@ -163,7 +163,10 @@ placeItemHandlerSub:
     if @previousItem = 6 then @selectedItemKey = 3
 
     rotateItemDraw:
+    @selectedItem = @itemValues(@selectedItemKey)
+    @gameBoard(@currentPlayerPostision) = @selectedItem
     gosub writeGameBoardTileSub
+    gosub pipeConnectionHandlerSub
     goto removeSideBarItem
 
     removeGameBoardItem:

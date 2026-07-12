@@ -99,13 +99,13 @@ dim @itemTiles$(17)
 @itemTiles$(9) = "{darkgrey}{198}{199}{200}{down}{3 left}{214}{215}{216}{down}{3 left}{166}{167}{168}"
 @itemValues(9) = @rock
 # giddy up
-@itemTiles$(10) = "{yellow}{201}{202}{32}{down}{3 left}{217}{218}{219}{down}{3 left}{32}{170}{171}"
+@itemTiles$(10) = "{grn}{201}{32}{203}{down}{3 left}{white}{217}{218}{219}{down}{3 left}{grn}{169}{white}{170}{grn}{171}"
 @itemValues(10) = @move + @cow
 # pick axe
-@itemTiles$(11) = "{lightgrey}{62}{63}{brn}{59}{down}{3 left}{32}{60}{32}{down}{3 left}{32}{61}{32}"
+@itemTiles$(11) = "{lightgrey}{61}{62}{63}{down}{3 left}{brn}{43}{60}{lightgrey}{207}{down}{3 left}{brn}{175}{44}{lightgrey}{223}"
 @itemValues(11) = @destroy + @rock
 # axe
-@itemTiles$(12) = "{red}{32}{58}{brn}{59}{down}{3 left}{32}{60}{32}{down}{3 left}{32}{61}{32}"
+@itemTiles$(12) = "{lightgrey}{32}{58}{59}{down}{3 left}{brn}{43}{60}{lightgrey}{202}{down}{3 left}{brn}{175}{44}{32}"
 @itemValues(12) = @destroy + @tree
 
 # start
@@ -116,10 +116,10 @@ dim @itemTiles$(17)
 @itemValues(14) = .
 
 # rotate right
-@itemTiles$(15) = "{32}{lightgrey}{205}{grn}{206}{down}{3 left}{32}{lightgrey}{221}{grn}{222}{down}{3 left}{32}{lightgrey}{173}{grn}{174}"
+@itemTiles$(15) = "{grn}{204}{205}{206}{down}{3 left}{220}{32}{222}{down}{3 left}{172}{173}{174}"
 @itemValues(15) = @rotate + @pipeRight
 # rotate left
-@itemTiles$(16) = "{grn}{204}{lightgrey}{205}{32}{down}{3 left}{grn}{220}{lightgrey}{221}{32}{down}{3 left}{grn}{172}{lightgrey}{173}{32}"
+@itemTiles$(16) = "{grn}{204}{205}{206}{down}{3 left}{222}{32}{220}{down}{3 left}{172}{173}{174}"
 @itemValues(16) = @rotate + @pipeLeft
 
 # TODO: items to add: dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows)
