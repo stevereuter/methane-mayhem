@@ -122,21 +122,50 @@ placeItemHandlerSub:
     # utility handler
     utilityHandler:
     if (@selectedItem and @rotate) = @rotate then rotateItemHandler
-    # skip if the item doesn't remove
-    if (@selectedItem and @destroy) <> @destroy then moveItemHandler
-    r=-1
-    # remove matching items
-    if (@previousItem and @selectedItem and @tree) = @tree then r=.
-    if (@previousItem and @selectedItem and @rock) = @rock then r=.
-
-    if r then moveItemHandler
-
-    goto removeGameBoardItem
+    if (@selectedItem and @move) = @move then moveItemHandler
+    # destroy item handler
+    if (@previousItem and @selectedItem and @tree) = @tree then removeGameBoardItem
+    if (@previousItem and @selectedItem and @rock) = @rock then removeGameBoardItem
 
     moveItemHandler:
     # if giddy up move cow
-    if (@previousItem and @selectedItem and @cow) = @cow then r=.
-    # TODO: need to add this
+    i = 0
+    r = int(rnd(1) * 4) + 1
+    getNewPositionHandler:
+    i = i + 1
+    on r goto moveUpLeft, moveUpRight, moveDownLeft, moveDownRight
+    # positions 
+    moveUpLeft:
+    r = @currentPlayerPostision - 9
+    goto tryMoveItemHandler
+    moveUpRight:
+    r = @currentPlayerPostision - 7
+    goto tryMoveItemHandler
+    moveDownLeft:
+    r = @currentPlayerPostision + 7
+    goto tryMoveItemHandler
+    moveDownRight:
+    r = @currentPlayerPostision + 9
+    # fall through
+    tryMoveItemHandler:
+    @newItem = @gameBoard(r)
+    if (@newItem and @empty) = @empty then moveItemToNewPositionHandler
+
+    retryHandler:
+    # can't move
+    if i > 4 then @printText$ = "Can't move" : gosub writeLogSub : goto placeItemHandlerDone
+    r = r + 1
+    if r > 4 then r = 1
+    goto getNewPositionHandler
+    # add the new cow in the new position
+    moveItemToNewPositionHandler:
+    @gameBoard(r) = @previousItem
+    
+    @selectedItemKey = 8
+    i = @currentPlayerPostision
+    @currentPlayerPostision = r
+    gosub writeGameBoardTileSub
+    @currentPlayerPostision = i
 
     goto removeGameBoardItem
 
@@ -228,7 +257,11 @@ return
 
 # write feeder handler, select random item and write to feeder area
 generateNextItemSub:
-    @nextItemKey = INT(rnd(1) * 6) + 1
+    i = len(@feeder$)
+    if i < 1 then gosub fillFeederSub : i = len(@feeder$)
+    r = int(rnd(1) * i) + 1
+    @nextItemKey = val(mid$(@feeder$, r , 1))
+    @feeder$ = left$(@feeder$, r - 1) + mid$(@feeder$, r + 1)
     x = 35 : y = 2
     @printText$ = @itemTiles$(@nextItemKey)
     gosub writeTextSub
@@ -243,4 +276,12 @@ return
 clearLogSub:
     x=7 : y=24 : gosub locateCursorSub
     print "{black}                          ";
+return
+
+fillFeederSub:
+    for c = 1 to 6
+        for i = . to 1
+            @feeder$ = @feeder$ + right$(str$(c), 1)
+        next
+    next
 return

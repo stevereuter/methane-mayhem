@@ -34,6 +34,7 @@ let @isComplete = .
 let @selectedItemKey = .
 let @selectedItem = .
 let @previousItem = .
+let @newItem = .
 
 let @gameLoop = .
 let @isGameOver = .
@@ -48,6 +49,7 @@ let @nextItemKey = .
 
 let @printText$ = ""
 let @loopMax = 100
+let @feeder$ = ""
 
 # arrays
 dim @colorPulse(6)
