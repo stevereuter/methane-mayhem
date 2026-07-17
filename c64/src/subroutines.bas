@@ -1,10 +1,10 @@
 # subroutines.bas
 
-# write @selectedItemKey to game board convert @currentPlayerPostision to x,y
+# write @selectedItemKey to game board convert @drawTo to x,y
 writeGameBoardTileSub:
-    x=8 + (@currentPlayerPostision - INT(@currentPlayerPostision / 8) * 8) * 3
-    y=2 + INT(@currentPlayerPostision / 8) * 3
-    @gameBoard(@currentPlayerPostision) = @itemValues(@selectedItemKey)
+    x=8 + (@drawTo - INT(@drawTo / 8) * 8) * 3
+    y=2 + INT(@drawTo / 8) * 3
+    @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
     gosub locateCursorSub
     # FIXME: need the item index here not the item value
     print @itemTiles$(@selectedItemKey);
@@ -94,6 +94,8 @@ return
 # place item handler
 placeItemHandlerSub:
     gosub clearLogSub
+    @drawTo = @currentPlayerPostision
+    @clearTo = @drawTo
 
     if @keyInputAsc <> 13 then placeItemHandlerSkip
 
@@ -112,113 +114,126 @@ placeItemHandlerSub:
 
     # pipe handler
     placePipeHandler:
-    gosub writeGameBoardTileSub
-    @gameBoard(@currentPlayerPostision) = @selectedItem
-    gosub pipeConnectionHandlerSub
-    feedNextItemHandler:
-    gosub nextItemHandlerSub
+        gosub writeGameBoardTileSub
+        @gameBoard(@drawTo) = @selectedItem
+        gosub pipeConnectionHandlerSub
+        feedNextItemHandler:
+        gosub nextItemHandlerSub
     goto placeItemHandlerDone
 
     # utility handler
     utilityHandler:
-    if @previousItem = @empty then placeItemHandlerSkip
-    if (@selectedItem and @rotate) = @rotate then rotateItemHandler
-    if (@selectedItem and @move) = @move then moveItemHandler
-    # destroy item handler
-    # TODO: fix destroy item issues, cutting tree on empty adds cow
-    if (@previousItem and @selectedItem and @tree) = @tree then removeGameBoardItem
-    if (@previousItem and @selectedItem and @rock) = @rock then removeGameBoardItem
-
-    moveItemHandler:
-    # TODO: fix move
-    # if giddy up move cow
-    i = 0
-    r = int(rnd(1) * 4) + 1
-    getNewPositionHandler:
-    i = i + 1
-    on r goto moveUpLeft, moveUpRight, moveDownLeft, moveDownRight
-    # positions 
-    moveUpLeft:
-    r = @currentPlayerPostision - 9
-    goto tryMoveItemHandler
-    moveUpRight:
-    r = @currentPlayerPostision - 7
-    goto tryMoveItemHandler
-    moveDownLeft:
-    r = @currentPlayerPostision + 7
-    goto tryMoveItemHandler
-    moveDownRight:
-    r = @currentPlayerPostision + 9
-    # fall through
-    tryMoveItemHandler:
-    @newItem = @gameBoard(r)
-    if (@newItem and @empty) = @empty then moveItemToNewPositionHandler
-
-    retryHandler:
-    # can't move
-    if i > 4 then @printText$ = "Can't move" : gosub writeLogSub : goto placeItemHandlerDone
-    r = r + 1
-    if r > 4 then r = 1
-    goto getNewPositionHandler
-    # add the new cow in the new position
-    moveItemToNewPositionHandler:
-    @gameBoard(r) = @previousItem
-    
-    @selectedItemKey = 8
-    i = @currentPlayerPostision
-    @currentPlayerPostision = r
-    gosub writeGameBoardTileSub
-    @currentPlayerPostision = i
-
-    goto removeGameBoardItem
+        if @previousItem = @empty then placeItemHandlerSkip
+        if (@selectedItem and @rotate) = @rotate then rotateItemHandler
+        if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveItemHandler : goto removeGameBoardItemDone
+        # destroy item handler
+        if (@selectedItem and @destroy) <> @destroy then placeItemHandlerSkip
+        if (@previousItem and @selectedItem and @tree) = @tree then gosub removeGameBoardItem : goto removeGameBoardItemDone
+        if (@previousItem and @selectedItem and @rock) = @rock then gosub removeGameBoardItem : goto removeGameBoardItemDone
+    goto placeItemHandlerSkip
 
     # if rotate change
     rotateItemHandler:
-    @selectedItemKey = .
-    # handle straight pipes
-    if @previousItem = @pipeUp + @pipeDown then @selectedItemKey = 2
-    if @previousItem = @pipeLeft + @pipeRight then @selectedItemKey = 1
-    if @selectedItemKey > . then rotateItemDraw
+        if @previousItem >= @cow then placeItemHandlerSkip
+        @selectedItemKey = .
+        # handle straight pipes
+        if @previousItem = @pipeUp + @pipeDown then @selectedItemKey = 2 : goto rotateItemDraw
+        if @previousItem = @pipeLeft + @pipeRight then @selectedItemKey = 1 : goto rotateItemDraw
 
-    if @selectedItem = @pipeLeft then rotateLefthandler
-    # TODO: fix rotate issues
-    # handle rotate right
-    if @previousItem = 3 then @selectedItemKey = 3
-    if @previousItem = 6 then @selectedItemKey = 4
-    if @previousItem = 12 then @selectedItemKey = 6
-    if @previousItem = 9 then @selectedItemKey = 5
-    goto rotateItemDraw
-    rotateLefthandler:
-    # handle rotate left
-    if @previousItem = 3 then @selectedItemKey = 5
-    if @previousItem = 9 then @selectedItemKey = 6
-    if @previousItem = 12 then @selectedItemKey = 4
-    if @previousItem = 6 then @selectedItemKey = 3
+        if (@selectedItem and @pipeLeft) = @pipeLeft then rotateLefthandler
+        # handle rotate right
+            if @previousItem = 3 then @selectedItemKey = 3
+            if @previousItem = 6 then @selectedItemKey = 4
+            if @previousItem = 9 then @selectedItemKey = 5
+            if @previousItem = 12 then @selectedItemKey = 6
+        goto rotateItemDraw
 
-    rotateItemDraw:
-    @selectedItem = @itemValues(@selectedItemKey)
-    @gameBoard(@currentPlayerPostision) = @selectedItem
-    gosub writeGameBoardTileSub
-    gosub pipeConnectionHandlerSub
+        rotateLefthandler:
+            # handle rotate left
+            if @previousItem = 3 then @selectedItemKey = 6
+            if @previousItem = 6 then @selectedItemKey = 5
+            if @previousItem = 9 then @selectedItemKey = 4
+            if @previousItem = 12 then @selectedItemKey = 3
+
+        rotateItemDraw:
+            @selectedItem = @itemValues(@selectedItemKey)
+            @drawTo = @currentPlayerPostision
+            @gameBoard(@drawTo) = @selectedItem
+            gosub writeGameBoardTileSub
+            gosub pipeConnectionHandlerSub
     goto removeSideBarItem
-
-    removeGameBoardItem:
-    @selectedItemKey = @empty
-    gosub writeGameBoardTileSub
+    gosub removeGameBoardItem
+    removeGameBoardItemDone:
 
     removeSideBarItem:
-    @gameSidebar(@selectedSidebarIndex) = @empty
-    @printText$ = @itemTiles$(@empty)
-    gosub writeItemSub
-    # reset to first item in sidebar
-    @keyInput$ = "1"
-    gosub itemSelectorHandlerSub
+        @gameSidebar(@selectedSidebarIndex) = @empty
+        @printText$ = @itemTiles$(@empty)
+        gosub writeItemSub
+        # reset to first item in sidebar
+        @keyInput$ = "1"
+        gosub itemSelectorHandlerSub
     
     placeItemHandlerDone:
         # random cow movement
-    gosub movementActionHandlerSub
+        gosub movementActionHandlerSub
 
     placeItemHandlerSkip:
+return
+
+moveItemHandler:
+    # move cow
+    @moved = 0
+    c = 0 : @clearTo = @drawTo
+    r = int(rnd(1) * 4) + 1
+    getNewPositionHandler:
+        c = c + 1
+        on r goto moveUpLeft, moveUpRight, moveDownLeft, moveDownRight
+        # positions 
+        moveUpLeft:
+            @nextValue = @drawTo - a
+            goto tryMoveItemHandler
+        moveUpRight:
+            @nextValue = @drawTo - b
+            goto tryMoveItemHandler
+        moveDownLeft:
+            @nextValue = @drawTo + b
+            goto tryMoveItemHandler
+        moveDownRight:
+            @nextValue = @drawTo + a
+            # fall through
+
+    tryMoveItemHandler:
+        if @nextValue < 0 then retryHandler
+        if @nextValue >=54 then retryHandler
+        @newItem = @gameBoard(@nextValue)
+        if (@newItem and @empty) = @empty then moveItemToNewPositionHandler
+
+        retryHandler:
+        # can't move
+        if c > 4 then @printText$ = "Can't move" : gosub writeLogSub : goto placeItemHandlerSkip
+        r = r + 1
+        if r > 4 then r = 1
+    
+        goto getNewPositionHandler
+    
+    # add the new cow in the new position
+    moveItemToNewPositionHandler:
+        @gameBoard(@nextValue) = @previousItem
+        
+        @selectedItemKey = 8
+        @clearTo = @drawTo
+        @drawTo = @nextValue
+        gosub writeGameBoardTileSub
+        @drawTo = @clearTo
+        gosub removeGameBoardItem
+        # moo
+        @printText$ = "Moo!" : gosub writeLogSub
+        @moved = @nextValue
+return
+
+removeGameBoardItem:
+    @selectedItemKey = @empty
+    gosub writeGameBoardTileSub
 return
 
 # pipe connection handler
@@ -259,34 +274,13 @@ movementActionHandlerSub:
     for i = . to 56
         @checkTile = @gameBoard(i)
         if @checkTile <> @cow then movementActionHandlerEnd
-        # TODO: get random direction and move if empty
-        r = int(rnd(1) * 10) + 1
-        on r goto noCowMove, cowMoveUp, cowMoveRight, cowMoveDown, cowMoveLeft
-        noCowMove:
-            r = i
-            goto movementActionHandlerEnd
-        cowMoveUp:
-            r = i - 8
-            goto cowMoveHandler
-        cowMoveRight:
-            r = i + 1
-            goto cowMoveHandler
-        cowMoveDown:
-            r = i + 8
-            goto cowMoveHandler
-        cowMoveLeft:
-            r = i - 1
-            goto cowMoveHandler
-
-        cowMoveHandler:
-        if r < 0 then movementActionHandlerEnd
-        if r > 55 then movementActionHandlerEnd
-        if @gameBoard(r) <> @empty then movementActionHandlerEnd
-        # move cow to r
-        # clear i
-
-        # moo
-        @printText$ = "Moo!" : gosub writeLogSub
+        r = int(rnd(1) * 3)
+        if r > 0 then movementActionHandlerEnd
+        # move cow
+        @drawTo = i
+        a = 8 : b = 1
+        gosub moveItemHandler
+        if @moved > i then i = @moved
         
         movementActionHandlerEnd:
     next

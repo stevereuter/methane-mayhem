@@ -19,10 +19,12 @@ let @destroy = 1024
 let @move = 2048
 let @rotate = 4096
 let @highPercent = 8192
-# unused = 16384
+# not usable = 16384
 # NOTE: there is no 16th bit as that is used for the sign in C64 BASIC
 # NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
 
+let i = .
+let r = .
 let @checkIndex = .
 let @nextIndex = .
 let @checkTile = .
@@ -42,6 +44,13 @@ let @currentPlayerPostision = .
 let @selectedSidebarIndex = .
 let @direction = .
 let @nextItemKey = .
+let @nextValue = .
+let @drawTo = .
+let @clearTo = .
+let @moved = .
+let a = .
+let b = .
+let c = .
 
 # NOTE: will also need events: cows moving, trees spawning, fire spreading, rocks falling (meteors), add panic to cows near fire or death (higher chance of moving), alien cows spawning (delivered by UFO if taken in the past)
 
@@ -100,7 +109,7 @@ dim @itemTiles$(17)
 # rock
 @itemTiles$(9) = "{brn}{198}{199}{200}{down}{3 left}{214}{215}{216}{down}{3 left}{166}{167}{168}"
 @itemValues(9) = @rock
-# giddy up
+# cow mover
 @itemTiles$(10) = "{grn}{201}{32}{203}{down}{3 left}{white}{217}{218}{219}{down}{3 left}{grn}{169}{white}{170}{grn}{171}"
 @itemValues(10) = @move + @cow
 # pick axe
@@ -118,10 +127,10 @@ dim @itemTiles$(17)
 @itemValues(14) = .
 
 # rotate right
-@itemTiles$(15) = "{grn}{204}{205}{206}{down}{3 left}{220}{32}{222}{down}{3 left}{172}{173}{174}"
+@itemTiles$(15) = "{grn}{204}{205}{206}{down}{3 left}{222}{32}{220}{down}{3 left}{172}{173}{174}"
 @itemValues(15) = @rotate + @pipeRight
 # rotate left
-@itemTiles$(16) = "{grn}{204}{205}{206}{down}{3 left}{222}{32}{220}{down}{3 left}{172}{173}{174}"
+@itemTiles$(16) = "{grn}{204}{205}{206}{down}{3 left}{220}{32}{222}{down}{3 left}{172}{173}{174}"
 @itemValues(16) = @rotate + @pipeLeft
 
 # TODO: items to add: dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows)

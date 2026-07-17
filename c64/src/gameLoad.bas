@@ -62,21 +62,22 @@ gosub writeItemSub
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
 for @selectedItemKey = 7 to 9
-    @currentPlayerPostision = INT(rnd(1) * 56)
+    @drawTo = INT(rnd(1) * 56)
     gosub writeGameBoardTileSub
-    @currentPlayerPostision = INT(rnd(1) * 56)
+    @drawTo = INT(rnd(1) * 56)
     gosub writeGameBoardTileSub
-    @currentPlayerPostision = INT(rnd(1) * 56)
+    @drawTo = INT(rnd(1) * 56)
     gosub writeGameBoardTileSub
 next
 
+# add random start and end positions for the pipe connection
 @connectionStartPosition = INT(rnd(1) * 7) * 8
 @connectionEndPosition = INT(rnd(1) * 7) * 8 + 7
 @selectedItemKey = 13
-@currentPlayerPostision = @connectionStartPosition
+@drawTo = @connectionStartPosition
 gosub writeGameBoardTileSub
 @gameBoard(@connectionStartPosition) = .
 @selectedItemKey = 14
-@currentPlayerPostision = @connectionEndPosition
+@drawTo = @connectionEndPosition
 gosub writeGameBoardTileSub
 @gameBoard(@connectionEndPosition) = .
