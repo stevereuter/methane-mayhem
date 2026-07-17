@@ -52,8 +52,6 @@ for @gameLoop=. to @loopMax
     # TODO: handle item placement here, will need to check if it's available for the current selected item
     gosub placeItemHandlerSub
 
-    # TODO: handle win condition logic
-
     # TODO: handle game over logic
     # set over to true (-1) to end game, or false (0) to keep going
     @isGameOver = .

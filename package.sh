@@ -34,12 +34,6 @@ fi
 # with LOAD "METHANE MAYHEM",8,1 in the default C64 character mode.
 c1541 -format "methane,00" d64 "$D64_FILE" -write "$PRG_FILE" "methane"
 
-# Add configured binary assets (for example charset PRGs) to the D64 image.
-if [ -f "c64/tools/add_config_binaries.py" ]; then
-    echo "🧩 Adding configured binaries to d64 image..."
-    python3 "c64/tools/add_config_binaries.py"
-fi
-
 # Create the zip package
 echo "📦 Creating zip package..."
 ZIP_FILE="c64/build/methane-mayhem-v${VERSION}.zip"

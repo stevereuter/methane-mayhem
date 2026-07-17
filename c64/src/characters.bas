@@ -9,6 +9,13 @@ loadCharacterSet:
     # Set Screen to 52224 and Chars to 49152
     poke 53272, 48
 
+    # switch to multi color mode
+    poke 53270, peek(53270) or 16
+    # set shared 1 color white
+    poke 53282, 15
+    # set shared 2 color black
+    poke 53283, 0
+
     # Tell BASIC the screen moved
     poke 648, 204
 

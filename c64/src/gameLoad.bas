@@ -8,15 +8,15 @@ poke 53281, 13
 # brown border
 poke 53280, 9
 
-r1$="       {rvon}                          {rvof} {rvon}next {rvof}"
+r1$="       {rvon}                          {rvof} {91}{92}{93}{94}{95}"
 r2$="       {rvon} {rvof}                        {rvon} {rvof}"
-r3$="       {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{93}{93}{93}{rvon} {rvof}"
+r3$="       {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
 r4$="       {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
 r5$="       {rvon}                          {rvof}"
 r6$="       {rvon}                          {rvof}"
 r7$="       {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
 
-print "{clr}{brown}             methane mayhem"
+print "{clr}{blk}             methane mayhem"
 print r1$
 
 for i=. to 2
@@ -62,6 +62,10 @@ gosub writeItemSub
 # TODO: temp remove
 # draw tree, cow, and rock in random positions on the board for testing
 for @selectedItemKey = 7 to 9
+    @currentPlayerPostision = INT(rnd(1) * 56)
+    gosub writeGameBoardTileSub
+    @currentPlayerPostision = INT(rnd(1) * 56)
+    gosub writeGameBoardTileSub
     @currentPlayerPostision = INT(rnd(1) * 56)
     gosub writeGameBoardTileSub
 next

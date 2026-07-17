@@ -95,7 +95,7 @@ return
 placeItemHandlerSub:
     gosub clearLogSub
 
-    if @keyInputAsc <> 13 then placeItemHandlerDone
+    if @keyInputAsc <> 13 then placeItemHandlerSkip
 
     @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
     @selectedItem = @itemValues(@selectedItemKey)
@@ -108,7 +108,7 @@ placeItemHandlerSub:
 
     @printText$ = "blocked"
     gosub writeLogSub
-    goto placeItemHandlerDone
+    goto placeItemHandlerSkip
 
     # pipe handler
     placePipeHandler:
@@ -121,13 +121,16 @@ placeItemHandlerSub:
 
     # utility handler
     utilityHandler:
+    if @previousItem = @empty then placeItemHandlerSkip
     if (@selectedItem and @rotate) = @rotate then rotateItemHandler
     if (@selectedItem and @move) = @move then moveItemHandler
     # destroy item handler
+    # TODO: fix destroy item issues, cutting tree on empty adds cow
     if (@previousItem and @selectedItem and @tree) = @tree then removeGameBoardItem
     if (@previousItem and @selectedItem and @rock) = @rock then removeGameBoardItem
 
     moveItemHandler:
+    # TODO: fix move
     # if giddy up move cow
     i = 0
     r = int(rnd(1) * 4) + 1
@@ -178,6 +181,7 @@ placeItemHandlerSub:
     if @selectedItemKey > . then rotateItemDraw
 
     if @selectedItem = @pipeLeft then rotateLefthandler
+    # TODO: fix rotate issues
     # handle rotate right
     if @previousItem = 3 then @selectedItemKey = 3
     if @previousItem = 6 then @selectedItemKey = 4
@@ -211,6 +215,10 @@ placeItemHandlerSub:
     gosub itemSelectorHandlerSub
     
     placeItemHandlerDone:
+        # random cow movement
+    gosub movementActionHandlerSub
+
+    placeItemHandlerSkip:
 return
 
 # pipe connection handler
@@ -245,6 +253,44 @@ pipeConnectionHandlerSub:
     next
     gosub clearLogSub
     if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub
+return
+
+movementActionHandlerSub:
+    for i = . to 56
+        @checkTile = @gameBoard(i)
+        if @checkTile <> @cow then movementActionHandlerEnd
+        # TODO: get random direction and move if empty
+        r = int(rnd(1) * 10) + 1
+        on r goto noCowMove, cowMoveUp, cowMoveRight, cowMoveDown, cowMoveLeft
+        noCowMove:
+            r = i
+            goto movementActionHandlerEnd
+        cowMoveUp:
+            r = i - 8
+            goto cowMoveHandler
+        cowMoveRight:
+            r = i + 1
+            goto cowMoveHandler
+        cowMoveDown:
+            r = i + 8
+            goto cowMoveHandler
+        cowMoveLeft:
+            r = i - 1
+            goto cowMoveHandler
+
+        cowMoveHandler:
+        if r < 0 then movementActionHandlerEnd
+        if r > 55 then movementActionHandlerEnd
+        if @gameBoard(r) <> @empty then movementActionHandlerEnd
+        # move cow to r
+        # clear i
+
+        # moo
+        @printText$ = "Moo!" : gosub writeLogSub
+        
+        movementActionHandlerEnd:
+    next
+
 return
 
 # feed item handler, move item from feeder to sidebar and replace
