@@ -59,7 +59,7 @@
 | next 5            | 31    | 95  |
 | space             | 32    | 32  |
 | !                 | 33    | 33  |
-|                   | 34    | 34  |
+| "                 | 34    | 34  |
 | pipe-horizontal   | 35    | 35  |
 | pipe-vertical     | 36    | 36  |
 | pipe-top-right    | 37    | 37  |
@@ -94,7 +94,7 @@
 | v block 4/8       | 66    | 130 |
 | h block 4/8       | 67    | 131 |
 | h block 3/8       | 68    | 132 |
-| h block 2/8       | 69    | 133 |
+|                   | 69    | 133 |
 | h block 6/8       | 70    | 134 |
 | v block 3/8       | 71    | 135 |
 | v block 6/8       | 72    | 136 |
@@ -158,7 +158,7 @@
 | tree-3            | 130   | 194 |
 | cow-1             | 131   | 195 |
 | cow-2             | 132   | 196 |
-| cow-3             | 133   | 197 |
+| window border     | 133   | 197 |
 | rock-1            | 134   | 198 |
 | rock-2            | 135   | 199 |
 | rock-3            | 136   | 200 |
@@ -182,7 +182,7 @@
 | giddy up center   | 154   | 218 |
 | giddy up center   | 155   | 219 |
 | rotate down       | 156   | 220 |
-| empty             | 157   | 221 |
+| pipe down right   | 157   | 221 |
 | rotate up         | 158   | 222 |
 | pick bottom 3     | 159   | 223 |
 | tree-7            | 160   | 160 |

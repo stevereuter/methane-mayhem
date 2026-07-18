@@ -34,16 +34,21 @@ poke 53249, @positionY
 poke 53264, peek(53264) or 2
 poke 53250, 48
 poke 53251, 98
+# turn on sprites
+poke 53269, peek(53269) or 3
 # time difference 0-9, is reset at 10 giffies
 @timeDifference = TI
 @currentPlayerPostision = 0
 @selectedSidebarIndex = 0
+# set over to true (-1) to end game, or false (0) to keep going
+@isGameOver = .
+@isComplete = .
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
     gosub animateSelectorSub
     # TODO: may have to convert this to ASC as we will need enter and function keys
     get @keyInput$
-    if @keyInput$ = "" then gameLoopDone
+    if @keyInput$ = "" then gameLoopSkip
     @keyInputAsc = ASC(@keyInput$)
     # selecting a tool to use
     gosub itemSelectorHandlerSub
@@ -53,14 +58,12 @@ for @gameLoop=. to @loopMax
     gosub placeItemHandlerSub
 
     # TODO: handle game over logic
-    # set over to true (-1) to end game, or false (0) to keep going
-    @isGameOver = .
     # if game over, set loop to max to end game
     if @isGameOver then @gameLoop = @loopMax : goto gameLoopDone
 
-
-    gameLoopDone:
+    gameLoopSkip:
     # best to set it back to 0 (use -1 as next will increment) once reached to prevent the game from ending
     # TODO: need to determine if we are going to use the index for anything
     if @gameLoop = 5 then @gameLoop = -1
+    gameLoopDone:
 next

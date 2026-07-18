@@ -3,7 +3,6 @@
 #include "variables.bas"
 #include "sprites.bas"
 
-goto gameStart
 goto start
 # putting this up top so that the main loop is closest to the subroutines
 gameOver:

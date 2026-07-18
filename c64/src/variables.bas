@@ -59,6 +59,7 @@ let c = .
 let @printText$ = ""
 let @loopMax = 100
 let @feeder$ = ""
+let @timer = 15
 
 # arrays
 dim @colorPulse(6)
@@ -69,6 +70,14 @@ dim @gameSidebar(4)
 dim @itemValues(17)
 # board tiles
 dim @itemTiles$(17)
+# TODO: temp need to create level system
+dim @tempItems(5)
+@tempItems(0) = 10
+@tempItems(1) = 11
+@tempItems(2) = 12
+@tempItems(3) = 15
+@tempItems(4) = 16
+
 
 @colorPulse(0) = 1
 @colorPulse(1) = 15
@@ -89,7 +98,7 @@ dim @itemTiles$(17)
 @itemTiles$(2) = "{brn}   {down}{3 left}{35}{35}{35}{down}{3 left}   "
 @itemValues(2) = @pipeLeft + @pipeRight
 # pipe corner down right
-@itemTiles$(3) = "{brn}   {down}{3 left} {39}{35}{down}{3 left} {36} "
+@itemTiles$(3) = "{brn}   {down}{3 left} {221}{35}{down}{3 left} {36} "
 @itemValues(3) = @pipeDown + @pipeRight
 # pipe corner down left
 @itemTiles$(4) = "{brn}   {down}{3 left}{35}{64} {down}{3 left} {36} "
@@ -104,7 +113,7 @@ dim @itemTiles$(17)
 @itemTiles$(7) = "{green}{192}{193}{194}{down}{3 left}{208}{209}{210}{down}{3 left}{lightgreen}{160}{161}{162}"
 @itemValues(7) = @tree
 # cow
-@itemTiles$(8) = "{brn}{195}{196}{197}{down}{3 left}{211}{212}{213}{down}{3 left}{163}{164}{165}"
+@itemTiles$(8) = "{brn}{195}{196}{32}{down}{3 left}{211}{212}{213}{down}{3 left}{163}{164}{165}"
 @itemValues(8) = @cow
 # rock
 @itemTiles$(9) = "{brn}{198}{199}{200}{down}{3 left}{214}{215}{216}{down}{3 left}{166}{167}{168}"

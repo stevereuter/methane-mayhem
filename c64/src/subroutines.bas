@@ -174,9 +174,11 @@ placeItemHandlerSub:
         gosub itemSelectorHandlerSub
     
     placeItemHandlerDone:
+        if @isGameOver then placeItemHandlerSkip
         # random cow movement
         gosub movementActionHandlerSub
 
+        gosub updateTimerHandlerSub
     placeItemHandlerSkip:
 return
 
@@ -206,11 +208,11 @@ moveItemHandler:
         if @nextValue < 0 then retryHandler
         if @nextValue >=54 then retryHandler
         @newItem = @gameBoard(@nextValue)
-        if (@newItem and @empty) = @empty then moveItemToNewPositionHandler
+        if @newItem = @empty then moveItemToNewPositionHandler
 
         retryHandler:
         # can't move
-        if c > 4 then @printText$ = "Can't move" : gosub writeLogSub : goto placeItemHandlerSkip
+        if c > 4 then @printText$ = "Can't move" : gosub writeLogSub : goto tryMoveItemHandlerSkip
         r = r + 1
         if r > 4 then r = 1
     
@@ -229,6 +231,8 @@ moveItemHandler:
         # moo
         @printText$ = "Moo!" : gosub writeLogSub
         @moved = @nextValue
+
+    tryMoveItemHandlerSkip:
 return
 
 removeGameBoardItem:
@@ -267,7 +271,7 @@ pipeConnectionHandlerSub:
         endValidateGameBoardBounds:
     next
     gosub clearLogSub
-    if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub
+    if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub : @isGameOver = -1
 return
 
 movementActionHandlerSub:
@@ -284,7 +288,24 @@ movementActionHandlerSub:
         
         movementActionHandlerEnd:
     next
+return
 
+updateTimerHandlerSub:
+    @timer = @timer - 1 : x = 2
+    if @timer < 0 then updateTimerLeak
+    
+    # update time lower
+        @printText$ = "   "
+        y = 17 - @timer
+        goto updateTimerDraw
+
+    updateTimerLeak:
+        y = 18 + @timer
+        @printText$ = "{rvon}{grn}   {rvof}"
+        if @timer = -17 then @isGameOver = -1 : @printText$ = "Time is up!" : gosub writeLogSub
+
+    updateTimerDraw:
+        gosub writeTextSub
 return
 
 # feed item handler, move item from feeder to sidebar and replace

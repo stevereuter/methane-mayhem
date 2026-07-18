@@ -14,7 +14,7 @@ for sn = . to 1
     poke 53240+sn, 32
 
     # Enable sprite 0 (bit 0 of $D015 / 53269).
-    poke 53269, peek(53269) or (2 ^ sn)
+    # poke 53269, peek(53269) or (2 ^ sn)
 
     # For resizing the sprite
     # x double-width on
