@@ -8,12 +8,12 @@ let @pipeUp = 1
 let @pipeRight = 2
 let @pipeDown = 4
 let @pipeLeft = 8
-let @cow = 16
+let @growing = 16
 let @tree = 32
 let @rock = 64
 # effects, 
 let @burning = 128
-let @growing = 256
+let @cow = 256
 let @invincible = 512
 let @destroy = 1024
 let @move = 2048
@@ -60,6 +60,8 @@ let @printText$ = ""
 let @loopMax = 100
 let @feeder$ = ""
 let @timer = 15
+let @seed = .
+let @isChallengeMode = .
 
 # arrays
 dim @colorPulse(6)
@@ -141,6 +143,10 @@ dim @tempItems(5)
 # rotate left
 @itemTiles$(16) = "{grn}{204}{205}{206}{down}{3 left}{220}{32}{222}{down}{3 left}{172}{173}{174}"
 @itemValues(16) = @rotate + @pipeLeft
+
+# baby tree
+@itemTiles$(17) = "{3 32}{down}{3 left}{3 32}{down}{3 left}{32}{lightgreen}{176}{32}"
+@itemValues(17) = @tree + @growing
 
 # TODO: items to add: dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows)
 

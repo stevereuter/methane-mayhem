@@ -106,7 +106,8 @@ placeItemHandlerSub:
     if @selectedSidebarIndex <> . then utilityHandler
     if @selectedItem = @previousItem then feedNextItemHandler
     if @previousItem = @empty then placePipeHandler
-    if @previousItem < @cow then placePipeHandler
+    if @previousItem < @growing then placePipeHandler
+    if (@previousItem and @growing) = @growing then placePipeHandler
 
     @printText$ = "blocked"
     gosub writeLogSub
@@ -134,7 +135,7 @@ placeItemHandlerSub:
 
     # if rotate change
     rotateItemHandler:
-        if @previousItem >= @cow then placeItemHandlerSkip
+        if @previousItem >= @growing then placeItemHandlerSkip
         @selectedItemKey = .
         # handle straight pipes
         if @previousItem = @pipeUp + @pipeDown then @selectedItemKey = 2 : goto rotateItemDraw
@@ -175,8 +176,11 @@ placeItemHandlerSub:
     
     placeItemHandlerDone:
         if @isGameOver then placeItemHandlerSkip
+
         # random cow movement
-        gosub movementActionHandlerSub
+        gosub cowRandomMovementHandlerSub
+        # random tree spawn
+        gosub treeSpawnHandlerSub
 
         gosub updateTimerHandlerSub
     placeItemHandlerSkip:
@@ -274,20 +278,43 @@ pipeConnectionHandlerSub:
     if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub : @isGameOver = -1
 return
 
-movementActionHandlerSub:
+cowRandomMovementHandlerSub:
+    @moved = -1
     for i = . to 56
         @checkTile = @gameBoard(i)
-        if @checkTile <> @cow then movementActionHandlerEnd
-        r = int(rnd(1) * 3)
-        if r > 0 then movementActionHandlerEnd
+        # skip past last moved to prevent double move
+        if i <= @moved then cowRandomMovementHandlerEnd
+        if @checkTile <> @cow then cowRandomMovementHandlerEnd
+        if rnd(1) > .7 then cowRandomMovementHandlerEnd
         # move cow
         @drawTo = i
         a = 8 : b = 1
         gosub moveItemHandler
-        if @moved > i then i = @moved
         
-        movementActionHandlerEnd:
+        cowRandomMovementHandlerEnd:
+
+        if @checkTile = @tree + @growing then gosub growTreeHandlerSub
     next
+return
+
+growTreeHandlerSub:
+    @drawTo = i
+    @gameBoard(@drawTo) = @tree
+    @selectedItemKey = 7
+    gosub writeGameBoardTileSub
+return
+
+treeSpawnHandlerSub:
+    if rnd(1) > .8 then treeSpawnHandlerEnd
+    # spawn a tree in a random position on the game board
+    @drawTo = int(rnd(1) * 56)
+    if @gameBoard(@drawTo) <> @empty then treeSpawnHandlerEnd
+
+    @selectedItemKey = 17
+    gosub writeGameBoardTileSub
+    @printText$="Tree spawned!" : gosub writeLogSub
+
+    treeSpawnHandlerEnd:
 return
 
 updateTimerHandlerSub:
@@ -314,6 +341,52 @@ nextItemHandlerSub:
     @printText$ = @itemTiles$(@nextItemKey)
     gosub writeItemSub
     gosub generateNextItemSub
+return
+
+generateLevelSub:
+    # TODO: this needs to be based on the level and the obstacles in it
+    gosub generateNextItemSub
+
+    # TODO: add @gameSidebar
+        for @selectedSidebarIndex = 1 to 3
+            @selectedItemKey = @tempItems(int(rnd(1) * 5))
+            @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
+            @printText$ = @itemTiles$(@selectedItemKey)
+            gosub writeItemSub
+        NEXT
+
+    # TODO: temp remove, create random pipe for item sidebar
+        @selectedSidebarIndex = .
+        @selectedItemKey = INT(rnd(1) * 6) + 1
+        @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
+        @printText$ = @itemTiles$(@selectedItemKey)
+        gosub writeItemSub
+
+    # TODO: temp remove
+    # draw tree, cow, and rock in random positions on the board for testing 7-9
+        for @selectedItemKey = 7 to 9
+            @drawTo = INT(rnd(1) * 56)
+            gosub writeGameBoardTileSub
+            @drawTo = INT(rnd(1) * 56)
+            gosub writeGameBoardTileSub
+            @drawTo = INT(rnd(1) * 56)
+            gosub writeGameBoardTileSub
+            @drawTo = INT(rnd(1) * 56)
+            gosub writeGameBoardTileSub
+        next
+
+    # add random start and end positions for the pipe connection
+        @connectionStartPosition = INT(rnd(1) * 7) * 8
+        @connectionEndPosition = INT(rnd(1) * 7) * 8 + 7
+        @selectedItemKey = 13
+        @drawTo = @connectionStartPosition
+        gosub writeGameBoardTileSub
+        @gameBoard(@connectionStartPosition) = .
+        @selectedItemKey = 14
+        @drawTo = @connectionEndPosition
+        gosub writeGameBoardTileSub
+        @gameBoard(@connectionEndPosition) = .
+
 return
 
 # write feeder handler, select random item and write to feeder area
@@ -345,4 +418,11 @@ fillFeederSub:
             @feeder$ = @feeder$ + right$(str$(c), 1)
         next
     next
+return
+
+generateSeedSub:
+    if @isChallengeMode then input "enter a number for the challenge mode seed"; @seed
+    if @seed = 0 then @seed = int(rnd(.) * -9000)
+    if @seed > 0 then @seed = @seed * -1
+    @seed = rnd(@seed)
 return
