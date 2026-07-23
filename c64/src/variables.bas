@@ -131,10 +131,10 @@ dim @tempItems(5)
 @itemValues(12) = @destroy + @tree
 
 # start
-@itemTiles$(13) = "{brn}{down}{left}{35}"
+@itemTiles$(13) = "{brn}   {down}{4 left}{35}   {down}{3 left}   "
 @itemValues(13) = .
 # end
-@itemTiles$(14) = "{brn}{down}{3 right}{35}"
+@itemTiles$(14) = "{brn}   {down}{3 left}   {35}{down}{4 left}   "
 @itemValues(14) = .
 
 # rotate right

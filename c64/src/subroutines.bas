@@ -45,9 +45,9 @@ animateSelectorSub:
 return
 
 # item selector handler
-itemSelectorHandlerSub:
+playerSelectItemHandlerSub:
     # selecting a tool to use
-    # TODO: probably better to just update the selected item here then update the sprite based on that index
+    # TODO: probably better to just update the selected item here than update the sprite based on that index
     # TODO: need to add function keys for selecting the @gameSidebar too
     # 49 or 133
     if @keyInput$ = "1" then poke 53251, 98 : @selectedSidebarIndex = 0
@@ -60,7 +60,7 @@ itemSelectorHandlerSub:
 return
 
 # board selector handler
-boardSelectorHandlerSub:
+playerMoveHandlerSub:
     # play area positioning, 24x24 cells in an 8x7 grid
     @newPositionX = @positionX
     @newPositionY = @positionY
@@ -117,7 +117,7 @@ placeItemHandlerSub:
     placePipeHandler:
         gosub writeGameBoardTileSub
         @gameBoard(@drawTo) = @selectedItem
-        gosub pipeConnectionHandlerSub
+        gosub checkPipeConnectionHandlerSub
         feedNextItemHandler:
         gosub nextItemHandlerSub
     goto placeItemHandlerDone
@@ -161,7 +161,7 @@ placeItemHandlerSub:
             @drawTo = @currentPlayerPostision
             @gameBoard(@drawTo) = @selectedItem
             gosub writeGameBoardTileSub
-            gosub pipeConnectionHandlerSub
+            gosub checkPipeConnectionHandlerSub
     goto removeSideBarItem
     gosub removeGameBoardItem
     removeGameBoardItemDone:
@@ -172,7 +172,7 @@ placeItemHandlerSub:
         gosub writeItemSub
         # reset to first item in sidebar
         @keyInput$ = "1"
-        gosub itemSelectorHandlerSub
+        gosub playerSelectItemHandlerSub
     
     placeItemHandlerDone:
         if @isGameOver then placeItemHandlerSkip
@@ -245,10 +245,10 @@ removeGameBoardItem:
 return
 
 # pipe connection handler
-pipeConnectionHandlerSub:
+checkPipeConnectionHandlerSub:
     # loop from begining to see if we reach the end
-    @requiredConnection = @pipeLeft
-    @checkIndex = @connectionStartPosition
+    @requiredConnection = @pipeRight
+    @checkIndex = @connectionEndPosition
     @printText$ = "Checking connections..." : gosub writeLogSub
     for i =. to 55
         @checkTile = @gameBoard(@checkIndex)
@@ -256,7 +256,7 @@ pipeConnectionHandlerSub:
         # check if not connect
         if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @isComplete = -1 : i = 55 : goto endValidateGameBoardBounds
+        if @checkIndex = @connectionStartPosition then if (@checkTile and @pipeLeft) = @pipeLeft then @isComplete = -1 : i = 55 : goto endValidateGameBoardBounds
 
         # get next required connection
         if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @checkIndex - 8 : goto validateGameBoardBounds
@@ -305,14 +305,14 @@ growTreeHandlerSub:
 return
 
 treeSpawnHandlerSub:
-    if rnd(1) > .8 then treeSpawnHandlerEnd
+    if rnd(1) > .9 then treeSpawnHandlerEnd
     # spawn a tree in a random position on the game board
     @drawTo = int(rnd(1) * 56)
     if @gameBoard(@drawTo) <> @empty then treeSpawnHandlerEnd
 
     @selectedItemKey = 17
     gosub writeGameBoardTileSub
-    @printText$="Tree spawned!" : gosub writeLogSub
+    @printText$="a tree is growing!" : gosub writeLogSub
 
     treeSpawnHandlerEnd:
 return
@@ -347,7 +347,7 @@ generateLevelSub:
     # TODO: this needs to be based on the level and the obstacles in it
     gosub generateNextItemSub
 
-    # TODO: add @gameSidebar
+    # TODO: add to @gameSidebar
         for @selectedSidebarIndex = 1 to 3
             @selectedItemKey = @tempItems(int(rnd(1) * 5))
             @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
@@ -386,7 +386,6 @@ generateLevelSub:
         @drawTo = @connectionEndPosition
         gosub writeGameBoardTileSub
         @gameBoard(@connectionEndPosition) = .
-
 return
 
 # write feeder handler, select random item and write to feeder area
@@ -425,4 +424,48 @@ generateSeedSub:
     if @seed = 0 then @seed = int(rnd(.) * -9000)
     if @seed > 0 then @seed = @seed * -1
     @seed = rnd(@seed)
+return
+
+drawGameBoardSub:
+# light green background
+    poke 53281, 13
+# brown border
+    poke 53280, 9
+
+# draw main game board
+    r1$=" {rvon}     {rvof} {rvon}                          {rvof} {91}{92}{93}{94}{95}"
+    r2$="       {rvon} {rvof}                        {rvon} {rvof}"
+    r3$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
+    r4$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
+    r5$="       {rvon}                          {rvof}"
+    r6$="       {rvon}                          {rvof}"
+    r7$=" {rvon}     {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
+
+    print "{clr}{blk}             methane mayhem"
+    print r1$
+
+    for i=. to 2
+        print r4$
+    next
+    print r3$
+    for i=. to 11
+        print r4$
+    next
+    print r7$
+    for i=. to 3
+        print r2$
+    next
+
+    print r6$;
+return
+
+initializeTimerSub:
+# fill the timer
+    @timer = 0
+    @printText$ = "{rvon}{yellow}   {rvof}"
+    x = 2
+    for y = 17 to 2 step -1
+        gosub writeTextSub
+        @timer = @timer + 1
+    next
 return

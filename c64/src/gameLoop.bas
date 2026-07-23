@@ -51,9 +51,9 @@ for @gameLoop=. to @loopMax
     if @keyInput$ = "" then gameLoopSkip
     @keyInputAsc = ASC(@keyInput$)
     # selecting a tool to use
-    gosub itemSelectorHandlerSub
+    gosub playerSelectItemHandlerSub
     # selecting a cell on the board
-    gosub boardSelectorHandlerSub
+    gosub playerMoveHandlerSub
     # TODO: handle item placement here, will need to check if it's available for the current selected item
     gosub placeItemHandlerSub
 
