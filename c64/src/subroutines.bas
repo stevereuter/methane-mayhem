@@ -344,6 +344,11 @@ nextItemHandlerSub:
 return
 
 generateLevelSub:
+    # reset game board
+        for i=. to 55
+            @gameBoard(i) = @empty
+        next
+
     # TODO: this needs to be based on the level and the obstacles in it
     gosub generateNextItemSub
 
@@ -364,6 +369,7 @@ generateLevelSub:
 
     # TODO: temp remove
     # draw tree, cow, and rock in random positions on the board for testing 7-9
+    # TODO: add the items without drawing, then loop through the board and draw once everything is complete to prevent flicker and changes
         for @selectedItemKey = 7 to 9
             @drawTo = INT(rnd(1) * 56)
             gosub writeGameBoardTileSub
