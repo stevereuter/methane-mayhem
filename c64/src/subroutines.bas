@@ -354,7 +354,7 @@ generateLevelSub:
 
     # TODO: add to @gameSidebar
         for @selectedSidebarIndex = 1 to 3
-            @selectedItemKey = @tempItems(int(rnd(1) * 5))
+            @selectedItemKey = @tempItems(int(rnd(1) * 7))
             @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
             @printText$ = @itemTiles$(@selectedItemKey)
             gosub writeItemSub

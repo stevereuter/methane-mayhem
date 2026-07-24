@@ -69,17 +69,18 @@ dim @colorPulse(6)
 dim @gameBoard(56)
 dim @gameSidebar(4)
 # items
-dim @itemValues(17)
+dim @itemValues(19)
 # board tiles
-dim @itemTiles$(17)
+dim @itemTiles$(19)
 # TODO: temp need to create level system
-dim @tempItems(5)
+dim @tempItems(7)
 @tempItems(0) = 10
 @tempItems(1) = 11
 @tempItems(2) = 12
 @tempItems(3) = 15
 @tempItems(4) = 16
-
+@tempItems(5) = 18
+@tempItems(6) = 19
 
 @colorPulse(0) = 1
 @colorPulse(1) = 15
@@ -91,64 +92,67 @@ dim @tempItems(5)
 # all item images
 # TODO: create a cross reference for items and their attributes
 # empty
-@itemTiles$(0) = "   {down}{3 left}   {down}{3 left}   "
-@itemValues(0) = @empty
+    @itemTiles$(0) = "   {down}{3 left}   {down}{3 left}   "
+    @itemValues(0) = @empty
 # pipe vertical
-@itemTiles$(1) = "{brn} {36} {down}{3 left} {36} {down}{3 left} {36} "
-@itemValues(1) = @pipeUp + @pipeDown
+    @itemTiles$(1) = "{brn} {36} {down}{3 left} {36} {down}{3 left} {36} "
+    @itemValues(1) = @pipeUp + @pipeDown
 # pipe horizontal
-@itemTiles$(2) = "{brn}   {down}{3 left}{35}{35}{35}{down}{3 left}   "
-@itemValues(2) = @pipeLeft + @pipeRight
+    @itemTiles$(2) = "{brn}   {down}{3 left}{35}{35}{35}{down}{3 left}   "
+    @itemValues(2) = @pipeLeft + @pipeRight
 # pipe corner down right
-@itemTiles$(3) = "{brn}   {down}{3 left} {221}{35}{down}{3 left} {36} "
-@itemValues(3) = @pipeDown + @pipeRight
+    @itemTiles$(3) = "{brn}   {down}{3 left} {221}{35}{down}{3 left} {36} "
+    @itemValues(3) = @pipeDown + @pipeRight
 # pipe corner down left
-@itemTiles$(4) = "{brn}   {down}{3 left}{35}{64} {down}{3 left} {36} "
-@itemValues(4) = @pipeDown + @pipeLeft
+    @itemTiles$(4) = "{brn}   {down}{3 left}{35}{64} {down}{3 left} {36} "
+    @itemValues(4) = @pipeDown + @pipeLeft
 # pipe corner up right
-@itemTiles$(5) = "{brn} {36} {down}{3 left} {37}{35}{down}{3 left}   "
-@itemValues(5) = @pipeUp + @pipeRight
+    @itemTiles$(5) = "{brn} {36} {down}{3 left} {37}{35}{down}{3 left}   "
+    @itemValues(5) = @pipeUp + @pipeRight
 # pipe corner up left
-@itemTiles$(6) = "{brn} {36} {down}{3 left}{35}{38} {down}{3 left}   "
-@itemValues(6) = @pipeUp + @pipeLeft
+    @itemTiles$(6) = "{brn} {36} {down}{3 left}{35}{38} {down}{3 left}   "
+    @itemValues(6) = @pipeUp + @pipeLeft
 # tree
-@itemTiles$(7) = "{green}{192}{193}{194}{down}{3 left}{208}{209}{210}{down}{3 left}{lightgreen}{160}{161}{162}"
-@itemValues(7) = @tree
+    @itemTiles$(7) = "{green}{192}{193}{194}{down}{3 left}{208}{209}{210}{down}{3 left}{lightgreen}{160}{161}{162}"
+    @itemValues(7) = @tree
 # cow
-@itemTiles$(8) = "{brn}{195}{196}{32}{down}{3 left}{211}{212}{213}{down}{3 left}{163}{164}{165}"
-@itemValues(8) = @cow
+    @itemTiles$(8) = "{brn}{195}{196}{32}{down}{3 left}{211}{212}{213}{down}{3 left}{blk}{163}{brn}{164}{165}"
+    @itemValues(8) = @cow
 # rock
-@itemTiles$(9) = "{brn}{198}{199}{200}{down}{3 left}{214}{215}{216}{down}{3 left}{166}{167}{168}"
-@itemValues(9) = @rock
+    @itemTiles$(9) = "{brn}{198}{199}{200}{down}{3 left}{214}{215}{216}{down}{3 left}{166}{167}{168}"
+    @itemValues(9) = @rock
 # cow mover
-@itemTiles$(10) = "{grn}{201}{32}{203}{down}{3 left}{white}{217}{218}{219}{down}{3 left}{grn}{169}{white}{170}{grn}{171}"
-@itemValues(10) = @move + @cow
+    @itemTiles$(10) = "{grn}{201}{32}{203}{down}{3 left}{white}{217}{218}{219}{down}{3 left}{grn}{169}{white}{170}{grn}{171}"
+    @itemValues(10) = @move + @cow
 # pick axe
-@itemTiles$(11) = "{white}{61}{62}{63}{down}{3 left}{blk}{43}{60}{white}{207}{down}{3 left}{blk}{175}{44}{white}{223}"
-@itemValues(11) = @destroy + @rock
+    @itemTiles$(11) = "{white}{61}{62}{63}{down}{3 left}{blk}{43}{60}{white}{207}{down}{3 left}{blk}{175}{44}{white}{223}"
+    @itemValues(11) = @destroy + @rock
 # axe
-@itemTiles$(12) = "{white}{32}{58}{59}{down}{3 left}{blk}{43}{60}{white}{202}{down}{3 left}{blk}{175}{44}{32}"
-@itemValues(12) = @destroy + @tree
-
+    @itemTiles$(12) = "{white}{32}{58}{59}{down}{3 left}{blk}{43}{60}{white}{202}{down}{3 left}{blk}{175}{44}{32}"
+    @itemValues(12) = @destroy + @tree
 # start
-@itemTiles$(13) = "{brn}   {down}{4 left}{35}   {down}{3 left}   "
-@itemValues(13) = .
+    @itemTiles$(13) = "{brn}   {down}{4 left}{35}   {down}{3 left}   "
+    @itemValues(13) = .
 # end
-@itemTiles$(14) = "{brn}   {down}{3 left}   {35}{down}{4 left}   "
-@itemValues(14) = .
-
+    @itemTiles$(14) = "{brn}   {down}{3 left}   {35}{down}{4 left}   "
+    @itemValues(14) = .
 # rotate right
-@itemTiles$(15) = "{grn}{204}{205}{206}{down}{3 left}{222}{32}{220}{down}{3 left}{172}{173}{174}"
-@itemValues(15) = @rotate + @pipeRight
+    @itemTiles$(15) = "{grn}{204}{205}{206}{down}{3 left}{222}{32}{220}{down}{3 left}{172}{173}{174}"
+    @itemValues(15) = @rotate + @pipeRight
 # rotate left
-@itemTiles$(16) = "{grn}{204}{205}{206}{down}{3 left}{220}{32}{222}{down}{3 left}{172}{173}{174}"
-@itemValues(16) = @rotate + @pipeLeft
-
+    @itemTiles$(16) = "{grn}{204}{205}{206}{down}{3 left}{220}{32}{222}{down}{3 left}{172}{173}{174}"
+    @itemValues(16) = @rotate + @pipeLeft
 # baby tree
-@itemTiles$(17) = "{3 32}{down}{3 left}{3 32}{down}{3 left}{32}{lightgreen}{176}{32}"
-@itemValues(17) = @tree + @growing
+    @itemTiles$(17) = "{3 32}{down}{3 left}{3 32}{down}{3 left}{32}{lightgreen}{176}{32}"
+    @itemValues(17) = @tree + @growing
+# match
+    @itemTiles$(18) = "{32}{blk}{43}{red}{177}{down}{3 left}{blk}{43}{60}{44}{down}{3 left}{175}{44}{32}"
+    @itemValues(18) = @tree + @burning
+# dynamite
+    @itemTiles$(19) = "{32}{red}{181}{lightgrey}{182}{down}{3 left}{red}{181}{179}{180}{down}{3 left}{178}{180}{32}"
+    @itemValues(19) = @destroy + @rock + @burning + @tree
 
-# TODO: items to add: dynamite (destroy large area and create fire), UFO (remove cows from the board), chainsaw? (destroy multiple trees), water/fire extinguisher (destroy fire stop spread), match (burn tree), tranquilizer? (calm cows)
+# TODO: items to add: UFO (remove cows from the board), water/fire extinguisher (destroy fire stop spread)
 
 
 
