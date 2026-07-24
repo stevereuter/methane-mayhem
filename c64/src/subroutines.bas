@@ -2,12 +2,17 @@
 
 # write @selectedItemKey to game board convert @drawTo to x,y
 writeGameBoardTileSub:
-    x=8 + (@drawTo - INT(@drawTo / 8) * 8) * 3
-    y=2 + INT(@drawTo / 8) * 3
+    gosub boardIndexToXYSub
     @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
     gosub locateCursorSub
     # FIXME: need the item index here not the item value
     print @itemTiles$(@selectedItemKey);
+return
+
+# convert board index to x,y coordinates
+boardIndexToXYSub:
+    x=8 + (@drawTo - int(@drawTo / 8) * 8) * 3
+    y=2 + int(@drawTo / 8) * 3
 return
 
 # write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
@@ -245,12 +250,23 @@ return
 
 addFireToBoardSub:
     @gameBoard(@currentPlayerPostision) = @previousItem + @burning
+
+    gosub boardIndexToXYSub
+    c = 2
+    for a=y to y+2
+        if a = y+2 then c = 10
+        for b=x to x+2
+            poke 55296 + b + (a * 40), c
+        next
+    next
     # TODO: add buring sprite
     @printText$ = "a fire has started" : gosub writeLogSub
+
     addFireToBoardEnd:
 return
 
 addExplosionToBoardSub:
+    # TODO: need to prevent off board explosion
     @explosionPositions(0) = @currentPlayerPostision
     @explosionPositions(1) = @currentPlayerPostision - 8
     @explosionPositions(2) = @currentPlayerPostision + 8
@@ -271,8 +287,8 @@ return
 # pipe connection handler
 checkPipeConnectionHandlerSub:
     # loop from begining to see if we reach the end
-    @requiredConnection = @pipeRight
-    @checkIndex = @connectionEndPosition
+    @requiredConnection = @pipeLeft
+    @checkIndex = @connectionStartPosition
     @printText$ = "Checking connections..." : gosub writeLogSub
     for i =. to 55
         @checkTile = @gameBoard(@checkIndex)
@@ -280,7 +296,7 @@ checkPipeConnectionHandlerSub:
         # check if not connect
         if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if @checkIndex = @connectionStartPosition then if (@checkTile and @pipeLeft) = @pipeLeft then @isComplete = -1 : i = 55 : goto endValidateGameBoardBounds
+        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @isComplete = -1 : i = 55 : goto endValidateGameBoardBounds
 
         # get next required connection
         if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @checkIndex - 8 : goto validateGameBoardBounds
@@ -297,6 +313,7 @@ checkPipeConnectionHandlerSub:
 
         @checkIndex = @nextIndex
         endValidateGameBoardBounds:
+        # TODO: check if leaking and move animation to @checkIndex
     next
     gosub clearLogSub
     if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub : @isGameOver = -1

@@ -125,14 +125,14 @@ dim @tempItems(7)
 # rock
     @itemTiles$(9) = "{brn}{198}{199}{200}{down}{3 left}{214}{215}{216}{down}{3 left}{166}{167}{168}"
     @itemValues(9) = @rock
-# cow mover
-    @itemTiles$(10) = "{grn}{201}{32}{203}{down}{3 left}{white}{217}{218}{219}{down}{3 left}{grn}{169}{white}{170}{grn}{171}"
+# giddy up
+    @itemTiles$(10) = "{grn}{201}{brn}{202}{grn}{203}{down}{3 left}{brn}{217}{218}{white}{219}{down}{3 left}{grn}{169}{brn}{170}{grn}{171}"
     @itemValues(10) = @move + @cow
 # pick axe
     @itemTiles$(11) = "{white}{61}{62}{63}{down}{3 left}{blk}{43}{60}{white}{207}{down}{3 left}{blk}{175}{44}{white}{223}"
     @itemValues(11) = @destroy + @rock
 # axe
-    @itemTiles$(12) = "{white}{32}{58}{59}{down}{3 left}{blk}{43}{60}{white}{202}{down}{3 left}{blk}{175}{44}{32}"
+    @itemTiles$(12) = "{white}{32}{58}{59}{down}{3 left}{blk}{43}{60}{white}{183}{down}{3 left}{blk}{175}{44}{32}"
     @itemValues(12) = @destroy + @tree
 # start
     @itemTiles$(13) = "{brn}   {down}{4 left}{35}   {down}{3 left}   "

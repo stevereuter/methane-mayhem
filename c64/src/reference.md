@@ -2,26 +2,26 @@
 
 ## Colors
 
-| index |      colors |
-| ----- | ----------: |
-| 0     |       black |
-| 11    |   dark grey |
-| 12    |        grey |
-| 15    |  light grey |
-| 1     |       white |
-| 9     |       brown |
-| 8     |      orange |
-| 4     |      purple |
-| 2     |         red |
-| 10    |        pink |
-| 7     |      yellow |
-| 5     |       green |
-| 13    | light green |
-| 3     |        cyan |
-| 14    |  light blue |
-| 6     |        blue |
+| index |      colors | Multicolor |
+| ----- | ----------: | ---------: |
+| 0     |       black |            |
+| 1     |       white |            |
+| 2     |         red |            |
+| 3     |        cyan |            |
+| 4     |      purple |            |
+| 5     |       green |            |
+| 6     |        blue |            |
+| 7     |      yellow |            |
+| 8     |      orange |      black |
+| 9     |       brown |      white |
+| 10    |        pink |        red |
+| 11    |   dark grey |       cyan |
+| 12    |        grey |     purple |
+| 13    | light green |      green |
+| 14    |  light blue |       blue |
+| 15    |  light grey |     yellow |
 
-# Characters
+## Characters
 
 | character         | index | ASC |
 | ----------------- | ----- | --- |
@@ -144,7 +144,7 @@
 | dynamite bottom 2 | 116   | 180 |
 | dynamite middle 1 | 117   | 181 |
 | dynamite top 3    | 118   | 182 |
-| chr\$(183)        | 119   | 183 |
+| axe center 3      | 119   | 183 |
 | chr\$(184)        | 120   | 184 |
 | chr\$(185)        | 121   | 185 |
 | chr\$(186)        | 122   | 186 |
@@ -163,8 +163,8 @@
 | rock-2            | 135   | 199 |
 | rock-3            | 136   | 200 |
 | giddy up top 1    | 137   | 201 |
-| axe center 3      | 138   | 202 |
-| giddy up top 2    | 139   | 203 |
+| giddy up top 2    | 138   | 202 |
+| giddy up top 3    | 139   | 203 |
 | rotate top 1/3    | 140   | 204 |
 | rotate top 1/3    | 141   | 205 |
 | rotate top 1/3    | 142   | 206 |
@@ -178,9 +178,9 @@
 | rock-4            | 150   | 214 |
 | rock-5            | 151   | 215 |
 | rock-6            | 152   | 216 |
-| giddy up center   | 153   | 217 |
-| giddy up center   | 154   | 218 |
-| giddy up center   | 155   | 219 |
+| giddy up center 1 | 153   | 217 |
+| giddy up center 2 | 154   | 218 |
+| giddy up center 3 | 155   | 219 |
 | rotate down       | 156   | 220 |
 | pipe down right   | 157   | 221 |
 | rotate up         | 158   | 222 |
@@ -194,9 +194,9 @@
 | rock-7            | 166   | 166 |
 | rock-8            | 167   | 167 |
 | rock-9            | 168   | 168 |
-| giddy up bottom   | 169   | 169 |
-| giddy up bottom   | 170   | 170 |
-| giddy up bottom   | 171   | 171 |
+| empty             | 169   | 169 |
+| giddy up bottom 2 | 170   | 170 |
+| giddy up bottom 3 | 171   | 171 |
 | rotate bottom 1/3 | 172   | 172 |
 | rotate bottom 1/3 | 173   | 173 |
 | rotate bottom 1/3 | 174   | 174 |
