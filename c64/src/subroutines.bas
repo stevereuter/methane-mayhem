@@ -120,18 +120,21 @@ placeItemHandlerSub:
         gosub checkPipeConnectionHandlerSub
         feedNextItemHandler:
         gosub nextItemHandlerSub
-    goto placeItemHandlerDone
+        goto placeItemHandlerDone
 
     # utility handler
     utilityHandler:
         if @previousItem = @empty then placeItemHandlerSkip
         if (@selectedItem and @rotate) = @rotate then rotateItemHandler
         if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveItemHandler : goto removeGameBoardItemDone
+        # fire and explotions
+        if (@selectedItem and @burning) = @burning then if (@previousItem and @tree) = @tree then gosub addFireToBoardSub : goto removeGameBoardItemDone
+        if (@selectedItem and @explosion) = @explosion then gosub addExplosionToBoardSub : goto removeGameBoardItemDone
         # destroy item handler
         if (@selectedItem and @destroy) <> @destroy then placeItemHandlerSkip
         if (@previousItem and @selectedItem and @tree) = @tree then gosub removeGameBoardItem : goto removeGameBoardItemDone
         if (@previousItem and @selectedItem and @rock) = @rock then gosub removeGameBoardItem : goto removeGameBoardItemDone
-    goto placeItemHandlerSkip
+        goto placeItemHandlerSkip
 
     # if rotate change
     rotateItemHandler:
@@ -162,8 +165,9 @@ placeItemHandlerSub:
             @gameBoard(@drawTo) = @selectedItem
             gosub writeGameBoardTileSub
             gosub checkPipeConnectionHandlerSub
-    goto removeSideBarItem
-    gosub removeGameBoardItem
+
+        goto removeSideBarItem
+
     removeGameBoardItemDone:
 
     removeSideBarItem:
@@ -178,7 +182,7 @@ placeItemHandlerSub:
         if @isGameOver then placeItemHandlerSkip
 
         # random cow movement
-        gosub cowRandomMovementHandlerSub
+        gosub randomGameEventsHandlerSub
         # random tree spawn
         gosub treeSpawnHandlerSub
 
@@ -239,6 +243,26 @@ moveItemHandler:
     tryMoveItemHandlerSkip:
 return
 
+addFireToBoardSub:
+    @gameBoard(@currentPlayerPostision) = @previousItem + @burning
+    # TODO: add buring sprite
+    @printText$ = "a fire has started" : gosub writeLogSub
+    addFireToBoardEnd:
+return
+
+addExplosionToBoardSub:
+    @explosionPositions(0) = @currentPlayerPostision
+    @explosionPositions(1) = @currentPlayerPostision - 8
+    @explosionPositions(2) = @currentPlayerPostision + 8
+    @explosionPositions(3) = @currentPlayerPostision - 1
+    @explosionPositions(4) = @currentPlayerPostision + 1
+    
+    for i=. to 4
+        @drawTo = @explosionPositions(i)
+        gosub removeGameBoardItem
+    next
+return
+
 removeGameBoardItem:
     @selectedItemKey = @empty
     gosub writeGameBoardTileSub
@@ -265,11 +289,11 @@ checkPipeConnectionHandlerSub:
         if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeLeft : @nextIndex = @checkIndex + 1
 
         validateGameBoardBounds:
-        if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
-        if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
-        @column = @checkIndex - INT(@checkIndex / 8) * 8
-        if @column = 0 then if @nextIndex = @checkIndex - 1 then i = 55 : goto endValidateGameBoardBounds
-        if @column = 7 then if @nextIndex = @checkIndex + 1 then i = 55 : goto endValidateGameBoardBounds
+            if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
+            if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
+            @column = @checkIndex - INT(@checkIndex / 8) * 8
+            if @column = 0 then if @nextIndex = @checkIndex - 1 then i = 55 : goto endValidateGameBoardBounds
+            if @column = 7 then if @nextIndex = @checkIndex + 1 then i = 55 : goto endValidateGameBoardBounds
 
         @checkIndex = @nextIndex
         endValidateGameBoardBounds:
@@ -278,27 +302,32 @@ checkPipeConnectionHandlerSub:
     if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub : @isGameOver = -1
 return
 
-cowRandomMovementHandlerSub:
+randomGameEventsHandlerSub:
     @moved = -1
     for i = . to 56
         @checkTile = @gameBoard(i)
         # skip past last moved to prevent double move
-        if i <= @moved then cowRandomMovementHandlerEnd
-        if @checkTile <> @cow then cowRandomMovementHandlerEnd
-        if rnd(1) > .7 then cowRandomMovementHandlerEnd
+        if i <= @moved then randomGameEventsHandlerEnd
+        if @checkTile <> @cow then randomGameEventsHandlerEnd
+        if rnd(1) > .7 then randomGameEventsHandlerEnd
         # move cow
         @drawTo = i
         a = 8 : b = 1
         gosub moveItemHandler
         
-        cowRandomMovementHandlerEnd:
+        randomGameEventsHandlerEnd:
 
+        @drawTo = i
+        # grow trees
         if @checkTile = @tree + @growing then gosub growTreeHandlerSub
+        # remove burning trees
+        if @checkTile = @tree + @destroy then gosub removeGameBoardItem
+        # update burning trees to be destroyed
+        if @checkTile = @tree + @burning then @gameBoard(i) = @tree + @destroy
     next
 return
 
 growTreeHandlerSub:
-    @drawTo = i
     @gameBoard(@drawTo) = @tree
     @selectedItemKey = 7
     gosub writeGameBoardTileSub
@@ -433,40 +462,40 @@ generateSeedSub:
 return
 
 drawGameBoardSub:
-# light green background
-    poke 53281, 13
-# brown border
-    poke 53280, 9
+    # light green background
+        poke 53281, 13
+    # brown border
+        poke 53280, 9
 
-# draw main game board
-    r1$=" {rvon}     {rvof} {rvon}                          {rvof} {91}{92}{93}{94}{95}"
-    r2$="       {rvon} {rvof}                        {rvon} {rvof}"
-    r3$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
-    r4$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
-    r5$="       {rvon}                          {rvof}"
-    r6$="       {rvon}                          {rvof}"
-    r7$=" {rvon}     {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
+    # draw main game board
+        r1$=" {rvon}     {rvof} {rvon}                          {rvof} {91}{92}{93}{94}{95}"
+        r2$="       {rvon} {rvof}                        {rvon} {rvof}"
+        r3$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
+        r4$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
+        r5$="       {rvon}                          {rvof}"
+        r6$="       {rvon}                          {rvof}"
+        r7$=" {rvon}     {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
 
-    print "{clr}{blk}             methane mayhem"
-    print r1$
+        print "{clr}{blk}             methane mayhem"
+        print r1$
 
-    for i=. to 2
-        print r4$
-    next
-    print r3$
-    for i=. to 11
-        print r4$
-    next
-    print r7$
-    for i=. to 3
-        print r2$
-    next
+        for i=. to 2
+            print r4$
+        next
+        print r3$
+        for i=. to 11
+            print r4$
+        next
+        print r7$
+        for i=. to 3
+            print r2$
+        next
 
-    print r6$;
+        print r6$;
 return
 
 initializeTimerSub:
-# fill the timer
+    # fill the timer
     @timer = 0
     @printText$ = "{rvon}{yellow}   {rvof}"
     x = 2

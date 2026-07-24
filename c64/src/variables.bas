@@ -18,7 +18,8 @@ let @invincible = 512
 let @destroy = 1024
 let @move = 2048
 let @rotate = 4096
-let @highPercent = 8192
+let @large = 8192
+let @explosion = @destroy + @large
 # not usable = 16384
 # NOTE: there is no 16th bit as that is used for the sign in C64 BASIC
 # NOTE: the idea here being that an item would contain the affected type and effect, so the giddy up would be 2048+16 (move cow), the axe would be 1024+32 (destroy tree), and the cone would be 4096+16+32 (blocked cow and tree)
@@ -48,6 +49,7 @@ let @nextValue = .
 let @drawTo = .
 let @clearTo = .
 let @moved = .
+let @gameState = .
 let a = .
 let b = .
 let c = .
@@ -72,6 +74,8 @@ dim @gameSidebar(4)
 dim @itemValues(19)
 # board tiles
 dim @itemTiles$(19)
+# explotion positions
+dim @explosionPositions(5)
 # TODO: temp need to create level system
 dim @tempItems(7)
 @tempItems(0) = 10
@@ -150,7 +154,7 @@ dim @tempItems(7)
     @itemValues(18) = @tree + @burning
 # dynamite
     @itemTiles$(19) = "{32}{red}{181}{lightgrey}{182}{down}{3 left}{red}{181}{179}{180}{down}{3 left}{178}{180}{32}"
-    @itemValues(19) = @destroy + @rock + @burning + @tree
+    @itemValues(19) = @destroy + @large
 
 # TODO: items to add: UFO (remove cows from the board), water/fire extinguisher (destroy fire stop spread)
 
