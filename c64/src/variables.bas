@@ -65,10 +65,6 @@ let @gameStateUfoRelease = 16
 let @gameStateComplete = 32
 let @gameStateOver = 64
 
-# NOTE: will also need events: cows moving, trees spawning, fire spreading, rocks falling (meteors), add panic to cows near fire or death (higher chance of moving), alien cows spawning (delivered by UFO if taken in the past)
-
-# NOTE: going to need a cross reference array for all items and their images
-
 let @printText$ = ""
 let @loopMax = 100
 let @feeder$ = ""
@@ -105,7 +101,6 @@ dim @tempItems(7)
 @colorPulse(5) = 15
 
 # all item images
-# TODO: create a cross reference for items and their attributes
 # empty
     @itemTiles$(0) = "   {down}{3 left}   {down}{3 left}   "
     @itemValues(0) = @empty
@@ -167,8 +162,4 @@ dim @tempItems(7)
     @itemTiles$(19) = "{32}{red}{181}{lightgrey}{182}{down}{3 left}{red}{181}{179}{180}{down}{3 left}{178}{180}{32}"
     @itemValues(19) = @destroy + @large
 
-# TODO: items to add: UFO (remove cows from the board), water/fire extinguisher (destroy fire stop spread)
-
-
-
-# {space}, {return}, {shift-return}, {clr}, {clear}, {home}, {del}, {inst}, {stop}, {run/stop}, {esc}, {cursor right}, {crsr right}, {cursor left}, {crsr left}, {down}, {cursor down}, {crsr down}, {cursor up}, {crsr dup}, {uppercase}, {upper}, {swuc}, {cset1}, {lowercase}, {lower}, {cset0}, {black}, {blk}, {white}, {wht}, {red}, {cyan}, {cyn}, {purple}, {pur}, {green}, {grn}, {blue}, {blu}, {yellow}, {yel}, {orange}, {brown}, {pink}, {light-red}, {gray1}, {darkgrey}, {grey}, {lightgreen}, {lgrn}, {lightblue}, {lblu}, {lightgrey}, {grey3}, {rvs on}, {rvon}, {rvs off}, {rvof}, {dish}, {ensh}, {f1}, {f3}, {f5}, {f7}, {f2}, {f4}, {f6}, {f8}, {ctrl-c}, {ctrl-e}, {ctrl-h}, {ctrl-i}, {ctrl-m}, {ctrl-n}, {ctrl-r}, {ctrl-s}, {ctrl-t}, {ctrl-q}, {ctrl-1}, {ctrl-2}, {ctrl-3}, {ctrl-4}, {ctrl-5}, {ctrl-6}, {ctrl-7}, {ctrl-8}, {ctrl-9}, {ctrl-0}, {ctrl-/}, {c=1}, {c=2}, {c=3}, {c=4}, {c=5}, {c=6}, {c=7}, {c=8}
+# TODO: items to add: UFO (remove cows from the board)

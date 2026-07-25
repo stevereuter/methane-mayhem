@@ -5,9 +5,16 @@
         {
             "name": "Custom Characters",
             "path": "assets/c64-character-set_Character_Set_Main_mixed_charset_source.json",
-            "type": "json",
+            "type": "characters",
             "loadAddress": "00 C0",
             "discName": "chars"
+        },
+        {
+            "name": "Sprites",
+            "path": "assets/c64-sprites_Sprites_sprites.json",
+            "type": "sprites",
+            "loadAddress": "00 C8",
+            "discName": "sprites"
         }
     ],
     "asepriteColorMap": [

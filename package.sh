@@ -42,11 +42,10 @@ ZIP_FILE="c64/build/methane-mayhem-v${VERSION}.zip"
 rm -f "$ZIP_FILE"
 
 # Use native zip command (available on macOS/Linux)
-zip -j -q "$ZIP_FILE" "c64/build/Methane Mayhem.prg" "c64/build/Methane Mayhem.d64" "readme.txt"
+zip -j -q "$ZIP_FILE" "c64/build/Methane Mayhem.d64" "readme.txt"
 
 echo ""
 echo "✅ Packaging complete!"
 echo "📦 Created: $ZIP_FILE"
-echo "   - Methane Mayhem.prg"
 echo "   - Methane Mayhem.d64"
 echo "   - readme.txt"

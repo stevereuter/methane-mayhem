@@ -661,6 +661,49 @@ def generate_color_ram_bytes(screen_json: dict[str, Any], raw_to_rule: dict[int,
     return bytes(out)
 
 
+def generate_sprite_bytes(sprite_json: dict[str, Any]) -> bytes:
+    """Generate sprite data from JSON export.
+    
+    Each sprite gets 64 bytes (63 data bytes + 1 padding byte) for correct memory spacing.
+    Sprites are standard C64 format: 24x21 pixels, 3 bytes per row, 21 rows.
+    """
+    sprites = sprite_json.get("sprites")
+    if not isinstance(sprites, list):
+        fail("Sprite JSON field 'sprites' must be an array")
+    
+    out = bytearray()
+    for sprite_idx, sprite in enumerate(sprites):
+        if not isinstance(sprite, dict):
+            fail(f"Sprite {sprite_idx} entry must be an object")
+        
+        sprite_bytes = sprite.get("spriteBytes")
+        if not isinstance(sprite_bytes, list):
+            fail(f"Sprite {sprite_idx} spriteBytes must be an array")
+        if len(sprite_bytes) != 21:
+            fail(f"Sprite {sprite_idx} must have 21 rows, got {len(sprite_bytes)}")
+        
+        # Process each row (3 bytes per row)
+        for row_idx, row_bytes in enumerate(sprite_bytes):
+            if not isinstance(row_bytes, list):
+                fail(f"Sprite {sprite_idx} row {row_idx} must be an array")
+            if len(row_bytes) != 3:
+                fail(f"Sprite {sprite_idx} row {row_idx} must have 3 bytes, got {len(row_bytes)}")
+            
+            for byte_val in row_bytes:
+                try:
+                    val = int(byte_val)
+                except (TypeError, ValueError):
+                    fail(f"Sprite {sprite_idx} row {row_idx} contains invalid byte value: {byte_val}")
+                if val < 0 or val > 255:
+                    fail(f"Sprite {sprite_idx} row {row_idx} byte out of range 0-255: {val}")
+                out.append(val)
+        
+        # Add 64th byte (padding) for memory spacing in C64
+        out.append(0)
+    
+    return bytes(out)
+
+
 def generate_asset_bytes(
     entry: dict[str, Any], repo_root: Path, by_hex: dict[str, list[dict[str, Any]]], json_cache: dict[Path, dict[str, Any]]
 ) -> bytes:
@@ -670,20 +713,24 @@ def generate_asset_bytes(
         fail("binaries entry is missing 'path'")
 
     source_file = repo_root / str(path)
-    if not source_file.exists() and asset_type in {"json", "mixed-charset-source", "mixed-charset"}:
+    if not source_file.exists() and asset_type in {"json", "mixed-charset-source", "mixed-charset", "characters", "sprites"}:
         alt = source_file.with_suffix(".json")
         if alt.exists():
             source_file = alt
     if not source_file.exists():
         fail(f"Source file not found: {source_file}")
 
-    if asset_type == "raw-bin":
-        if source_file.suffix.lower() == ".bas":
-            return parse_basic_data_bytes(source_file)
-        return source_file.read_bytes()
-
-    if asset_type not in {"screen-map", "screen-chars", "screen-colors", "json", "mixed-charset-source", "mixed-charset"}:
+    if asset_type not in {"screen-map", "screen-chars", "screen-colors", "json", "mixed-charset-source", "mixed-charset", "sprites", "characters"}:
         fail(f"Unsupported binaries entry type '{asset_type}' for path {path}")
+
+    # For sprite data, we only need the JSON structure, not color mapping
+    if asset_type == "sprites":
+        sprite_json = json_cache.get(source_file)
+        if sprite_json is None:
+            with source_file.open("r", encoding="utf-8") as handle:
+                sprite_json = json.load(handle)
+            json_cache[source_file] = sprite_json
+        return generate_sprite_bytes(sprite_json)
 
     screen_json = json_cache.get(source_file)
     if screen_json is None:
@@ -693,7 +740,8 @@ def generate_asset_bytes(
 
     raw_to_rule = build_raw_to_color_rule(screen_json, by_hex)
 
-    if asset_type in {"json", "mixed-charset-source", "mixed-charset"}:
+    # Characters and mixed-charset types both use the mixed charset processing
+    if asset_type in {"json", "mixed-charset-source", "mixed-charset", "characters"}:
         return generate_mixed_charset_bytes(screen_json, raw_to_rule)
 
     if asset_type == "screen-map":

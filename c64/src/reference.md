@@ -2,24 +2,24 @@
 
 ## Colors
 
-| index |      colors | Multicolor |
-| ----- | ----------: | ---------: |
-| 0     |       black |            |
-| 1     |       white |            |
-| 2     |         red |            |
-| 3     |        cyan |            |
-| 4     |      purple |            |
-| 5     |       green |            |
-| 6     |        blue |            |
-| 7     |      yellow |            |
-| 8     |      orange |      black |
-| 9     |       brown |      white |
-| 10    |        pink |        red |
-| 11    |   dark grey |       cyan |
-| 12    |        grey |     purple |
-| 13    | light green |      green |
-| 14    |  light blue |       blue |
-| 15    |  light grey |     yellow |
+| index |      colors | Multicolor | Abbreviation |
+| ----- | ----------: | ---------: | -----------: |
+| 0     |       black |            |        {blk} |
+| 1     |       white |            |        {wht} |
+| 2     |         red |            |        {red} |
+| 3     |        cyan |            |        {cyn} |
+| 4     |      purple |            |        {pur} |
+| 5     |       green |            |        {grn} |
+| 6     |        blue |            |        {blu} |
+| 7     |      yellow |            |        {yel} |
+| 8     |      orange |      black |     {orange} |
+| 9     |       brown |      white |        {brn} |
+| 10    |        pink |        red |       {pink} |
+| 11    |   dark grey |       cyan |      {gray1} |
+| 12    |        grey |     purple |       {grey} |
+| 13    | light green |      green |       {lgrn} |
+| 14    |  light blue |       blue |       {lblu} |
+| 15    |  light grey |     yellow |      {grey3} |
 
 ## Characters
 

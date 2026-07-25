@@ -1,11 +1,4 @@
-# Start sprite writing
-
-# Sprite data must live in RAM inside the active VIC bank.
-# Using 51200 keeps it in Bank 3.
-for i = 51200 to 51262
-    read c
-    poke i, c
-next
+# sprite data is loaded into memory from disc
 
 # Sprite number from 1 to 7
 for sn = . to 1

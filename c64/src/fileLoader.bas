@@ -1,6 +1,6 @@
 # Start custom characters writing
 x = x + 1
-on x goto loadCharacterSet, discLoadingComplete
+on x goto loadCharacterSet, loadSprites, discLoadingComplete
 
 loadCharacterSet:
     # Switch VIC to Bank 3
@@ -22,5 +22,10 @@ loadCharacterSet:
     #include "splash.bas"
     # load characterset from disk
     load "chars", 8, 1
+
+loadSprites:
+    # load sprites from disk
+    print "loading sprites"
+    load "sprites", 8, 1
 
 discLoadingComplete:
