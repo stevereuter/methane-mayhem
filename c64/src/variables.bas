@@ -1,3 +1,6 @@
+# functions
+def fn @checkGameState(@state) = (@gameState and @state) = @state
+
 # variables
 # start with the most important ones in the main game loop
 let x = .
@@ -33,14 +36,12 @@ let @requiredConnection = .
 let @column = .
 let @connectionStartPosition = .
 let @connectionEndPosition = .
-let @isComplete = .
 let @selectedItemKey = .
 let @selectedItem = .
 let @previousItem = .
 let @newItem = .
 
 let @gameLoop = .
-let @isGameOver = .
 let @currentPlayerPostision = .
 let @selectedSidebarIndex = .
 let @direction = .
@@ -49,10 +50,20 @@ let @nextValue = .
 let @drawTo = .
 let @clearTo = .
 let @moved = .
-let @gameState = .
 let a = .
 let b = .
 let c = .
+
+# game states
+let @level = .
+let @gameState = .
+let @gameStateLeaking = 1
+let @gameStatePanicing = 2
+let @gameStateMeteor = 4
+let @gameStateUfoAbduction = 8
+let @gameStateUfoRelease = 16
+let @gameStateComplete = 32
+let @gameStateOver = 64
 
 # NOTE: will also need events: cows moving, trees spawning, fire spreading, rocks falling (meteors), add panic to cows near fire or death (higher chance of moving), alien cows spawning (delivered by UFO if taken in the past)
 

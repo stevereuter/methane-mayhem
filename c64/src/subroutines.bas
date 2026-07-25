@@ -184,7 +184,7 @@ placeItemHandlerSub:
         gosub playerSelectItemHandlerSub
     
     placeItemHandlerDone:
-        if @isGameOver then placeItemHandlerSkip
+        if fn @checkGameState(@gameStateOver) then placeItemHandlerSkip
 
         # random cow movement
         gosub randomGameEventsHandlerSub
@@ -296,7 +296,7 @@ checkPipeConnectionHandlerSub:
         # check if not connect
         if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @isComplete = -1 : i = 55 : goto endValidateGameBoardBounds
+        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = (@gameState or @gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
 
         # get next required connection
         if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @checkIndex - 8 : goto validateGameBoardBounds
@@ -316,7 +316,7 @@ checkPipeConnectionHandlerSub:
         # TODO: check if leaking and move animation to @checkIndex
     next
     gosub clearLogSub
-    if @isComplete then @printText$ = "Connection complete!" : gosub writeLogSub : @isGameOver = -1
+    if fn @checkGameState(@gameStateComplete) then @printText$ = "Connection complete!" : gosub writeLogSub : @gameState = (@gameState or @gameStateOver)
 return
 
 randomGameEventsHandlerSub:
@@ -375,7 +375,7 @@ updateTimerHandlerSub:
     updateTimerLeak:
         y = 18 + @timer
         @printText$ = "{rvon}{grn}   {rvof}"
-        if @timer = -17 then @isGameOver = -1 : @printText$ = "Time is up!" : gosub writeLogSub
+        if @timer = -17 then @gameState = (@gameState or @gameStateOver) : @printText$ = "Time is up!" : gosub writeLogSub
 
     updateTimerDraw:
         gosub writeTextSub

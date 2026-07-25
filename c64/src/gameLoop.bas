@@ -40,9 +40,8 @@ poke 53269, peek(53269) or 3
 @timeDifference = TI
 @currentPlayerPostision = 0
 @selectedSidebarIndex = 0
-# set over to true (-1) to end game, or false (0) to keep going
-@isGameOver = .
-@isComplete = .
+
+@gameState = .
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
     gosub animateSelectorSub
@@ -59,7 +58,7 @@ for @gameLoop=. to @loopMax
 
     # TODO: handle game over logic
     # if game over, set loop to max to end game
-    if @isGameOver then @gameLoop = @loopMax : goto gameLoopDone
+    if fn @checkGameState(@gameStateOver) then @gameLoop = @loopMax : goto gameLoopDone
 
     gameLoopSkip:
     # best to set it back to 0 (use -1 as next will increment) once reached to prevent the game from ending
