@@ -147,7 +147,7 @@ dim @tempItems(7)
     @itemTiles$(14) = "{brn}   {down}{3 left}   {35}{down}{4 left}   "
     @itemValues(14) = .
 # rotate right
-    @itemTiles$(15) = "{grn}{204}{205}{206}{down}{3 left}{222}{32}{220}{down}{3 left}{172}{173}{174}"
+    @itemTiles$(15) = "{grn}{204}{173}{206}{down}{3 left}{222}{32}{220}{down}{3 left}{172}{205}{174}"
     @itemValues(15) = @rotate + @pipeRight
 # rotate left
     @itemTiles$(16) = "{grn}{204}{205}{206}{down}{3 left}{220}{32}{222}{down}{3 left}{172}{173}{174}"

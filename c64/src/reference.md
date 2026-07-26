@@ -145,7 +145,7 @@
 | dynamite middle 1 | 117   | 181 |
 | dynamite top 3    | 118   | 182 |
 | axe center 3      | 119   | 183 |
-| chr\$(184)        | 120   | 184 |
+| double circle     | 120   | 184 |
 | chr\$(185)        | 121   | 185 |
 | chr\$(186)        | 122   | 186 |
 | chr\$(187)        | 123   | 187 |

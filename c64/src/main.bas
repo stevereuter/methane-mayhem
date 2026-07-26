@@ -25,4 +25,3 @@ goto gameOver
 end
 
 #include "subroutines.bas"
-#include "data.bas"

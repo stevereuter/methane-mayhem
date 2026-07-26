@@ -190,6 +190,8 @@ placeItemHandlerSub:
         gosub randomGameEventsHandlerSub
         # random tree spawn
         gosub treeSpawnHandlerSub
+        # end panic chance
+        gosub endPanicHandlerSub
 
         gosub updateTimerHandlerSub
     placeItemHandlerSkip:
@@ -197,7 +199,7 @@ return
 
 moveItemHandler:
     # move cow
-    @moved = 0
+    @moved = -1
     c = 0 : @clearTo = @drawTo
     r = int(rnd(1) * 4) + 1
     getNewPositionHandler:
@@ -225,7 +227,7 @@ moveItemHandler:
 
         retryHandler:
         # can't move
-        if c > 4 then @printText$ = "Can't move" : gosub writeLogSub : goto tryMoveItemHandlerSkip
+        if c > 4 then goto tryMoveItemHandlerSkip
         r = r + 1
         if r > 4 then r = 1
     
@@ -246,6 +248,7 @@ moveItemHandler:
         @moved = @nextValue
 
     tryMoveItemHandlerSkip:
+    if @moved = 0 then if a = 9 then @printText$ = "Can't move" : gosub writeLogSub
 return
 
 addFireToBoardSub:
@@ -260,23 +263,35 @@ addFireToBoardSub:
         next
     next
     # TODO: add buring sprite
-    @printText$ = "a fire has started" : gosub writeLogSub
+    @printText$ = "cows are panicing" : gosub writeLogSub
+    @gameState = @gameState or @gameStatePanicing
 
     addFireToBoardEnd:
 return
 
 addExplosionToBoardSub:
-    # TODO: need to prevent off board explosion
+    @column = @currentPlayerPostision - int(@currentPlayerPostision / 8) * 8
     @explosionPositions(0) = @currentPlayerPostision
     @explosionPositions(1) = @currentPlayerPostision - 8
     @explosionPositions(2) = @currentPlayerPostision + 8
-    @explosionPositions(3) = @currentPlayerPostision - 1
-    @explosionPositions(4) = @currentPlayerPostision + 1
+    @explosionPositions(3) = -1
+    @explosionPositions(4) = -1
+    if @column > 0 then @explosionPositions(3) = @currentPlayerPostision - 1
+    if @column < 7 then @explosionPositions(4) = @currentPlayerPostision + 1
     
     for i=. to 4
+        if @explosionPositions(i) < 0 then addExplosionToBoardLoopEnd
+        if @explosionPositions(i) > 55 then addExplosionToBoardLoopEnd
+
         @drawTo = @explosionPositions(i)
         gosub removeGameBoardItem
+
+        addExplosionToBoardLoopEnd:
     next
+
+    @printText$ = "cows are panicing" : gosub writeLogSub
+    @gameState = @gameState or @gameStatePanicing
+    
 return
 
 removeGameBoardItem:
@@ -307,7 +322,7 @@ checkPipeConnectionHandlerSub:
         validateGameBoardBounds:
             if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
             if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
-            @column = @checkIndex - INT(@checkIndex / 8) * 8
+            @column = @checkIndex - int(@checkIndex / 8) * 8
             if @column = 0 then if @nextIndex = @checkIndex - 1 then i = 55 : goto endValidateGameBoardBounds
             if @column = 7 then if @nextIndex = @checkIndex + 1 then i = 55 : goto endValidateGameBoardBounds
 
@@ -321,15 +336,16 @@ return
 
 randomGameEventsHandlerSub:
     @moved = -1
+    a = 8 : b = 1
     for i = . to 56
         @checkTile = @gameBoard(i)
         # skip past last moved to prevent double move
         if i <= @moved then randomGameEventsHandlerEnd
         if @checkTile <> @cow then randomGameEventsHandlerEnd
-        if rnd(1) > .7 then randomGameEventsHandlerEnd
+        r = .7 : if @getGameState(@gameStatePanicing) then r = 0
+        if rnd(1) > r then randomGameEventsHandlerEnd
         # move cow
         @drawTo = i
-        a = 8 : b = 1
         gosub moveItemHandler
         
         randomGameEventsHandlerEnd:
@@ -388,6 +404,16 @@ nextItemHandlerSub:
     gosub writeItemSub
     gosub generateNextItemSub
 return
+
+endPanicHandlerSub:
+    if @getGameState(@gameStatePanicing) = 0 then endPanicHandlerEnd
+    if rnd(1) > .5 then endPanicHandlerEnd
+
+    @gameState = @gameState and (not @gameStatePanicing)
+    
+    endPanicHandlerEnd:
+return
+
 
 generateLevelSub:
     # reset game board
