@@ -53,6 +53,7 @@ let @moved = .
 let a = .
 let b = .
 let c = .
+let @ufoTarget = -1
 
 # game states
 let @level = .
@@ -61,9 +62,8 @@ let @gameStateLeaking = 1
 let @gameStatePanicing = 2
 let @gameStateMeteor = 4
 let @gameStateUfoAbduction = 8
-let @gameStateUfoRelease = 16
-let @gameStateComplete = 32
-let @gameStateOver = 64
+let @gameStateComplete = 16
+let @gameStateOver = 32
 
 let @printText$ = ""
 let @loopMax = 100

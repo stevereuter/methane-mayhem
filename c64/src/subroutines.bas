@@ -2,7 +2,7 @@
 
 # write @selectedItemKey to game board convert @drawTo to x,y
 writeGameBoardTileSub:
-    gosub boardIndexToXYSub
+    gosub boardIndexToCharacterXYSub
     @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
     gosub locateCursorSub
     # FIXME: need the item index here not the item value
@@ -10,7 +10,7 @@ writeGameBoardTileSub:
 return
 
 # convert board index to x,y coordinates
-boardIndexToXYSub:
+boardIndexToCharacterXYSub:
     x=8 + (@drawTo - int(@drawTo / 8) * 8) * 3
     y=2 + int(@drawTo / 8) * 3
 return
@@ -192,6 +192,48 @@ placeItemHandlerSub:
         gosub treeSpawnHandlerSub
         # end panic chance
         gosub endPanicHandlerSub
+        # catastrophic events
+        # TODO: add alien cow based on abduction game state
+            # animate UFO to random postions
+            # animate beam
+            # show alien cow
+            # remove beam
+            # animate UFO away
+
+        # TODO: add UFO abduction
+        if @ufoTarget = -1 then goto skipUfoAbduction
+            # animate UFO to cow @ufoTarget
+            # show beam
+            # remove cow
+            # remove beam
+            # animate UFO away
+            skipUfoAbduction:
+
+        # TODO: add meteor strike
+        if not fn @checkGameState(@gameStateMeteor) then goto meteorStrikeEnd
+            c = @currentPlayerPostision
+            @currentPlayerPostision = int(rnd(1) * 56)
+            @printText$ = "meteor strike! " + str$(@currentPlayerPostision) : gosub writeLogSub
+            # animate sprite, position should be set on the random event loop
+            # preform explotion
+            gosub addExplosionToBoardSub
+            # add rock
+            @drawTo = @currentPlayerPostision
+            @selectedItemKey = 9
+            gosub writeGameBoardTileSub
+            # remove sprite
+            @currentPlayerPostision = c
+            @gameState = @gameState and (not @gameStateMeteor)
+            meteorStrikeEnd:
+
+        # TODO: add catastrophic event base on level, meteor or UFO
+        if @ufoTarget >= 0 then catastrophicEventHandlerEnd
+        if rnd(1) < .9 then catastrophicEventHandlerEnd
+            c = @gameStateMeteor
+            # if rnd(1) < .5 then c = @gameStateUfoAbduction
+            @gameState = @gameState or c
+            @printText$ = "event incoming!" : gosub writeLogSub
+            catastrophicEventHandlerEnd:
 
         gosub updateTimerHandlerSub
     placeItemHandlerSkip:
@@ -254,7 +296,7 @@ return
 addFireToBoardSub:
     @gameBoard(@currentPlayerPostision) = @previousItem + @burning
 
-    gosub boardIndexToXYSub
+    gosub boardIndexToCharacterXYSub
     c = 2
     for a=y to y+2
         if a = y+2 then c = 10
@@ -336,7 +378,7 @@ return
 
 randomGameEventsHandlerSub:
     @moved = -1
-    a = 8 : b = 1
+    a = 8 : b = 1 : @ufoTarget = -1
     for i = . to 56
         @checkTile = @gameBoard(i)
         # skip past last moved to prevent double move
@@ -357,6 +399,8 @@ randomGameEventsHandlerSub:
         if @checkTile = @tree + @destroy then gosub removeGameBoardItem
         # update burning trees to be destroyed
         if @checkTile = @tree + @burning then @gameBoard(i) = @tree + @destroy
+        # if cow and is abduction, set UFO target
+        if fn @checkGameState(@gameStateUfoAbduction) then if @checkTile = @cow then @ufoTarget = i
     next
 return
 
