@@ -62,8 +62,9 @@ let @gameStateLeaking = 1
 let @gameStatePanicing = 2
 let @gameStateMeteor = 4
 let @gameStateUfoAbduction = 8
-let @gameStateComplete = 16
-let @gameStateOver = 32
+let @gameStateAlienInvasion = 16
+let @gameStateComplete = 32
+let @gameStateOver = 64
 
 let @printText$ = ""
 let @loopMax = 100
@@ -78,9 +79,9 @@ dim @colorPulse(6)
 dim @gameBoard(56)
 dim @gameSidebar(4)
 # items
-dim @itemValues(19)
+dim @itemValues(20)
 # board tiles
-dim @itemTiles$(19)
+dim @itemTiles$(20)
 # explotion positions
 dim @explosionPositions(5)
 # TODO: temp need to create level system
@@ -161,5 +162,8 @@ dim @tempItems(7)
 # dynamite
     @itemTiles$(19) = "{32}{red}{181}{lightgrey}{182}{down}{3 left}{red}{181}{179}{180}{down}{3 left}{178}{180}{32}"
     @itemValues(19) = @destroy + @large
+# alien cow
+    @itemTiles$(20) = "{grey}{195}{196}{32}{down}{3 left}{211}{212}{213}{down}{3 left}{blk}{163}{grey}{164}{165}"
+    @itemValues(20) = @cow + @invincible
 
 # TODO: items to add: UFO (remove cows from the board)
