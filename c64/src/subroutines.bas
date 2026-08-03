@@ -132,6 +132,7 @@ placeItemHandlerSub:
         if (@selectedItem and @rotate) = @rotate then rotateItemHandler
         if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveItemHandler : goto removeGameBoardItemDone
         # fire and explotions
+        if (@selectedItem and @cow) = @cow then placeItemHandlerSkip
         if (@selectedItem and @burning) = @burning then if (@previousItem and @tree) = @tree then gosub addFireToBoardSub : goto removeGameBoardItemDone
         if (@selectedItem and @explosion) = @explosion then gosub addExplosionToBoardSub : goto removeGameBoardItemDone
         # destroy item handler
@@ -232,6 +233,7 @@ moveItemHandler:
     tryMoveItemHandler:
         if @nextValue < 0 then retryHandler
         if @nextValue >=54 then retryHandler
+        if (@checkTile and @invincible) = @invincible then moveItemToNewPositionHandler
         @newItem = @gameBoard(@nextValue)
         if @newItem = @empty then moveItemToNewPositionHandler
 
@@ -245,6 +247,7 @@ moveItemHandler:
     
     # add the new cow in the new position
     moveItemToNewPositionHandler:
+        if (@newItem and @cow) = @cow then @gameState = @gameState or @gameStateAlienInvasion
         c = 8 : if (@checkTile and @invincible) = @invincible then c = 20
         @selectedItemKey = c
         @clearTo = @drawTo
@@ -431,6 +434,7 @@ return
 alienInvasionHandlerSub:
     # TODO: add alien cow based on abduction game state
     @drawTo = int(rnd(1) * 56)
+    @previousItem = @gameBoard(@drawTo)
 
     # animate UFO to random postions
     # animate beam
@@ -440,7 +444,7 @@ alienInvasionHandlerSub:
     # remove beam
     # animate UFO away
 
-    @gameState = @gameState and (not @gameStateAlienInvasion)
+    if (@previousItem and @cow) <> @cow then @gameState = @gameState and (not @gameStateAlienInvasion)
     @printText$ = "alien invasion!" : gosub writeLogSub
 
     alienInvasionHandlerEnd:
