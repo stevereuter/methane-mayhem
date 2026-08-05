@@ -59,6 +59,7 @@ for @gameLoop=. to @loopMax
     # TODO: handle game over logic
     # if game over, set loop to max to end game
     if fn @checkGameState(@gameStateOver) then @gameLoop = @loopMax : goto gameLoopDone
+    if fn @checkGameState(@gameStateComplete) then @gameLoop = @loopMax : goto gameLoopDone
 
     gameLoopSkip:
     # best to set it back to 0 (use -1 as next will increment) once reached to prevent the game from ending
@@ -66,3 +67,9 @@ for @gameLoop=. to @loopMax
     if @gameLoop = 5 then @gameLoop = -1
     gameLoopDone:
 next
+
+if not fn @checkGameState(@gameStateComplete) then gameStateCompleteCheckEnd
+    @level = @level + 1
+    for i = . to 3000 : next
+    goto gameStart
+gameStateCompleteCheckEnd:

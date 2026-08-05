@@ -122,6 +122,7 @@ placeItemHandlerSub:
         gosub writeGameBoardTileSub
         @gameBoard(@drawTo) = @selectedItem
         gosub checkPipeConnectionHandlerSub
+        if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         feedNextItemHandler:
         gosub nextItemHandlerSub
         goto placeItemHandlerDone
@@ -170,7 +171,7 @@ placeItemHandlerSub:
             @gameBoard(@drawTo) = @selectedItem
             gosub writeGameBoardTileSub
             gosub checkPipeConnectionHandlerSub
-
+            if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         goto removeSideBarItem
 
     removeGameBoardItemDone:
@@ -345,7 +346,8 @@ checkPipeConnectionHandlerSub:
         # TODO: check if leaking and move animation to @checkIndex
     next
     gosub clearLogSub
-    if fn @checkGameState(@gameStateComplete) then @printText$ = "connection complete!" : gosub writeLogSub : @level = @level + 1 : goto gameStart
+
+    if fn @checkGameState(@gameStateComplete) then @printText$ = "connection complete!" : gosub writeLogSub
 return
 
 randomGameEventsHandlerSub:
@@ -489,7 +491,7 @@ meteorStrikeHandlerSub:
 return
 
 catastrophicEventHandlerSub:
-    if @level < 9 then catastrophicEventHandlerEnd
+    if @level < 7 then catastrophicEventHandlerEnd
     if fn @checkGameState(@gameStateAlienInvasion) then catastrophicEventHandlerEnd
     if rnd(1) < .9 then catastrophicEventHandlerEnd
 
@@ -507,18 +509,17 @@ generateLevelSub:
         @gameBoard(i) = @empty
     next
 
+    # add pipes and tools to sidebar
+    # TODO: after level 1 the selected pipe is not drawn
     gosub generateNextPipeSub
-
-    # add tools to sidebar
-    gosub replenishToolsSub
     gosub nextItemHandlerSub
+    gosub replenishToolsSub
 
     # draw tree, cow, and rock
-    c = 1
-    if @level > 1 then c = 2
-    if @level > 3 then c = 3
-    if @level > 12 then c = 4
-    for i = 0 to @level + 4
+    c = 3
+    if @level < 3 then c = @level + 1
+    if @level > 7 then c = 4
+    for i = 0 to @level + 6
         @selectedItemKey = @levelItems(int(rnd(1) * c))
         @drawTo = INT(rnd(1) * 56)
         @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
@@ -543,13 +544,13 @@ return
 
 # replenish tools
 replenishToolsSub:
-    c = 3
-    if @level > 3 then c = 4
-    if @level > 6 then c = 5
-    if @level > 9 then c = 6
-    if @level > 12 then c = 7
+    c = @level + 3
+    if @level > 5 then c = 6
+    if @level > 8 then c = 7
     for @selectedSidebarIndex = 3 to 1 step -1
         @selectedItemKey = @levelTools(int(rnd(1) * c))
+        if @level > 6 then if @selectedItemKey = 12 then @selectedItemKey = 18
+        if @level > 7 then if @selectedItemKey = 11 then @selectedItemKey = 19
         @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
         @printText$ = @itemTiles$(@selectedItemKey)
         gosub writeItemSub
