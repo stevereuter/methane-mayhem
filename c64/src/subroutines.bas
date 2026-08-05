@@ -130,7 +130,7 @@ placeItemHandlerSub:
     utilityHandler:
         if @previousItem = @empty then placeItemHandlerSkip
         if (@selectedItem and @rotate) = @rotate then rotateItemHandler
-        if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveItemHandler : goto removeGameBoardItemDone
+        if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveCowSub : goto removeGameBoardItemDone
         # fire and explotions
         if (@selectedItem and @cow) = @cow then placeItemHandlerSkip
         if (@selectedItem and @burning) = @burning then if (@previousItem and @tree) = @tree then gosub addFireToBoardSub : goto removeGameBoardItemDone
@@ -182,6 +182,8 @@ placeItemHandlerSub:
         # reset to first item in sidebar
         @keyInput$ = "1"
         gosub playerSelectItemHandlerSub
+        @toolCount = @toolCount - 1
+        if @toolCount < 1 then gosub replenishToolsSub
     
     placeItemHandlerDone:
 
@@ -208,7 +210,7 @@ placeItemHandlerSub:
     placeItemHandlerSkip:
 return
 
-moveItemHandler:
+moveCowSub:
     # move cow
     @moved = -1
     c = 0 : @clearTo = @drawTo
@@ -247,7 +249,7 @@ moveItemHandler:
     
     # add the new cow in the new position
     moveItemToNewPositionHandler:
-        if (@newItem and @cow) = @cow then @gameState = @gameState or @gameStateAlienInvasion
+        if (@newItem and @cow) = @cow then @gameState = fn @addGameState(@gameStateAlienInvasion)
         c = 8 : if (@checkTile and @invincible) = @invincible then c = 20
         @selectedItemKey = c
         @clearTo = @drawTo
@@ -276,7 +278,7 @@ addFireToBoardSub:
     next
     # TODO: add buring sprite
     @printText$ = "cows are panicing" : gosub writeLogSub
-    @gameState = @gameState or @gameStatePanicing
+    @gameState = fn @addGameState(@gameStatePanicing)
 
     addFireToBoardEnd:
 return
@@ -302,7 +304,7 @@ addExplosionToBoardSub:
     next
 
     @printText$ = "cows are panicking" : gosub writeLogSub
-    @gameState = @gameState or @gameStatePanicing
+    @gameState = fn @addGameState(@gameStatePanicing)
     
 return
 
@@ -323,7 +325,7 @@ checkPipeConnectionHandlerSub:
         # check if not connect
         if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = (@gameState or @gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
+        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
 
         # get next required connection
         if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @checkIndex - 8 : goto validateGameBoardBounds
@@ -343,7 +345,7 @@ checkPipeConnectionHandlerSub:
         # TODO: check if leaking and move animation to @checkIndex
     next
     gosub clearLogSub
-    if fn @checkGameState(@gameStateComplete) then @printText$ = "Connection complete!" : gosub writeLogSub : @gameState = (@gameState or @gameStateOver)
+    if fn @checkGameState(@gameStateComplete) then @printText$ = "Connection complete!" : gosub writeLogSub : @gameState = fn @addGameState(@gameStateOver)
 return
 
 randomGameEventsHandlerSub:
@@ -358,7 +360,7 @@ randomGameEventsHandlerSub:
         if rnd(1) > r then randomGameEventsHandlerEnd
         # move cow
         @drawTo = i
-        gosub moveItemHandler
+        gosub moveCowSub
         
         randomGameEventsHandlerEnd:
 
@@ -372,7 +374,7 @@ randomGameEventsHandlerSub:
         # if cow and is abduction, set UFO target
         if fn @checkGameState(@gameStateUfoAbduction) then if @checkTile = @cow then @ufoTarget = i
     next
-    if fn @checkGameState(@gameStateUfoAbduction) then if @ufoTarget = -1 then @gameState = @gameState and (not @gameStateUfoAbduction) : @gameState = @gameState or @gameStateAlienInvasion
+    if fn @checkGameState(@gameStateUfoAbduction) then if @ufoTarget = -1 then @gameState = fn @removeGameState(@gameStateUfoAbduction) : @gameState = fn @addGameState(@gameStateAlienInvasion)
 return
 
 growTreeHandlerSub:
@@ -382,7 +384,7 @@ growTreeHandlerSub:
 return
 
 treeSpawnHandlerSub:
-    if rnd(1) > .9 then treeSpawnHandlerEnd
+    if rnd(1) > .5 then treeSpawnHandlerEnd
     # spawn a tree in a random position on the game board
     @drawTo = int(rnd(1) * 56)
     if @gameBoard(@drawTo) <> @empty then treeSpawnHandlerEnd
@@ -406,7 +408,7 @@ updateTimerHandlerSub:
     updateTimerLeak:
         y = 18 + @timer
         @printText$ = "{rvon}{grn}   {rvof}"
-        if @timer = -17 then @gameState = (@gameState or @gameStateOver) : @printText$ = "Time is up!" : gosub writeLogSub
+        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : @printText$ = "Time is up!" : gosub writeLogSub
 
     updateTimerDraw:
         gosub writeTextSub
@@ -417,14 +419,14 @@ nextItemHandlerSub:
     @gameSidebar(0) = @nextItemKey
     @printText$ = @itemTiles$(@nextItemKey)
     gosub writeItemSub
-    gosub generateNextItemSub
+    gosub generateNextPipeSub
 return
 
 endPanicHandlerSub:
     if @getGameState(@gameStatePanicing) = 0 then endPanicHandlerEnd
     if rnd(1) > .5 then endPanicHandlerEnd
 
-    @gameState = @gameState and (not @gameStatePanicing)
+    @gameState = fn @removeGameState(@gameStatePanicing)
     @printText$ = "cows have calmed down" : gosub writeLogSub
     
     endPanicHandlerEnd:
@@ -444,7 +446,7 @@ alienInvasionHandlerSub:
     # remove beam
     # animate UFO away
 
-    if (@previousItem and @cow) <> @cow then @gameState = @gameState and (not @gameStateAlienInvasion)
+    if (@previousItem and @cow) <> @cow then @gameState = fn @removeGameState(@gameStateAlienInvasion)
     @printText$ = "alien invasion!" : gosub writeLogSub
 
     alienInvasionHandlerEnd:
@@ -461,8 +463,8 @@ ufoAbductionHandlerSub:
     # remove beam
     # animate UFO away
     @ufoTarget = -1
-    @gameState = @gameState and (not @gameStateUfoAbduction)
-    @gameState = @gameState or @gameStateAlienInvasion
+    @gameState = fn @removeGameState(@gameStateUfoAbduction)
+    @gameState = fn @addGameState(@gameStateAlienInvasion)
 
     ufoAbductionHandlerEnd:
 return
@@ -481,7 +483,7 @@ meteorStrikeHandlerSub:
     gosub writeGameBoardTileSub
     # remove sprite
     @currentPlayerPostision = c
-    @gameState = @gameState and (not @gameStateMeteor)
+    @gameState = fn @removeGameState(@gameStateMeteor)
 
     meteorStrikeHandlerEnd:
 return
@@ -493,8 +495,8 @@ catastrophicEventHandlerSub:
 
     c = @gameStateMeteor : if rnd(1) < .5 then c = @gameStateUfoAbduction
 
-    @gameState = @gameState or c
-    @printText$ = "catastrophic event!" : gosub writeLogSub
+    @gameState = fn @addGameState(c)
+    @printText$ = "incoming danger!" : gosub writeLogSub
 
     catastrophicEventHandlerEnd:
 return
@@ -505,16 +507,10 @@ generateLevelSub:
             @gameBoard(i) = @empty
         next
 
-    # TODO: this needs to be based on the level and the obstacles in it
-    gosub generateNextItemSub
+    gosub generateNextPipeSub
 
-    # TODO: add to @gameSidebar
-        for @selectedSidebarIndex = 1 to 3
-            @selectedItemKey = @tempItems(int(rnd(1) * 7))
-            @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
-            @printText$ = @itemTiles$(@selectedItemKey)
-            gosub writeItemSub
-        NEXT
+    # add to @gameSidebar
+    gosub replenishToolsSub
 
     # TODO: temp remove, create random pipe for item sidebar
         @selectedSidebarIndex = .
@@ -523,19 +519,16 @@ generateLevelSub:
         @printText$ = @itemTiles$(@selectedItemKey)
         gosub writeItemSub
 
-    # TODO: temp remove
-    # draw tree, cow, and rock in random positions on the board for testing 7-9
-    # TODO: add the items without drawing, then loop through the board and draw once everything is complete to prevent flicker and changes
-        for @selectedItemKey = 7 to 9
-            @drawTo = INT(rnd(1) * 56)
-            gosub writeGameBoardTileSub
-            @drawTo = INT(rnd(1) * 56)
-            gosub writeGameBoardTileSub
-            @drawTo = INT(rnd(1) * 56)
-            gosub writeGameBoardTileSub
-            @drawTo = INT(rnd(1) * 56)
-            gosub writeGameBoardTileSub
-        next
+    # draw tree, cow, and rock
+    c = 1
+    if @level > 1 then c = 2
+    if @level > 3 then c = 3
+    if @level > 12 then c = 4
+    for i = 0 to @level + 4
+        @selectedItemKey = @levelItems(int(rnd(1) * c))
+        @drawTo = INT(rnd(1) * 56)
+        @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
+    next
 
     # add random start and end positions for the pipe connection
         @connectionStartPosition = INT(rnd(1) * 7) * 8
@@ -548,10 +541,47 @@ generateLevelSub:
         @drawTo = @connectionEndPosition
         gosub writeGameBoardTileSub
         @gameBoard(@connectionEndPosition) = .
+
+    gosub drawBoardItemsSub
+return
+
+# replenish tools
+replenishToolsSub:
+    c = 3
+    if @level > 3 then c = 4
+    if @level > 6 then c = 5
+    if @level > 9 then c = 6
+    if @level > 12 then c = 7
+    for @selectedSidebarIndex = 3 to 1 step -1
+        @selectedItemKey = @levelTools(int(rnd(1) * c))
+        @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
+        @printText$ = @itemTiles$(@selectedItemKey)
+        gosub writeItemSub
+    next
+    @toolCount = 3
+    @printText$ = "tools replenished" : gosub writeLogSub
+return
+
+# draw board item
+drawBoardItemsSub:
+    for @drawTo = 0 to 55
+        c = @gameBoard(@drawTo)
+
+        if c = @empty then drawBoardItemEnd
+        if c = @cow + @invincible then @selectedItemKey = 20 : goto drawBoardItemSkip
+        if c = @cow then @selectedItemKey = 8 : goto drawBoardItemSkip
+        if c = @tree + @growing then @selectedItemKey = 17 : goto drawBoardItemSkip
+        if c = @tree then @selectedItemKey = 7 : goto drawBoardItemSkip
+        if c = @rock then @selectedItemKey = 9 : goto drawBoardItemSkip
+
+        drawBoardItemSkip:
+        gosub writeGameBoardTileSub
+        drawBoardItemEnd:
+    next
 return
 
 # write feeder handler, select random item and write to feeder area
-generateNextItemSub:
+generateNextPipeSub:
     i = len(@feeder$)
     if i < 1 then gosub fillFeederSub : i = len(@feeder$)
     r = int(rnd(1) * i) + 1
@@ -583,6 +613,8 @@ return
 
 generateSeedSub:
     if @isChallengeMode then input "enter a number for the challenge mode seed"; @seed
+    # TODO: temp
+    @level = @seed
     if @seed = 0 then @seed = int(rnd(.) * -9000)
     if @seed > 0 then @seed = @seed * -1
     @seed = rnd(@seed)

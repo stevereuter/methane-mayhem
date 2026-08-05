@@ -1,5 +1,7 @@
 # functions
 def fn @checkGameState(@state) = (@gameState and @state) = @state
+def fn @addGameState(@state) = @gameState or @state
+def fn @removeGameState(@state) = @gameState and not @state
 
 # variables
 # start with the most important ones in the main game loop
@@ -54,9 +56,10 @@ let a = .
 let b = .
 let c = .
 let @ufoTarget = -1
+let @toolCount = .
 
 # game states
-let @level = .
+let @level = 1
 let @gameState = .
 let @gameStateLeaking = 1
 let @gameStatePanicing = 2
@@ -85,14 +88,20 @@ dim @itemTiles$(20)
 # explotion positions
 dim @explosionPositions(5)
 # TODO: temp need to create level system
-dim @tempItems(7)
-@tempItems(0) = 10
-@tempItems(1) = 11
-@tempItems(2) = 12
-@tempItems(3) = 15
-@tempItems(4) = 16
-@tempItems(5) = 18
-@tempItems(6) = 19
+dim @levelItems(4)
+@levelItems(0) = 8
+@levelItems(1) = 7
+@levelItems(2) = 9
+@levelItems(3) = 20
+
+dim @levelTools(7)
+@levelTools(0) = 15
+@levelTools(1) = 16
+@levelTools(2) = 10
+@levelTools(3) = 12
+@levelTools(4) = 11
+@levelTools(5) = 18
+@levelTools(6) = 19
 
 @colorPulse(0) = 1
 @colorPulse(1) = 15
