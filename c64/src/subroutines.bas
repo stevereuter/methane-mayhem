@@ -345,7 +345,7 @@ checkPipeConnectionHandlerSub:
         # TODO: check if leaking and move animation to @checkIndex
     next
     gosub clearLogSub
-    if fn @checkGameState(@gameStateComplete) then @printText$ = "Connection complete!" : gosub writeLogSub : @gameState = fn @addGameState(@gameStateOver)
+    if fn @checkGameState(@gameStateComplete) then @printText$ = "connection complete!" : gosub writeLogSub : @level = @level + 1 : goto gameStart
 return
 
 randomGameEventsHandlerSub:
@@ -488,8 +488,8 @@ meteorStrikeHandlerSub:
     meteorStrikeHandlerEnd:
 return
 
-# TODO: add catastrophic event base on level, meteor or UFO
 catastrophicEventHandlerSub:
+    if @level < 9 then catastrophicEventHandlerEnd
     if fn @checkGameState(@gameStateAlienInvasion) then catastrophicEventHandlerEnd
     if rnd(1) < .9 then catastrophicEventHandlerEnd
 
@@ -503,21 +503,15 @@ return
 
 generateLevelSub:
     # reset game board
-        for i=. to 55
-            @gameBoard(i) = @empty
-        next
+    for i=. to 55
+        @gameBoard(i) = @empty
+    next
 
     gosub generateNextPipeSub
 
-    # add to @gameSidebar
+    # add tools to sidebar
     gosub replenishToolsSub
-
-    # TODO: temp remove, create random pipe for item sidebar
-        @selectedSidebarIndex = .
-        @selectedItemKey = INT(rnd(1) * 6) + 1
-        @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
-        @printText$ = @itemTiles$(@selectedItemKey)
-        gosub writeItemSub
+    gosub nextItemHandlerSub
 
     # draw tree, cow, and rock
     c = 1
@@ -543,6 +537,8 @@ generateLevelSub:
         @gameBoard(@connectionEndPosition) = .
 
     gosub drawBoardItemsSub
+
+    @printText$ = "level " + str$(@level) : gosub writeLogSub
 return
 
 # replenish tools
