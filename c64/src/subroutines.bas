@@ -510,10 +510,9 @@ generateLevelSub:
     next
 
     # add pipes and tools to sidebar
-    # TODO: after level 1 the selected pipe is not drawn
+    gosub replenishToolsSub
     gosub generateNextPipeSub
     gosub nextItemHandlerSub
-    gosub replenishToolsSub
 
     # draw tree, cow, and rock
     c = 3
