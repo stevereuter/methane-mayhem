@@ -236,22 +236,21 @@ moveCowSub:
     tryMoveItemHandler:
         if @nextValue < 0 then retryHandler
         if @nextValue >=54 then retryHandler
-        if (@checkTile and @invincible) = @invincible then moveItemToNewPositionHandler
+        if (@previousItem and @invincible) = @invincible then moveItemToNewPositionHandler
         @newItem = @gameBoard(@nextValue)
         if @newItem = @empty then moveItemToNewPositionHandler
 
-        retryHandler:
+    retryHandler:
         # can't move
         if c > 4 then goto tryMoveItemHandlerSkip
         r = r + 1
         if r > 4 then r = 1
-    
         goto getNewPositionHandler
     
     # add the new cow in the new position
     moveItemToNewPositionHandler:
         if (@newItem and @cow) = @cow then @gameState = fn @addGameState(@gameStateAlienInvasion)
-        c = 8 : if (@checkTile and @invincible) = @invincible then c = 20
+        c = 8 : if (@previousItem and @invincible) = @invincible then c = 20
         @selectedItemKey = c
         @clearTo = @drawTo
         @drawTo = @nextValue
@@ -354,10 +353,10 @@ randomGameEventsHandlerSub:
     @moved = -1
     a = 8 : b = 1 : @ufoTarget = -1
     for i = . to 56
-        @checkTile = @gameBoard(i)
+        @previousItem = @gameBoard(i)
         # skip past last moved to prevent double move
         if i <= @moved then randomGameEventsHandlerEnd
-        if (@checkTile and @cow) <> @cow then randomGameEventsHandlerEnd
+        if (@previousItem and @cow) <> @cow then randomGameEventsHandlerEnd
         r = .7 : if @getGameState(@gameStatePanicing) then r = 0
         if rnd(1) > r then randomGameEventsHandlerEnd
         # move cow
@@ -368,13 +367,13 @@ randomGameEventsHandlerSub:
 
         @drawTo = i
         # grow trees
-        if @checkTile = @tree + @growing then gosub growTreeHandlerSub
+        if @previousItem = @tree + @growing then gosub growTreeHandlerSub
         # remove burning trees
-        if @checkTile = @tree + @destroy then gosub removeGameBoardItem
+        if @previousItem = @tree + @destroy then gosub removeGameBoardItem
         # update burning trees to be destroyed
-        if @checkTile = @tree + @burning then @gameBoard(i) = @tree + @destroy
+        if @previousItem = @tree + @burning then @gameBoard(i) = @tree + @destroy
         # if cow and is abduction, set UFO target
-        if fn @checkGameState(@gameStateUfoAbduction) then if @checkTile = @cow then @ufoTarget = i
+        if fn @checkGameState(@gameStateUfoAbduction) then if @previousItem = @cow then @ufoTarget = i
     next
     if fn @checkGameState(@gameStateUfoAbduction) then if @ufoTarget = -1 then @gameState = fn @removeGameState(@gameStateUfoAbduction) : @gameState = fn @addGameState(@gameStateAlienInvasion)
 return
@@ -608,12 +607,11 @@ fillFeederSub:
 return
 
 generateSeedSub:
-    if @isChallengeMode then input "enter a number for the challenge mode seed"; @seed
-    # TODO: temp
-    @level = @seed
+    if fn @checkGameState(@gameStateChallengeMode) then input "enter a number for the challenge mode seed"; @seed
     if @seed = 0 then @seed = int(rnd(.) * -9000)
     if @seed > 0 then @seed = @seed * -1
     @seed = rnd(@seed)
+    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(1) * 10) + 1
 return
 
 drawGameBoardSub:

@@ -1,7 +1,7 @@
 # functions
 def fn @checkGameState(@state) = (@gameState and @state) = @state
 def fn @addGameState(@state) = @gameState or @state
-def fn @removeGameState(@state) = @gameState and not @state
+def fn @removeGameState(@state) = @gameState and (not @state)
 
 # variables
 # start with the most important ones in the main game loop
@@ -68,13 +68,13 @@ let @gameStateUfoAbduction = 8
 let @gameStateAlienInvasion = 16
 let @gameStateComplete = 32
 let @gameStateOver = 64
+let @gameStateChallengeMode = 128
 
 let @printText$ = ""
 let @loopMax = 100
 let @feeder$ = ""
 let @timer = 15
 let @seed = .
-let @isChallengeMode = .
 
 # arrays
 dim @colorPulse(6)

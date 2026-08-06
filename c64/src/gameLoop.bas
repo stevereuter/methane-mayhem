@@ -41,7 +41,7 @@ poke 53269, peek(53269) or 3
 @currentPlayerPostision = 0
 @selectedSidebarIndex = 0
 
-@gameState = .
+@gameState = @gameState and @gameStateChallengeMode
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
     gosub animateSelectorSub
@@ -67,7 +67,7 @@ for @gameLoop=. to @loopMax
     if @gameLoop = 5 then @gameLoop = -1
     gameLoopDone:
 next
-
+if fn @checkGameState(@gameStateChallengeMode) then gameStateCompleteCheckEnd
 if not fn @checkGameState(@gameStateComplete) then gameStateCompleteCheckEnd
     @level = @level + 1
     for i = . to 3000 : next
