@@ -82,6 +82,7 @@ let @spriteReg = 53240
 let @spriteRegX = 53248
 let @spriteRegY = 53249
 let @spriteColor = 53287
+let @currentSprite = .
 # sprite flags, bit for each sprite
 let @spritesEnabled = 53269
 let @spriteDoubleX = 53277

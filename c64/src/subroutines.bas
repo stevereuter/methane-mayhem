@@ -14,6 +14,16 @@ boardIndexToCharacterXYSub:
     y=2 + int(@drawTo / 8) * 3
 return
 
+# set sprite position for @currentSprite at @drawTo
+setSpritePositionSub:
+    gosub boardIndexToCharacterXYSub
+    x = 24 + x * 8
+    if x < 256 then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
+    if x > 255 then x = x - 255 : poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
+    poke @spriteRegX + @currentSprite * 2, x
+    poke @spriteRegY + @currentSprite * 2, 48 + y * 8
+return
+
 # write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
 writeItemSub:
     x = 35
@@ -275,16 +285,12 @@ addFireToBoardSub:
             poke 55296 + b + (a * 40), c
         next
     next
-    # TODO: add buring sprite
     # set sprite position
-    x = 24 + x * 8
-    if x < 256 then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ 7)
-    if x > 255 then x = x - 255 : poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ 7)
-    poke @spriteRegX + 14, x
-    poke @spriteRegY + 14, 48 + y * 8
+    @currentSprite = 7
+    gosub setSpritePositionSub
     # enable sprite
     poke @spritesEnabled, peek(@spritesEnabled) or 128
-    poke @spriteReg + 7, @spriteFire
+    poke @spriteReg + @currentSprite, @spriteFire
     @burnAnimation = 1
     @printText$ = "cows are panicing" : gosub writeLogSub
     @gameState = fn @addGameState(@gameStatePanicing)
@@ -390,7 +396,24 @@ return
 growTreeHandlerSub:
     @gameBoard(@drawTo) = @tree
     @selectedItemKey = 7
+    # sprite 3
+    @currentSprite = 3
+    gosub setSpritePositionSub
+    # set first frame
+    poke @spriteReg + @currentSprite, @spriteTreeGrow
+    # set color
+    poke @spriteColor + @currentSprite, 5
+    # enable
+    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+    # pause
+    for i = . to 100 : next
+    # show second frame
+    poke @spriteReg + @currentSprite, @spriteTreeGrow + 1
+    # pause
+    for i = . to 100 : next
     gosub writeGameBoardTileSub
+    # disable
+    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
 return
 
 treeSpawnHandlerSub:
