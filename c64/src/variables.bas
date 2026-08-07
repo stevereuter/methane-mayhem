@@ -77,6 +77,7 @@ let @loopMax = 100
 let @feeder$ = ""
 let @timer = 15
 let @seed = .
+let @skipAnimation = .
 # starting registers for sprite 0
 let @spriteReg = 53240
 let @spriteRegX = 53248

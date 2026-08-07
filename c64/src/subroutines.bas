@@ -49,7 +49,7 @@ animateSelectorSub:
     # TODO: we may be able to use the game index here if it has no other use
     # pulse color of main sprites
     @timeDifference= TI - @timeDifference
-    if @timeDifference <= 10 then animateSelectorDone
+    if @timeDifference <= 5 then animateSelectorDone
     @colorPulsePointer = @colorPulsePointer + 1
     @timeDifference = TI
     if @colorPulsePointer > 5 then @colorPulsePointer = 0
@@ -265,7 +265,9 @@ moveCowSub:
         @drawTo = @nextValue
         gosub writeGameBoardTileSub
         @drawTo = @clearTo
+        @skipAnimation = -1
         gosub removeGameBoardItem
+        @skipAnimation = 0
         # moo
         @printText$ = "Moo!" : gosub writeLogSub
         @moved = @nextValue
@@ -324,8 +326,23 @@ addExplosionToBoardSub:
 return
 
 removeGameBoardItem:
+    if @skipAnimation then removeGameBoardItemJump
+    # sprite 5
+    @currentSprite = 5
+    gosub setSpritePositionSub
+    poke @spriteReg + @currentSprite, @spritePoof
+    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+    for i = . to 100 : next
+    poke @spriteReg + @currentSprite, @spritePoof + 2
+    for i = . to 100 : next
+    removeGameBoardItemJump:
     @selectedItemKey = @empty
     gosub writeGameBoardTileSub
+    if @skipAnimation then removeGameBoardItemEnd
+    poke @spriteReg + @currentSprite, @spritePoof + 3
+    for i = . to 100 : next
+    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+    removeGameBoardItemEnd:
 return
 
 # pipe connection handler
