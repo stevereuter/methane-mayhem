@@ -57,6 +57,8 @@ let b = .
 let c = .
 let @ufoTarget = -1
 let @toolCount = .
+let @startX = 88
+let @startY = 66
 
 # game states
 let @level = 1
@@ -75,6 +77,35 @@ let @loopMax = 100
 let @feeder$ = ""
 let @timer = 15
 let @seed = .
+# starting registers for sprite 0
+let @spriteReg = 53240
+let @spriteRegX = 53248
+let @spriteRegY = 53249
+let @spriteColor = 53287
+# sprite flags, bit for each sprite
+let @spritesEnabled = 53269
+let @spriteDoubleX = 53277
+let @spriteDoubleY = 53271
+let @spriteScreenRight = 53264
+# sprite date pointers starting at 51200 (x-49152)/64 = y
+let @spriteSelector = 32
+let @spriteMeteor = 33
+# let @spriteMeteor2 = 34
+let @spriteFire = 35
+# let @spriteFire2 = 36
+let @spriteTreeGrow = 37
+# let @spriteTreeGrow2 = 38
+let @spriteUFO = 39
+let @spriteBeam = 40
+# let @spriteBeam2 = 41
+let @spriteDestroy = 42
+# let @spriteDestroy2 = 43
+# let @spriteDestroy3 = 44
+let @spriteGas = 45
+#let @spriteGas2 = 46
+let @spriteCow = 47
+# animation variables
+let @burnAnimation = .
 
 # arrays
 dim @colorPulse(6)
@@ -87,7 +118,7 @@ dim @itemValues(20)
 dim @itemTiles$(20)
 # explotion positions
 dim @explosionPositions(5)
-# TODO: temp need to create level system
+
 dim @levelItems(4)
 @levelItems(0) = 8
 @levelItems(1) = 7
@@ -174,5 +205,3 @@ dim @levelTools(7)
 # alien cow
     @itemTiles$(20) = "{grey}{195}{196}{32}{down}{3 left}{211}{212}{213}{down}{3 left}{blk}{163}{grey}{164}{165}"
     @itemValues(20) = @cow + @invincible
-
-# TODO: items to add: UFO (remove cows from the board)

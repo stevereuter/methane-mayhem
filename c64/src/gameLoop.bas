@@ -19,23 +19,23 @@
 # pointer color
 @colorPulsePointer = 0
 # x position
-@positionX = 88
+@positionX = @startX
 # x right side
 @sidebarX = @positionX
 # y position
-@positionY = 66
+@positionY = @startY
 # new x position
 @newPositionX = 0
 # new y position
 @newPositionY = 0
-poke 53248, @positionX
-poke 53249, @positionY
+poke @spriteRegX + 2, @positionX
+poke @spriteRegY + 2, @positionY
 # use right side for sprite 1
-poke 53264, peek(53264) or 2
-poke 53250, 48
-poke 53251, 98
+poke @spriteScreenRight, peek(@spriteScreenRight) or 4
+poke @spriteRegX + 4, 48
+poke @spriteRegY + 4, 98
 # turn on sprites
-poke 53269, peek(53269) or 3
+poke @spritesEnabled, peek(@spritesEnabled) or 6
 # time difference 0-9, is reset at 10 giffies
 @timeDifference = TI
 @currentPlayerPostision = 0
@@ -45,6 +45,10 @@ poke 53269, peek(53269) or 3
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
     gosub animateSelectorSub
+    poke @spriteReg + 7, @spriteFire + @burnAnimation
+    @burnAnimation = @burnAnimation + 1
+    if @burnAnimation = 2 then @burnAnimation = 0
+
     # TODO: may have to convert this to ASC as we will need enter and function keys
     get @keyInput$
     if @keyInput$ = "" then gameLoopSkip
@@ -53,10 +57,8 @@ for @gameLoop=. to @loopMax
     gosub playerSelectItemHandlerSub
     # selecting a cell on the board
     gosub playerMoveHandlerSub
-    # TODO: handle item placement here, will need to check if it's available for the current selected item
     gosub placeItemHandlerSub
 
-    # TODO: handle game over logic
     # if game over, set loop to max to end game
     if fn @checkGameState(@gameStateOver) then @gameLoop = @loopMax : goto gameLoopDone
     if fn @checkGameState(@gameStateComplete) then @gameLoop = @loopMax : goto gameLoopDone

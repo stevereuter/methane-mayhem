@@ -43,24 +43,23 @@ animateSelectorSub:
     @colorPulsePointer = @colorPulsePointer + 1
     @timeDifference = TI
     if @colorPulsePointer > 5 then @colorPulsePointer = 0
-    poke 53287, @colorPulse(@colorPulsePointer)
-    poke 53288, @colorPulse(@colorPulsePointer)
+    poke @spriteColor + 1, @colorPulse(@colorPulsePointer)
+    poke @spriteColor + 2, @colorPulse(@colorPulsePointer)
     animateSelectorDone:
 return
 
 # item selector handler
 playerSelectItemHandlerSub:
     # selecting a tool to use
-    # TODO: probably better to just update the selected item here than update the sprite based on that index
     # TODO: need to add function keys for selecting the @gameSidebar too
     # 49 or 133
-    if @keyInput$ = "1" then poke 53251, 98 : @selectedSidebarIndex = 0
+    if @keyInput$ = "1" then poke @spriteRegY + 4, 98 : @selectedSidebarIndex = 0
     # 50 or 134
-    if @keyInput$ = "2" then poke 53251, 122 : @selectedSidebarIndex = 1
+    if @keyInput$ = "2" then poke @spriteRegY + 4, 122 : @selectedSidebarIndex = 1
     # 51 or 135
-    if @keyInput$ = "3" then poke 53251, 146 : @selectedSidebarIndex = 2
+    if @keyInput$ = "3" then poke @spriteRegY + 4, 146 : @selectedSidebarIndex = 2
     # 52 or 136
-    if @keyInput$ = "4" then poke 53251, 170 : @selectedSidebarIndex = 3
+    if @keyInput$ = "4" then poke @spriteRegY + 4, 170 : @selectedSidebarIndex = 3
 return
 
 # board selector handler
@@ -88,10 +87,10 @@ playerMoveHandlerSub:
     @positionY = @newPositionY
 
     # Set X position
-    if @positionX < 256 then poke 53248, @positionX : poke 53264, peek(53264) and 254
-    if @positionX > 255 then poke 53248, @sidebarX : poke 53264, peek(53264) or 1
+    if @positionX < 256 then poke @spriteRegX + 2, @positionX : poke @spriteScreenRight, peek(@spriteScreenRight) and 253
+    if @positionX > 255 then poke @spriteRegX + 2, @sidebarX : poke @spriteScreenRight, peek(@spriteScreenRight) or 2
     # Set Y position
-    poke 53249, @positionY
+    poke @spriteRegY + 2, @positionY
     boardSelectorHandlerDone:
 return
 
@@ -277,6 +276,16 @@ addFireToBoardSub:
         next
     next
     # TODO: add buring sprite
+    # set sprite position
+    x = 24 + x * 8
+    if x < 256 then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ 7)
+    if x > 255 then x = x - 255 : poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ 7)
+    poke @spriteRegX + 14, x
+    poke @spriteRegY + 14, 48 + y * 8
+    # enable sprite
+    poke @spritesEnabled, peek(@spritesEnabled) or 128
+    poke @spriteReg + 7, @spriteFire
+    @burnAnimation = 1
     @printText$ = "cows are panicing" : gosub writeLogSub
     @gameState = fn @addGameState(@gameStatePanicing)
 
@@ -369,7 +378,7 @@ randomGameEventsHandlerSub:
         # grow trees
         if @previousItem = @tree + @growing then gosub growTreeHandlerSub
         # remove burning trees
-        if @previousItem = @tree + @destroy then gosub removeGameBoardItem
+        if @previousItem = @tree + @destroy then poke @spritesEnabled, peek(@spritesEnabled) and not 128 : gosub removeGameBoardItem
         # update burning trees to be destroyed
         if @previousItem = @tree + @burning then @gameBoard(i) = @tree + @destroy
         # if cow and is abduction, set UFO target
