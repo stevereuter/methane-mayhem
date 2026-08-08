@@ -661,34 +661,127 @@ def generate_color_ram_bytes(screen_json: dict[str, Any], raw_to_rule: dict[int,
     return bytes(out)
 
 
-def generate_sprite_bytes(sprite_json: dict[str, Any]) -> bytes:
+def generate_sprite_bytes(sprite_json: dict[str, Any], by_hex: dict[str, list[dict[str, Any]]]) -> bytes:
     """Generate sprite data from JSON export.
     
     Each sprite gets 64 bytes (63 data bytes + 1 padding byte) for correct memory spacing.
     Sprites are standard C64 format: 24x21 pixels, 3 bytes per row, 21 rows.
     """
+    color_rules = build_raw_to_color_rule(sprite_json, by_hex)
     sprites = sprite_json.get("sprites")
     if not isinstance(sprites, list):
         fail("Sprite JSON field 'sprites' must be an array")
-    
-    out = bytearray()
-    for sprite_idx, sprite in enumerate(sprites):
-        if not isinstance(sprite, dict):
-            fail(f"Sprite {sprite_idx} entry must be an object")
-        
-        sprite_bytes = sprite.get("spriteBytes")
-        if not isinstance(sprite_bytes, list):
+
+    multicolor_role_to_bits = {
+        "background": 0b00,
+        "shared1": 0b01,
+        "shared2": 0b11,
+        "multicolor": 0b10,
+        "character": 0b10,
+    }
+    mismatch_warnings: set[tuple[int, int, int]] = set()
+
+    def parse_pixel_rows(sprite_idx: int, pixel_rows: Any) -> list[list[int]]:
+        if not isinstance(pixel_rows, list):
+            fail(f"Sprite {sprite_idx} pixelRows must be an array")
+        if len(pixel_rows) != 21:
+            fail(f"Sprite {sprite_idx} must have 21 pixelRows, got {len(pixel_rows)}")
+
+        rows: list[list[int]] = []
+        for row_idx, row in enumerate(pixel_rows):
+            if not isinstance(row, list):
+                fail(f"Sprite {sprite_idx} pixelRows row {row_idx} must be an array")
+            if len(row) != 24:
+                fail(f"Sprite {sprite_idx} pixelRows row {row_idx} must have 24 pixels, got {len(row)}")
+
+            converted_row: list[int] = []
+            for value in row:
+                try:
+                    converted_row.append(int(value))
+                except (TypeError, ValueError):
+                    fail(f"Sprite {sprite_idx} pixelRows row {row_idx} contains invalid pixel value: {value}")
+            rows.append(converted_row)
+
+        return rows
+
+    def encode_hires_rows(sprite_idx: int, pixel_rows: list[list[int]]) -> list[list[int]]:
+        encoded_rows: list[list[int]] = []
+        for row in pixel_rows:
+            row_bytes: list[int] = []
+            for byte_idx in range(3):
+                byte_val = 0
+                for bit_idx in range(8):
+                    pixel = row[byte_idx * 8 + bit_idx]
+                    if pixel > 0:
+                        byte_val |= 1 << (7 - bit_idx)
+                row_bytes.append(byte_val)
+            encoded_rows.append(row_bytes)
+        return encoded_rows
+
+    def encode_multicolor_rows(sprite_idx: int, pixel_rows: list[list[int]]) -> list[list[int]]:
+        local_color_indexes: set[int] = set()
+        encoded_rows: list[list[int]] = []
+
+        for row_idx, row in enumerate(pixel_rows):
+            row_bytes: list[int] = []
+            for byte_idx in range(3):
+                byte_val = 0
+                base_x = byte_idx * 8
+                for pair_idx in range(4):
+                    left = row[base_x + pair_idx * 2]
+                    right = row[base_x + pair_idx * 2 + 1]
+                    pixel = left
+                    if left != right:
+                        pixel = right if left == 0 else left
+                        mismatch_key = (sprite_idx, row_idx, byte_idx * 4 + pair_idx)
+                        if mismatch_key not in mismatch_warnings:
+                            mismatch_warnings.add(mismatch_key)
+                            print(
+                                "Warning: "
+                                f"Sprite {sprite_idx} row {row_idx} pair {byte_idx * 4 + pair_idx} mixes colors "
+                                f"{left} and {right}; using {pixel} for C64 multicolor packing.",
+                                file=sys.stderr,
+                            )
+
+                    rule = color_rules.get(pixel)
+                    if rule is None:
+                        fail(f"Sprite {sprite_idx} row {row_idx} pair {pair_idx} raw value {pixel} has no asepriteColorMap mapping")
+
+                    role = canonical_role(str(rule.get("role", "")))
+                    bits = multicolor_role_to_bits.get(role)
+                    if bits is None:
+                        fail(
+                            f"Sprite {sprite_idx} row {row_idx} pair {pair_idx} color role '{rule.get('role')}' "
+                            "cannot be encoded for multicolor sprites."
+                        )
+
+                    if bits == 0b10:
+                        local_color_indexes.add(int(rule["c64Index"]))
+                    byte_val |= bits << (6 - pair_idx * 2)
+
+                row_bytes.append(byte_val)
+            encoded_rows.append(row_bytes)
+
+        if len(local_color_indexes) > 1:
+            fail(
+                "A multicolor sprite can only use one sprite-local color, but sprite "
+                f"{sprite_idx} uses multiple local color indexes: {sorted(local_color_indexes)}"
+            )
+
+        return encoded_rows
+
+    def append_rows(sprite_idx: int, sprite_rows: Any, out: bytearray) -> None:
+        if not isinstance(sprite_rows, list):
             fail(f"Sprite {sprite_idx} spriteBytes must be an array")
-        if len(sprite_bytes) != 21:
-            fail(f"Sprite {sprite_idx} must have 21 rows, got {len(sprite_bytes)}")
-        
-        # Process each row (3 bytes per row)
-        for row_idx, row_bytes in enumerate(sprite_bytes):
+        if len(sprite_rows) != 21:
+            fail(f"Sprite {sprite_idx} must have 21 rows, got {len(sprite_rows)}")
+
+        for row_idx, row_bytes in enumerate(sprite_rows):
             if not isinstance(row_bytes, list):
                 fail(f"Sprite {sprite_idx} row {row_idx} must be an array")
             if len(row_bytes) != 3:
                 fail(f"Sprite {sprite_idx} row {row_idx} must have 3 bytes, got {len(row_bytes)}")
-            
+
             for byte_val in row_bytes:
                 try:
                     val = int(byte_val)
@@ -697,6 +790,21 @@ def generate_sprite_bytes(sprite_json: dict[str, Any]) -> bytes:
                 if val < 0 or val > 255:
                     fail(f"Sprite {sprite_idx} row {row_idx} byte out of range 0-255: {val}")
                 out.append(val)
+    
+    out = bytearray()
+    for sprite_idx, sprite in enumerate(sprites):
+        if not isinstance(sprite, dict):
+            fail(f"Sprite {sprite_idx} entry must be an object")
+
+        pixel_rows = sprite.get("pixelRows")
+        if pixel_rows is not None:
+            parsed_rows = parse_pixel_rows(sprite_idx, pixel_rows)
+            if bool(sprite.get("isMulticolor")):
+                append_rows(sprite_idx, encode_multicolor_rows(sprite_idx, parsed_rows), out)
+            else:
+                append_rows(sprite_idx, encode_hires_rows(sprite_idx, parsed_rows), out)
+        else:
+            append_rows(sprite_idx, sprite.get("spriteBytes"), out)
         
         # Add 64th byte (padding) for memory spacing in C64
         out.append(0)
@@ -730,7 +838,7 @@ def generate_asset_bytes(
             with source_file.open("r", encoding="utf-8") as handle:
                 sprite_json = json.load(handle)
             json_cache[source_file] = sprite_json
-        return generate_sprite_bytes(sprite_json)
+        return generate_sprite_bytes(sprite_json, by_hex)
 
     screen_json = json_cache.get(source_file)
     if screen_json is None:

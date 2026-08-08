@@ -78,6 +78,13 @@ let @feeder$ = ""
 let @timer = 15
 let @seed = .
 let @animationColor = .
+let @animationX = .
+let @animationY = .
+let @animateToX = .
+let @animateToY = .
+let @diffX = .
+let @diffY = .
+let @nextKey = .
 # starting registers for sprite 0
 let @spriteReg = 53240
 let @spriteRegX = 53248

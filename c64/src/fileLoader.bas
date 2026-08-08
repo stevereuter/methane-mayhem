@@ -13,8 +13,10 @@ loadCharacterSet:
     poke 53270, peek(53270) or 16
     # set shared 1 color white
     poke 53282, 15
+    poke 53285, 15
     # set shared 2 color black
     poke 53283, 0
+    poke 53286, 0
 
     # Tell BASIC the screen moved
     poke 648, 204

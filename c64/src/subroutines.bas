@@ -8,20 +8,38 @@ writeGameBoardTileSub:
     print @itemTiles$(@selectedItemKey);
 return
 
+# set sprite position for @currentSprite at @drawTo
+setSpritePositionByTileSub:
+    gosub getSpritePositionByTileSub
+    gosub updateSpritePositionSub
+return
+
+getSpritePositionByTileSub:
+    gosub boardIndexToCharacterXYSub
+    gosub updatePositionForSprite
+    gosub setSpriteRightPositionSub
+return
+
+updatePositionForSprite:
+    x = 24 + x * 8
+    y = 50 + y * 8
+return
+
+setSpriteRightPositionSub:
+    r = . : if x > 255 then x = x - 255 : r = -1
+return
+
+updateSpritePositionSub:
+    if not r then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
+    if r then poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
+    poke @spriteRegX + @currentSprite * 2, x
+    poke @spriteRegY + @currentSprite * 2, y
+return
+
 # convert board index to x,y coordinates
 boardIndexToCharacterXYSub:
     x=8 + (@drawTo - int(@drawTo / 8) * 8) * 3
     y=2 + int(@drawTo / 8) * 3
-return
-
-# set sprite position for @currentSprite at @drawTo
-setSpritePositionSub:
-    gosub boardIndexToCharacterXYSub
-    x = 24 + x * 8
-    if x < 256 then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
-    if x > 255 then x = x - 255 : poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
-    poke @spriteRegX + @currentSprite * 2, x
-    poke @spriteRegY + @currentSprite * 2, 50 + y * 8
 return
 
 # write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
@@ -257,17 +275,43 @@ moveCowSub:
         if r > 4 then r = 1
         goto getNewPositionHandler
     
-    # add the new cow in the new position
+    # add the new cow in the new position from @drawTo to @nextValue
     moveItemToNewPositionHandler:
         if (@newItem and @cow) = @cow then @gameState = fn @addGameState(@gameStateAlienInvasion)
-        c = 8 : if (@previousItem and @invincible) = @invincible then c = 20
-        @selectedItemKey = c
+        @nextKey = 8 : if (@previousItem and @invincible) = @invincible then @nextKey = 20
         @clearTo = @drawTo
-        @drawTo = @nextValue
+        # sprite
+        @currentSprite = 5
+        poke @spriteReg + @currentSprite, @spriteCow
+
+        # starting position
+            gosub boardIndexToCharacterXYSub
+            @animationX = x : @animationY = y
+            gosub updatePositionForSprite
+            gosub setSpriteRightPositionSub
+            poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+            @animationColor = -1
+            gosub removeGameBoardItem
+
+        # ending position
+            @drawTo = @nextValue
+            gosub boardIndexToCharacterXYSub
+            @animateToX = x : @animateToY = y
+
+        # animate
+        @diffX = (@animateToX - @animationX) / 4 : @diffY = (@animateToY - @animationY) / 4
+        for a = . to 3
+            @animationX = @animationX + @diffX : @animationY = @animationY + @diffY
+            x = @animationX : y = @animationY
+            gosub updatePositionForSprite
+            gosub setSpriteRightPositionSub
+            gosub updateSpritePositionSub
+        next
+
+        @selectedItemKey = @nextKey
         gosub writeGameBoardTileSub
-        @drawTo = @clearTo
-        @animationColor = -1
-        gosub removeGameBoardItem
+        # remove sprite
+        poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
         # moo
         @printText$ = "Moo!" : gosub writeLogSub
         @moved = @nextValue
@@ -289,7 +333,7 @@ addFireToBoardSub:
     next
     # set sprite position
     @currentSprite = 7
-    gosub setSpritePositionSub
+    gosub setSpritePositionByTileSub
     # enable sprite
     poke @spritesEnabled, peek(@spritesEnabled) or 128
     poke @spriteReg + @currentSprite, @spriteFire
@@ -331,7 +375,7 @@ removeGameBoardItem:
         # sprite 5
         @currentSprite = 5
         poke @spriteColor + @currentSprite, @animationColor
-        gosub setSpritePositionSub
+        gosub setSpritePositionByTileSub
         poke @spriteReg + @currentSprite, @spritePoof
         poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
         for c = . to 100 : next
@@ -418,7 +462,7 @@ growTreeHandlerSub:
     @selectedItemKey = 7
     # sprite 3
     @currentSprite = 3
-    gosub setSpritePositionSub
+    gosub setSpritePositionByTileSub
     # set first frame
     poke @spriteReg + @currentSprite, @spriteTreeGrow
     # set color

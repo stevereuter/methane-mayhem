@@ -24,3 +24,5 @@ for sn = 1 to 2
 next
 # set fire sprite to yellow
 poke @spriteColor + 7, 7
+poke @spriteColor + 5, 1
+poke 53276, peek(53276) or (2 ^ 5)
