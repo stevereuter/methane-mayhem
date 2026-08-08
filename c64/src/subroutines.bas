@@ -278,8 +278,10 @@ moveCowSub:
     # add the new cow in the new position from @drawTo to @nextValue
     moveItemToNewPositionHandler:
         if (@newItem and @cow) = @cow then @gameState = fn @addGameState(@gameStateAlienInvasion)
-        @nextKey = 8 : if (@previousItem and @invincible) = @invincible then @nextKey = 20
+        @nextKey = 8 : @animationColor = 1
+        if (@previousItem and @invincible) = @invincible then @nextKey = 20 : @animationColor = 4
         @clearTo = @drawTo
+        poke @spriteColor + 5, @animationColor
         # sprite
         @currentSprite = 5
         poke @spriteReg + @currentSprite, @spriteCow
@@ -372,8 +374,7 @@ return
 
 removeGameBoardItem:
     if @animationColor < 0 then removeGameBoardItemJump
-        # sprite 5
-        @currentSprite = 5
+        @currentSprite = 4
         poke @spriteColor + @currentSprite, @animationColor
         gosub setSpritePositionByTileSub
         poke @spriteReg + @currentSprite, @spritePoof
