@@ -21,7 +21,7 @@ setSpritePositionSub:
     if x < 256 then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
     if x > 255 then x = x - 255 : poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
     poke @spriteRegX + @currentSprite * 2, x
-    poke @spriteRegY + @currentSprite * 2, 48 + y * 8
+    poke @spriteRegY + @currentSprite * 2, 50 + y * 8
 return
 
 # write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
@@ -142,9 +142,10 @@ placeItemHandlerSub:
         if (@selectedItem and @rotate) = @rotate then rotateItemHandler
         if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveCowSub : goto removeGameBoardItemDone
         # fire and explotions
-        if (@selectedItem and @cow) = @cow then placeItemHandlerSkip
+        if (@previousItem and @cow) = @cow then placeItemHandlerSkip
         if (@selectedItem and @burning) = @burning then if (@previousItem and @tree) = @tree then gosub addFireToBoardSub : goto removeGameBoardItemDone
         if (@selectedItem and @explosion) = @explosion then gosub addExplosionToBoardSub : goto removeGameBoardItemDone
+        @animationColor = 1
         # destroy item handler
         if (@selectedItem and @destroy) <> @destroy then placeItemHandlerSkip
         if (@previousItem and @selectedItem and @tree) = @tree then gosub removeGameBoardItem : goto removeGameBoardItemDone
@@ -265,9 +266,8 @@ moveCowSub:
         @drawTo = @nextValue
         gosub writeGameBoardTileSub
         @drawTo = @clearTo
-        @skipAnimation = -1
+        @animationColor = -1
         gosub removeGameBoardItem
-        @skipAnimation = 0
         # moo
         @printText$ = "Moo!" : gosub writeLogSub
         @moved = @nextValue
@@ -310,6 +310,7 @@ addExplosionToBoardSub:
     if @column > 0 then @explosionPositions(3) = @currentPlayerPostision - 1
     if @column < 7 then @explosionPositions(4) = @currentPlayerPostision + 1
     
+    @animationColor = 2
     for i=. to 4
         if @explosionPositions(i) < 0 then addExplosionToBoardLoopEnd
         if @explosionPositions(i) > 55 then addExplosionToBoardLoopEnd
@@ -326,22 +327,23 @@ addExplosionToBoardSub:
 return
 
 removeGameBoardItem:
-    if @skipAnimation then removeGameBoardItemJump
-    # sprite 5
-    @currentSprite = 5
-    gosub setSpritePositionSub
-    poke @spriteReg + @currentSprite, @spritePoof
-    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-    for i = . to 100 : next
-    poke @spriteReg + @currentSprite, @spritePoof + 2
-    for i = . to 100 : next
+    if @animationColor < 0 then removeGameBoardItemJump
+        # sprite 5
+        @currentSprite = 5
+        poke @spriteColor + @currentSprite, @animationColor
+        gosub setSpritePositionSub
+        poke @spriteReg + @currentSprite, @spritePoof
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+        for c = . to 100 : next
+        poke @spriteReg + @currentSprite, @spritePoof + 1
+        for c = . to 100 : next
     removeGameBoardItemJump:
-    @selectedItemKey = @empty
-    gosub writeGameBoardTileSub
-    if @skipAnimation then removeGameBoardItemEnd
-    poke @spriteReg + @currentSprite, @spritePoof + 3
-    for i = . to 100 : next
-    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+        @selectedItemKey = @empty
+        gosub writeGameBoardTileSub
+        if @animationColor < 0 then removeGameBoardItemEnd
+        poke @spriteReg + @currentSprite, @spritePoof + 2
+        for c = . to 100 : next
+        poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
     removeGameBoardItemEnd:
 return
 
@@ -401,6 +403,7 @@ randomGameEventsHandlerSub:
         # grow trees
         if @previousItem = @tree + @growing then gosub growTreeHandlerSub
         # remove burning trees
+        @animationColor = 0
         if @previousItem = @tree + @destroy then poke @spritesEnabled, peek(@spritesEnabled) and not 128 : gosub removeGameBoardItem
         # update burning trees to be destroyed
         if @previousItem = @tree + @burning then @gameBoard(i) = @tree + @destroy
@@ -423,11 +426,11 @@ growTreeHandlerSub:
     # enable
     poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
     # pause
-    for i = . to 100 : next
+    for c = . to 100 : next
     # show second frame
     poke @spriteReg + @currentSprite, @spriteTreeGrow + 1
     # pause
-    for i = . to 100 : next
+    for c = . to 100 : next
     gosub writeGameBoardTileSub
     # disable
     poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
@@ -508,6 +511,7 @@ ufoAbductionHandlerSub:
     # show beam
     # remove cow
     @drawTo = @ufoTarget
+    @animationColor = -1
     gosub removeGameBoardItem
     @printText$ = "alien abduction!" : gosub writeLogSub
     # remove beam

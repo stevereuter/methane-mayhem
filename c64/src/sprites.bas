@@ -24,5 +24,3 @@ for sn = 1 to 2
 next
 # set fire sprite to yellow
 poke @spriteColor + 7, 7
-# poof white
-poke @spriteColor + 5, 1
