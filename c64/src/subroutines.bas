@@ -26,7 +26,7 @@ updatePositionForSprite:
 return
 
 setSpriteRightPositionSub:
-    r = . : if x > 255 then x = x - 255 : r = -1
+    r = . : if x > 255 then x = x - 256 : r = -1
 return
 
 updateSpritePositionSub:
@@ -264,7 +264,7 @@ moveCowSub:
     tryMoveItemHandler:
         if @nextValue < 0 then retryHandler
         if @nextValue >=54 then retryHandler
-        if (@previousItem and @invincible) = @invincible then moveItemToNewPositionHandler
+        if (@previousItem and @invincible) = @invincible then if (@nextValue and @cow) <> @com then moveItemToNewPositionHandler
         @newItem = @gameBoard(@nextValue)
         if @newItem = @empty then moveItemToNewPositionHandler
 
@@ -277,7 +277,6 @@ moveCowSub:
     
     # add the new cow in the new position from @drawTo to @nextValue
     moveItemToNewPositionHandler:
-        if (@newItem and @cow) = @cow then @gameState = fn @addGameState(@gameStateAlienInvasion)
         @nextKey = 8 : @animationColor = 1
         if (@previousItem and @invincible) = @invincible then @nextKey = 20 : @animationColor = 4
         @clearTo = @drawTo
@@ -291,6 +290,7 @@ moveCowSub:
             @animationX = x : @animationY = y
             gosub updatePositionForSprite
             gosub setSpriteRightPositionSub
+            gosub updateSpritePositionSub
             poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
             @animationColor = -1
             gosub removeGameBoardItem
@@ -302,7 +302,7 @@ moveCowSub:
 
         # animate
         @diffX = (@animateToX - @animationX) / 4 : @diffY = (@animateToY - @animationY) / 4
-        for a = . to 3
+        for c = . to 3
             @animationX = @animationX + @diffX : @animationY = @animationY + @diffY
             x = @animationX : y = @animationY
             gosub updatePositionForSprite
