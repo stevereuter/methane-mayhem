@@ -539,24 +539,8 @@ alienInvasionHandlerSub:
     @previousItem = @gameBoard(@drawTo)
 
     # show UFO
-        @currentSprite = 0
-        gosub boardIndexToCharacterXYSub
-        gosub updatePositionForSprite
-        y = y - 24
-        gosub setSpriteRightPositionSub
-        gosub updateSpritePositionSub
-        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-        for i = . to 300 : next
-    # animate beam
-        @currentSprite = 3
-        gosub boardIndexToCharacterXYSub
-        gosub updatePositionForSprite
-        gosub setSpriteRightPositionSub
-        gosub updateSpritePositionSub
-        poke @spriteReg + @currentSprite, @spriteBeam
-        poke @spriteColor + @currentSprite, 7
-        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-    # show alien cow
+    gosub showUfoHandlerSub
+    # animate bean and show alien cow
         @selectedItemKey = 20
         gosub boardIndexToCharacterXYSub
         for i = . to 20
@@ -566,11 +550,8 @@ alienInvasionHandlerSub:
             for r = . to 50 : next
             showAlienCowLoopEnd:
         next
-    # remove beam
-        poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
-    # remove UFO
-        for i = . to 300 : next
-        poke @spritesEnabled, peek(@spritesEnabled) and 254
+    # remove ufo and beam
+    gosub hideUfoHandlerSub
 
     if (@previousItem and @cow) <> @cow then @gameState = fn @removeGameState(@gameStateAlienInvasion)
     @printText$ = "alien invasion!" : gosub writeLogSub
@@ -580,20 +561,57 @@ return
 
 # UFO abduction
 ufoAbductionHandlerSub:
-    # TODO: animate UFO to cow @ufoTarget
-    # show beam
-    # remove cow
     @drawTo = @ufoTarget
     @animationColor = -1
-    gosub removeGameBoardItem
+    # show UFO
+    gosub showUfoHandlerSub
+    # animate bean and show alien cow
+        @selectedItemKey = 20
+        gosub boardIndexToCharacterXYSub
+        for i = . to 20
+            r = (i / 2 - int(i / 2)) * 2
+            poke @spriteReg + @currentSprite, @spriteBeam + r
+            if i = 15 then gosub removeGameBoardItem : goto hideAlienCowLoopEnd
+            for r = . to 50 : next
+            hideAlienCowLoopEnd:
+        next
+    # remove ufo and beam
+    gosub hideUfoHandlerSub
     @printText$ = "alien abduction!" : gosub writeLogSub
-    # remove beam
-    # animate UFO away
     @ufoTarget = -1
     @gameState = fn @removeGameState(@gameStateUfoAbduction)
     @gameState = fn @addGameState(@gameStateAlienInvasion)
 
     ufoAbductionHandlerEnd:
+return
+
+showUfoHandlerSub:
+    # show UFO sprite
+        @currentSprite = 0
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        y = y - 24
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+        for i = . to 300 : next
+    # show UFO beam sprite
+        @currentSprite = 3
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+        poke @spriteReg + @currentSprite, @spriteBeam
+        poke @spriteColor + @currentSprite, 7
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+return
+
+hideUfoHandlerSub:
+    # remove beam
+        poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+    # remove UFO
+        for i = . to 300 : next
+        poke @spritesEnabled, peek(@spritesEnabled) and 254
 return
 
 # meteor strike
