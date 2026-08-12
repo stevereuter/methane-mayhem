@@ -22,7 +22,11 @@ for sn = 1 to 2
     # y double-height on
     poke @spriteDoubleY, peek(@spriteDoubleY) or (2 ^ sn)
 next
-# set fire sprite to yellow
+# set colors
 poke @spriteColor + 7, 7
 poke @spriteColor + 5, 1
-poke 53276, peek(53276) or (2 ^ 5)
+poke @spriteColor, 2
+# set sprites 0 and 5 to multi-color mode
+poke 53276, 33
+
+poke @spriteReg, @spriteUFO

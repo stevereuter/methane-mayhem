@@ -340,7 +340,7 @@ addFireToBoardSub:
     poke @spritesEnabled, peek(@spritesEnabled) or 128
     poke @spriteReg + @currentSprite, @spriteFire
     @burnAnimation = 1
-    @printText$ = "cows are panicing" : gosub writeLogSub
+    @printText$ = "cows are panicking" : gosub writeLogSub
     @gameState = fn @addGameState(@gameStatePanicing)
 
     addFireToBoardEnd:
@@ -430,7 +430,8 @@ return
 
 randomGameEventsHandlerSub:
     @moved = -1
-    a = 8 : b = 1 : @ufoTarget = -1
+    r = 1 : if fn @checkGameState(@gameStatePanicing) then r = 2
+    a = 8 * r : b = 1 * r : @ufoTarget = -1
     for i = . to 56
         @previousItem = @gameBoard(i)
         # skip past last moved to prevent double move
@@ -463,6 +464,7 @@ growTreeHandlerSub:
     @selectedItemKey = 7
     # sprite 3
     @currentSprite = 3
+    poke @spriteColor + @currentSprite, 5
     gosub setSpritePositionByTileSub
     # set first frame
     poke @spriteReg + @currentSprite, @spriteTreeGrow
@@ -536,13 +538,39 @@ alienInvasionHandlerSub:
     @drawTo = int(rnd(1) * 56)
     @previousItem = @gameBoard(@drawTo)
 
-    # animate UFO to random postions
+    # show UFO
+        @currentSprite = 0
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        y = y - 24
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+        for i = . to 300 : next
     # animate beam
+        @currentSprite = 3
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+        poke @spriteReg + @currentSprite, @spriteBeam
+        poke @spriteColor + @currentSprite, 7
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
     # show alien cow
-    @selectedItemKey = 20
-    gosub writeGameBoardTileSub
+        @selectedItemKey = 20
+        gosub boardIndexToCharacterXYSub
+        for i = . to 20
+            r = (i / 2 - int(i / 2)) * 2
+            poke @spriteReg + @currentSprite, @spriteBeam + r
+            if i = 15 then gosub writeGameBoardTileSub : goto showAlienCowLoopEnd
+            for r = . to 50 : next
+            showAlienCowLoopEnd:
+        next
     # remove beam
-    # animate UFO away
+        poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+    # remove UFO
+        for i = . to 300 : next
+        poke @spritesEnabled, peek(@spritesEnabled) and 254
 
     if (@previousItem and @cow) <> @cow then @gameState = fn @removeGameState(@gameStateAlienInvasion)
     @printText$ = "alien invasion!" : gosub writeLogSub
