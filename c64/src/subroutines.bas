@@ -38,8 +38,8 @@ return
 
 # convert board index to x,y coordinates
 boardIndexToCharacterXYSub:
-    x=8 + (@drawTo - int(@drawTo / 8) * 8) * 3
-    y=2 + int(@drawTo / 8) * 3
+    x = 8 + (@drawTo - int(@drawTo / 8) * 8) * 3
+    y = 2 + int(@drawTo / 8) * 3
 return
 
 # write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
@@ -588,6 +588,7 @@ return
 showUfoHandlerSub:
     # show UFO sprite
         @currentSprite = 0
+        poke @spriteReg, @spriteUFO
         gosub boardIndexToCharacterXYSub
         gosub updatePositionForSprite
         y = y - 24
@@ -616,10 +617,37 @@ return
 
 # meteor strike
 meteorStrikeHandlerSub:
-    c = @currentPlayerPostision
+    @newItem = @currentPlayerPostision
+    # used for explosion
     @currentPlayerPostision = int(rnd(1) * 56)
-    @printText$ = "meteor strike! " + str$(@currentPlayerPostision) : gosub writeLogSub
-    # TODO: animate sprite, position should be set on the random event loop
+    @printText$ = "meteor strike!" + str$(@currentPlayerPostision) : gosub writeLogSub
+
+    # setup meteor sprite
+        @currentSprite = 0
+        poke @spriteReg, @spriteMeteor
+        @drawTo = @currentPlayerPostision
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        # ending position
+        @animateToX = x : @animateToY = y
+        # starting position
+        x = x + 24 : y = y - 24
+        @animationX = x  : @animationY = y
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+
+    # animation
+        @diffX = 4
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+        for c = . to 5
+            poke @spriteReg, @spriteMeteor + (c / 2 - int(c / 2)) * 2
+            @animationX = @animationX - @diffX : @animationY = @animationY + @diffX
+            x = @animationX : y = @animationY
+            gosub setSpriteRightPositionSub
+            gosub updateSpritePositionSub
+        next
+
+
     # preform explotion
     gosub addExplosionToBoardSub
     # add rock
@@ -627,10 +655,11 @@ meteorStrikeHandlerSub:
     @selectedItemKey = 9
     gosub writeGameBoardTileSub
     # remove sprite
-    @currentPlayerPostision = c
+    poke @spritesEnabled, peek(@spritesEnabled) and 254
     @gameState = fn @removeGameState(@gameStateMeteor)
 
     meteorStrikeHandlerEnd:
+    @currentPlayerPostision = @newItem
 return
 
 catastrophicEventHandlerSub:
