@@ -1,10 +1,11 @@
 # into or title screen
 @seed = .
-print "{clr}methane mayhem!"
-print "use AWSD to move your position"
-print "use 1-4 to select items"
-print "press return to place the item"
-print "press l to set the challenge mode seed"
+print "{clr}{blk}methane mayhem!" ; spc(2) ; "by steviesaurus dev" : print
+print "warning! this is an early access version in development. feel free to report    bugs or suggestions in the devlog       comments related to the version you are playing. thank you." : print
+print "use wasd to move in the map" : print
+print "use 1-4 to select pipe/tool" : print
+print "press return to place the pipe/tool" : print
+print "press l to set the challenge mode seed" : print
 print "press return to begin"
 
 @gameState = fn @removeGameState(@gameStateChallengeMode)

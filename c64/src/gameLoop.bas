@@ -1,21 +1,3 @@
-# colors
-# 0	black
-# 11 dark grey
-# 12 grey
-# 15 light grey
-# 1	white
-# 9	brown
-# 8	orange
-# 4	purple
-# 2	red
-# 10 pink
-# 7	yellow
-# 5	green
-# 13 light green
-# 3	cyan
-# 14 light blue
-# 6	blue
-
 # pointer color
 @colorPulsePointer = 0
 # x position

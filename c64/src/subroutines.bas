@@ -158,11 +158,11 @@ placeItemHandlerSub:
     utilityHandler:
         if @previousItem = @empty then placeItemHandlerSkip
         if (@selectedItem and @rotate) = @rotate then rotateItemHandler
-        if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveCowSub : goto removeGameBoardItemDone
+        if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveCowSub : if @moved > -1 then goto removeGameBoardItemDone : if @moved < 0 then placeItemHandlerDone
         # fire and explotions
         if (@previousItem and @cow) = @cow then placeItemHandlerSkip
         if (@selectedItem and @burning) = @burning then if (@previousItem and @tree) = @tree then gosub addFireToBoardSub : goto removeGameBoardItemDone
-        if (@selectedItem and @explosion) = @explosion then gosub addExplosionToBoardSub : goto removeGameBoardItemDone
+        if (@selectedItem and @explosion) = @explosion then if (@previousItem and @rock) = @rock then gosub addExplosionToBoardSub : goto removeGameBoardItemDone
         @animationColor = 1
         # destroy item handler
         if (@selectedItem and @destroy) <> @destroy then placeItemHandlerSkip
@@ -322,7 +322,7 @@ moveCowSub:
         @moved = @nextValue
 
     tryMoveItemHandlerSkip:
-    if @moved = 0 then if a = 9 then @printText$ = "Can't move" : gosub writeLogSub
+    if @moved < 0 then if a = 9 then @printText$ = "Can't move" : gosub writeLogSub
 return
 
 addFireToBoardSub:
@@ -366,6 +366,7 @@ addExplosionToBoardSub:
 
         @drawTo = @explosionPositions(i)
         gosub removeGameBoardItem
+        if @isMeteor then @selectedItemKey = 9 : gosub writeGameBoardTileSub : poke @spritesEnabled, peek(@spritesEnabled) and 254 : @isMeteor = .
 
         addExplosionToBoardLoopEnd:
     next
@@ -440,7 +441,7 @@ randomGameEventsHandlerSub:
         # skip past last moved to prevent double move
         if i <= @moved then randomGameEventsHandlerEnd
         if (@previousItem and @cow) <> @cow then randomGameEventsHandlerEnd
-        r = .7 : if @getGameState(@gameStatePanicking) then r = 0
+        r = .7 : if @checkGameState(@gameStatePanicking) then r = -1
         if rnd(1) > r then randomGameEventsHandlerEnd
         # move cow
         @drawTo = i
@@ -651,6 +652,7 @@ meteorStrikeHandlerSub:
 
 
     # preform explotion
+    @isMeteor = -1
     gosub addExplosionToBoardSub
     # add rock
     @drawTo = @currentPlayerPostision
@@ -667,7 +669,8 @@ return
 catastrophicEventHandlerSub:
     if @level < 7 then catastrophicEventHandlerEnd
     if fn @checkGameState(@gameStateAlienInvasion) then catastrophicEventHandlerEnd
-    if rnd(1) < .9 then catastrophicEventHandlerEnd
+    c = (9 - (@level - 7)) / 10
+    if rnd(1) < c then catastrophicEventHandlerEnd
 
     c = 1 : if @level > 7 then c = c + 1 : if @level > 8 then c = c + 1
     c = int(rnd(1) * c) + 1
@@ -708,7 +711,7 @@ generateLevelSub:
     c = 2
     if @level > 1 then c = c + 1
     if @level > 9 then c = c + 1
-    for i = 0 to @level + 6
+    for i = 0 to @level + 9
         @selectedItemKey = @levelItems(int(rnd(1) * c))
         @drawTo = INT(rnd(1) * 56)
         @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
@@ -805,36 +808,31 @@ generateSeedSub:
 return
 
 drawGameBoardSub:
-    # light green background
-        poke 53281, 13
-    # brown border
-        poke 53280, 9
-
     # draw main game board
-        r1$=" {rvon}     {rvof} {rvon}                          {rvof} {91}{92}{93}{94}{95}"
-        r2$="       {rvon} {rvof}                        {rvon} {rvof}"
-        r3$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
-        r4$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
-        r5$="       {rvon}                          {rvof}"
-        r6$="       {rvon}                          {rvof}"
-        r7$=" {rvon}     {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
+    r1$=" {rvon}     {rvof} {rvon}                          {rvof} {91}{92}{93}{94}{95}"
+    r2$="       {rvon} {rvof}                        {rvon} {rvof}"
+    r3$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
+    r4$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
+    r5$="       {rvon}                          {rvof}"
+    r6$="       {rvon}                          {rvof}"
+    r7$=" {rvon}     {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
 
-        print "{clr}{blk}             methane mayhem"
-        print r1$
+    print "{clr}{blk}             methane mayhem"
+    print r1$
 
-        for i=. to 2
-            print r4$
-        next
-        print r3$
-        for i=. to 11
-            print r4$
-        next
-        print r7$
-        for i=. to 3
-            print r2$
-        next
+    for i=. to 2
+        print r4$
+    next
+    print r3$
+    for i=. to 11
+        print r4$
+    next
+    print r7$
+    for i=. to 3
+        print r2$
+    next
 
-        print r6$;
+    print r6$;
 return
 
 initializeTimerSub:

@@ -2,7 +2,7 @@
 for i = . to 56 : @gameBoard = @empty : next
 for i = . to 3000 : next
 # turn off sprites
-poke 53269, peek(53269) and 252
+poke 53269, peek(53269) and 124
 # show stats and maybe reset game to create a pause before restarting
 x = 10
 y = 5 : @printText$ = "{blk}{20 197}" : gosub writeTextSub
