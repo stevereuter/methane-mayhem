@@ -281,3 +281,18 @@
 | rev chr\$(189)    | 253   | 61  |
 | rev chr\$(190)    | 254   | 62  |
 | rev chr\$(191)    | 255   | 63  |
+
+## Levels
+
+| Level | Obstacles   | Qty | Tools                 | Events     |
+| ----- | ----------- | --- | --------------------- | ---------- |
+| 1     | cows, trees | 7   | rotate, giddy up, axe | baby trees |
+| 2     | rocks       | 8   | pick axe              |            |
+| 3     |             | 9   | matches               |            |
+| 4     |             | 10  | dynamite              |            |
+| 5     |             | 11  | no axe                |            |
+| 6     |             | 12  | no pick aze           |            |
+| 7     |             | 13  |                       | meteor     |
+| 8     |             | 14  |                       | abductions |
+| 9     |             | 15  |                       | invasions  |
+| 10    | alien caws  | 16  |                       |            |

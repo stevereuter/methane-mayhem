@@ -38,7 +38,7 @@ return
 
 # convert board index to x,y coordinates
 boardIndexToCharacterXYSub:
-    x = 8 + (@drawTo - int(@drawTo / 8) * 8) * 3
+    x = 8 + fn @getColumn(@drawTo) * 3
     y = 2 + int(@drawTo / 8) * 3
 return
 
@@ -264,6 +264,9 @@ moveCowSub:
     tryMoveItemHandler:
         if @nextValue < 0 then retryHandler
         if @nextValue >=54 then retryHandler
+        @column = fn @getColumn(@drawTo)
+        if @column = 0 then if fn @getColumn(@nextValue) > 2 then retryHandler
+        if @column = 7 then if fn @getColumn(@nextValue) < 5 then retryHandler
         if (@previousItem and @invincible) = @invincible then if (@nextValue and @cow) <> @com then moveItemToNewPositionHandler
         @newItem = @gameBoard(@nextValue)
         if @newItem = @empty then moveItemToNewPositionHandler
@@ -341,13 +344,13 @@ addFireToBoardSub:
     poke @spriteReg + @currentSprite, @spriteFire
     @burnAnimation = 1
     @printText$ = "cows are panicking" : gosub writeLogSub
-    @gameState = fn @addGameState(@gameStatePanicing)
+    @gameState = fn @addGameState(@gameStatePanicking)
 
     addFireToBoardEnd:
 return
 
 addExplosionToBoardSub:
-    @column = @currentPlayerPostision - int(@currentPlayerPostision / 8) * 8
+    @column = fn @getColumn(@currentPlayerPostision)
     @explosionPositions(0) = @currentPlayerPostision
     @explosionPositions(1) = @currentPlayerPostision - 8
     @explosionPositions(2) = @currentPlayerPostision + 8
@@ -368,7 +371,7 @@ addExplosionToBoardSub:
     next
 
     @printText$ = "cows are panicking" : gosub writeLogSub
-    @gameState = fn @addGameState(@gameStatePanicing)
+    @gameState = fn @addGameState(@gameStatePanicking)
     
 return
 
@@ -415,7 +418,7 @@ checkPipeConnectionHandlerSub:
         validateGameBoardBounds:
             if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
             if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
-            @column = @checkIndex - int(@checkIndex / 8) * 8
+            @column = fn @getColumn(@checkIndex)
             if @column = 0 then if @nextIndex = @checkIndex - 1 then i = 55 : goto endValidateGameBoardBounds
             if @column = 7 then if @nextIndex = @checkIndex + 1 then i = 55 : goto endValidateGameBoardBounds
 
@@ -430,14 +433,14 @@ return
 
 randomGameEventsHandlerSub:
     @moved = -1
-    r = 1 : if fn @checkGameState(@gameStatePanicing) then r = 2
+    r = 1 : if fn @checkGameState(@gameStatePanicking) then r = 2
     a = 8 * r : b = 1 * r : @ufoTarget = -1
     for i = . to 56
         @previousItem = @gameBoard(i)
         # skip past last moved to prevent double move
         if i <= @moved then randomGameEventsHandlerEnd
         if (@previousItem and @cow) <> @cow then randomGameEventsHandlerEnd
-        r = .7 : if @getGameState(@gameStatePanicing) then r = 0
+        r = .7 : if @getGameState(@gameStatePanicking) then r = 0
         if rnd(1) > r then randomGameEventsHandlerEnd
         # move cow
         @drawTo = i
@@ -523,10 +526,10 @@ nextItemHandlerSub:
 return
 
 endPanicHandlerSub:
-    if @getGameState(@gameStatePanicing) = 0 then endPanicHandlerEnd
+    if not fn @checkGameState(@gameStatePanicking) then endPanicHandlerEnd
     if rnd(1) > .5 then endPanicHandlerEnd
 
-    @gameState = fn @removeGameState(@gameStatePanicing)
+    @gameState = fn @removeGameState(@gameStatePanicking)
     @printText$ = "cows have calmed down" : gosub writeLogSub
     
     endPanicHandlerEnd:
@@ -534,7 +537,6 @@ return
 
 # alien invasion handler
 alienInvasionHandlerSub:
-    # TODO: add alien cow based on abduction game state
     @drawTo = int(rnd(1) * 56)
     @previousItem = @gameBoard(@drawTo)
 
@@ -667,8 +669,24 @@ catastrophicEventHandlerSub:
     if fn @checkGameState(@gameStateAlienInvasion) then catastrophicEventHandlerEnd
     if rnd(1) < .9 then catastrophicEventHandlerEnd
 
-    c = @gameStateMeteor : if rnd(1) < .5 then c = @gameStateUfoAbduction
+    c = 1 : if @level > 7 then c = c + 1 : if @level > 8 then c = c + 1
+    c = int(rnd(1) * c) + 1
 
+    on c goto triggerMeteorEvent, triggerUfoAbductionEvent, triggerAlienInvasionEvent
+
+    triggerMeteorEvent:
+    c = @gameStateMeteor
+    goto setEventTriggerState
+
+    triggerUfoAbductionEvent:
+    c = @gameStateUfoAbduction
+    goto setEventTriggerState
+
+    triggerAlienInvasionEvent:
+    c = @gameStateAlienInvasion
+    # pass through
+
+    setEventTriggerState:
     @gameState = fn @addGameState(c)
     @printText$ = "incoming danger!" : gosub writeLogSub
 
@@ -687,9 +705,9 @@ generateLevelSub:
     gosub nextItemHandlerSub
 
     # draw tree, cow, and rock
-    c = 3
-    if @level < 3 then c = @level + 1
-    if @level > 7 then c = 4
+    c = 2
+    if @level > 1 then c = c + 1
+    if @level > 9 then c = c + 1
     for i = 0 to @level + 6
         @selectedItemKey = @levelItems(int(rnd(1) * c))
         @drawTo = INT(rnd(1) * 56)
@@ -715,13 +733,12 @@ return
 
 # replenish tools
 replenishToolsSub:
-    c = @level + 3
-    if @level > 5 then c = 6
-    if @level > 8 then c = 7
+    c = 7
+    if @level < 5 then c = @level + 3
     for @selectedSidebarIndex = 3 to 1 step -1
         @selectedItemKey = @levelTools(int(rnd(1) * c))
-        if @level > 6 then if @selectedItemKey = 12 then @selectedItemKey = 18
-        if @level > 7 then if @selectedItemKey = 11 then @selectedItemKey = 19
+        if @level > 4 then if @selectedItemKey = 12 then @selectedItemKey = 18
+        if @level > 5 then if @selectedItemKey = 11 then @selectedItemKey = 19
         @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
         @printText$ = @itemTiles$(@selectedItemKey)
         gosub writeItemSub

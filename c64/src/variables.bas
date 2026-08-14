@@ -2,6 +2,7 @@
 def fn @checkGameState(@state) = (@gameState and @state) = @state
 def fn @addGameState(@state) = @gameState or @state
 def fn @removeGameState(@state) = @gameState and (not @state)
+def fn @getColumn(@index) = @index - int(@index / 8) * 8
 
 # variables
 # start with the most important ones in the main game loop
@@ -64,7 +65,7 @@ let @startY = 66
 let @level = 1
 let @gameState = .
 let @gameStateLeaking = 1
-let @gameStatePanicing = 2
+let @gameStatePanicking = 2
 let @gameStateMeteor = 4
 let @gameStateUfoAbduction = 8
 let @gameStateAlienInvasion = 16
@@ -129,18 +130,28 @@ dim @itemTiles$(20)
 dim @explosionPositions(5)
 
 dim @levelItems(4)
+# cow
 @levelItems(0) = 8
+# tree
 @levelItems(1) = 7
+# rock
 @levelItems(2) = 9
+# alien cow
 @levelItems(3) = 20
 
 dim @levelTools(7)
+#rotate
 @levelTools(0) = 15
 @levelTools(1) = 16
+# giddy up
 @levelTools(2) = 10
+# axe (level 1, remove on level 5)
 @levelTools(3) = 12
+# pick axe (level 2, remove on level 6)
 @levelTools(4) = 11
+# match (level 3)
 @levelTools(5) = 18
+# dynamite (level 4)
 @levelTools(6) = 19
 
 @colorPulse(0) = 1
