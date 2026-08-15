@@ -1,7 +1,8 @@
 # into or title screen
 @seed = .
 print "{clr}{blk}methane mayhem!" ; spc(2) ; "by steviesaurus dev" : print
-print "warning! this is an early access version in development. feel free to report    bugs or suggestions in the devlog       comments related to the version you are playing. thank you." : print
+print "warning! this game is currently in      development. feel free to report bugs or suggestions in the devlog comments     related to version v{version}. "
+print "thank you." : print
 print "use wasd to move in the map" : print
 print "use 1-4 to select pipe/tool" : print
 print "press return to place the pipe/tool" : print

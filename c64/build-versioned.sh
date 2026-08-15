@@ -43,9 +43,10 @@ fi
 GENERATED_DIR="$SCRIPT_DIR/build/generated"
 GENERATED_MAIN="$GENERATED_DIR/main.generated.bas"
 GENERATED_SPLASH_CANONICAL="$GENERATED_DIR/splash.bas"
+GENERATED_INTRO_CANONICAL="$GENERATED_DIR/intro.bas"
 
 mkdir -p "$GENERATED_DIR"
-rm -f "$GENERATED_DIR"/*.generated.bas "$GENERATED_DIR"/alias-map.json "$GENERATED_DIR"/splash.bas
+rm -f "$GENERATED_DIR"/*.generated.bas "$GENERATED_DIR"/alias-map.json "$GENERATED_DIR"/splash.bas "$GENERATED_DIR"/intro.bas
 
 ESCAPED_VERSION=$(printf '%s' "$VERSION" | sed 's/[&/]/\\&/g')
 
