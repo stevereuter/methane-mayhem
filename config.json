@@ -13,7 +13,7 @@
             "name": "Sprites",
             "path": "assets/c64-sprites_Sprites_sprites.json",
             "type": "sprites",
-            "loadAddress": "00 C8",
+            "loadAddress": "00 E0",
             "discName": "sprites"
         }
     ],
