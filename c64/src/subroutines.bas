@@ -562,6 +562,7 @@ alienInvasionHandlerSub:
 
     if (@previousItem and @cow) <> @cow then @gameState = fn @removeGameState(@gameStateAlienInvasion)
     @printText$ = "alien invasion!" : gosub writeLogSub
+    gosub hideAlertHandlerSub
 
     alienInvasionHandlerEnd:
 return
@@ -588,6 +589,7 @@ ufoAbductionHandlerSub:
     @ufoTarget = -1
     @gameState = fn @removeGameState(@gameStateUfoAbduction)
     @gameState = fn @addGameState(@gameStateAlienInvasion)
+    gosub hideAlertHandlerSub
 
     ufoAbductionHandlerEnd:
 return
@@ -622,12 +624,17 @@ hideUfoHandlerSub:
         poke @spritesEnabled, peek(@spritesEnabled) and 254
 return
 
+hideAlertHandlerSub:
+    @printText$ = "     {down}{5 left}     {down}{5 left}     "
+    x = 34 : y = 20 : gosub writeTextSub
+return
+
 # meteor strike
 meteorStrikeHandlerSub:
     @newItem = @currentPlayerPostision
     # used for explosion
     @currentPlayerPostision = int(rnd(1) * 56)
-    @printText$ = "meteor strike!" + str$(@currentPlayerPostision) : gosub writeLogSub
+    @printText$ = "meteor strike!" : gosub writeLogSub
 
     # setup meteor sprite
         @currentSprite = 0
@@ -666,6 +673,8 @@ meteorStrikeHandlerSub:
     poke @spritesEnabled, peek(@spritesEnabled) and 254
     @gameState = fn @removeGameState(@gameStateMeteor)
 
+    gosub hideAlertHandlerSub
+
     meteorStrikeHandlerEnd:
     @currentPlayerPostision = @newItem
 return
@@ -695,7 +704,17 @@ catastrophicEventHandlerSub:
 
     setEventTriggerState:
     @gameState = fn @addGameState(c)
-    @printText$ = "incoming danger!" : gosub writeLogSub
+    # @printText$ = "incoming danger!" : gosub writeLogSub
+    @printText$ = "{red}{5 184}{down}{5 left}{185}{186}e{188}{189}{down}{5 left}{5 190}"
+    x = 34 : y = 20 : gosub writeTextSub
+    for i = . to 3
+            poke 53280, 7
+            for r = . to 80 : next
+            poke 53280, 8
+            for r = . to 80 : next
+            poke 53280, 2
+    next
+            poke 53280, 9
 
     catastrophicEventHandlerEnd:
 return

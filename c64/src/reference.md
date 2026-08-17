@@ -23,264 +23,264 @@
 
 ## Characters
 
-| character         | index | ASC |
-| ----------------- | ----- | --- |
-| pipe-bottom-left  | 0     | 64  |
-| A                 | 1     | 65  |
-| B                 | 2     | 66  |
-| C                 | 3     | 67  |
-| D                 | 4     | 68  |
-| E                 | 5     | 69  |
-| F                 | 6     | 70  |
-| G                 | 7     | 71  |
-| H                 | 8     | 72  |
-| I                 | 9     | 73  |
-| J                 | 10    | 74  |
-| K                 | 11    | 75  |
-| L                 | 12    | 76  |
-| M                 | 13    | 77  |
-| N                 | 14    | 78  |
-| O                 | 15    | 79  |
-| P                 | 16    | 80  |
-| Q                 | 17    | 81  |
-| R                 | 18    | 82  |
-| S                 | 19    | 83  |
-| T                 | 20    | 84  |
-| U                 | 21    | 85  |
-| V                 | 22    | 86  |
-| W                 | 23    | 87  |
-| X                 | 24    | 88  |
-| Y                 | 25    | 89  |
-| Z                 | 26    | 90  |
-| next 1            | 27    | 91  |
-| next 2            | 28    | 92  |
-| next 3            | 29    | 93  |
-| next 4            | 30    | 94  |
-| next 5            | 31    | 95  |
-| space             | 32    | 32  |
-| !                 | 33    | 33  |
-| "                 | 34    | 34  |
-| pipe-horizontal   | 35    | 35  |
-| pipe-vertical     | 36    | 36  |
-| pipe-top-right    | 37    | 37  |
-| pipe-top-left     | 38    | 38  |
-| pipe-bottom-right | 39    | 39  |
-| (                 | 40    | 40  |
-| )                 | 41    | 41  |
-| down arrow        | 42    | 42  |
-| handle center 1   | 43    | 43  |
-| handle bottom 2   | 44    | 44  |
-| -                 | 45    | 45  |
-| .                 | 46    | 46  |
-| /                 | 47    | 47  |
-| 0                 | 48    | 48  |
-| 1                 | 49    | 49  |
-| 2                 | 50    | 50  |
-| 3                 | 51    | 51  |
-| 4                 | 52    | 52  |
-| 5                 | 53    | 53  |
-| 6                 | 54    | 54  |
-| 7                 | 55    | 55  |
-| 8                 | 56    | 56  |
-| 9                 | 57    | 57  |
-| axe top 2         | 58    | 58  |
-| axe top 3         | 59    | 59  |
-| handle center 2   | 60    | 60  |
-| pick top 1        | 61    | 61  |
-| pick top 2        | 62    | 62  |
-| pick top 3        | 63    | 63  |
-| hline             | 64    | 128 |
-| spade             | 65    | 129 |
-| v block 4/8       | 66    | 130 |
-| h block 4/8       | 67    | 131 |
-| h block 3/8       | 68    | 132 |
-|                   | 69    | 133 |
-| h block 6/8       | 70    | 134 |
-| v block 3/8       | 71    | 135 |
-| v block 6/8       | 72    | 136 |
-| arc dn-left       | 73    | 137 |
-| arc up-right      | 74    | 138 |
-| arc up-left       | 75    | 139 |
-| left+low 1/8      | 76    | 140 |
-| diag ul-lr        | 77    | 141 |
-| diag ur-ll        | 78    | 142 |
-| left+up 1/8       | 79    | 143 |
-| right+up 1/8      | 80    | 144 |
-| solid circle      | 81    | 145 |
-| h block 7/8       | 82    | 146 |
-| heart             | 83    | 147 |
-| v block 2/8       | 84    | 148 |
-| arc dn-right      | 85    | 149 |
-| diagonal x        | 86    | 150 |
-| circle            | 87    | 151 |
-| club              | 88    | 152 |
-| v block 7/8       | 89    | 153 |
-| diamond           | 90    | 154 |
-| box cross         | 91    | 155 |
-| l half shade      | 92    | 156 |
-| vline             | 93    | 157 |
-| pi                | 94    | 158 |
-| tri up-right      | 95    | 159 |
-| chr\$(160)        | 96    | 160 |
-| chr\$(161)        | 97    | 161 |
-| chr\$(162)        | 98    | 162 |
-| chr\$(163)        | 99    | 163 |
-| chr\$(164)        | 100   | 164 |
-| chr\$(165)        | 101   | 165 |
-| chr\$(166)        | 102   | 166 |
-| chr\$(167)        | 103   | 167 |
-| chr\$(168)        | 104   | 168 |
-| chr\$(169)        | 105   | 169 |
-| chr\$(170)        | 106   | 170 |
-| chr\$(171)        | 107   | 171 |
-| chr\$(172)        | 108   | 172 |
-| chr\$(173)        | 109   | 173 |
-| chr\$(174)        | 110   | 174 |
-| chr\$(175)        | 111   | 175 |
-| baby tree         | 112   | 176 |
-| match top 3       | 113   | 177 |
-| dynamite bottom 1 | 114   | 178 |
-| dynamite middle 2 | 115   | 179 |
-| dynamite bottom 2 | 116   | 180 |
-| dynamite middle 1 | 117   | 181 |
-| dynamite top 3    | 118   | 182 |
-| axe center 3      | 119   | 183 |
-| double circle     | 120   | 184 |
-| chr\$(185)        | 121   | 185 |
-| chr\$(186)        | 122   | 186 |
-| chr\$(187)        | 123   | 187 |
-| chr\$(188)        | 124   | 188 |
-| chr\$(189)        | 125   | 189 |
-| chr\$(190)        | 126   | 190 |
-| chr\$(191)        | 127   | 191 |
-| tree-1            | 128   | 192 |
-| tree-2            | 129   | 193 |
-| tree-3            | 130   | 194 |
-| cow-1             | 131   | 195 |
-| cow-2             | 132   | 196 |
-| window border     | 133   | 197 |
-| rock-1            | 134   | 198 |
-| rock-2            | 135   | 199 |
-| rock-3            | 136   | 200 |
-| giddy up top 1    | 137   | 201 |
-| giddy up top 2    | 138   | 202 |
-| giddy up top 3    | 139   | 203 |
-| rotate top 1/3    | 140   | 204 |
-| rotate top 1/3    | 141   | 205 |
-| rotate top 1/3    | 142   | 206 |
-| pick center 3     | 143   | 207 |
-| tree-4            | 144   | 208 |
-| tree-5            | 145   | 209 |
-| tree-6            | 146   | 210 |
-| cow-4             | 147   | 211 |
-| cow-5             | 148   | 212 |
-| cow-6             | 149   | 213 |
-| rock-4            | 150   | 214 |
-| rock-5            | 151   | 215 |
-| rock-6            | 152   | 216 |
-| giddy up center 1 | 153   | 217 |
-| giddy up center 2 | 154   | 218 |
-| giddy up center 3 | 155   | 219 |
-| rotate down       | 156   | 220 |
-| pipe down right   | 157   | 221 |
-| rotate up         | 158   | 222 |
-| pick bottom 3     | 159   | 223 |
-| tree-7            | 160   | 160 |
-| tree-8            | 161   | 161 |
-| tree-9            | 162   | 162 |
-| cow-7             | 163   | 163 |
-| cow-8             | 164   | 164 |
-| cow-9             | 165   | 165 |
-| rock-7            | 166   | 166 |
-| rock-8            | 167   | 167 |
-| rock-9            | 168   | 168 |
-| empty             | 169   | 169 |
-| giddy up bottom 2 | 170   | 170 |
-| giddy up bottom 3 | 171   | 171 |
-| rotate bottom 1/3 | 172   | 172 |
-| rotate bottom 1/3 | 173   | 173 |
-| rotate bottom 1/3 | 174   | 174 |
-| handle bottom 1   | 175   | 175 |
-| rev 0             | 176   | 176 |
-| rev 1             | 177   | 177 |
-| rev 2             | 178   | 178 |
-| rev 3             | 179   | 179 |
-| rev 4             | 180   | 180 |
-| rev 5             | 181   | 181 |
-| rev 6             | 182   | 182 |
-| rev 7             | 183   | 183 |
-| rev 8             | 184   | 184 |
-| rev 9             | 185   | 185 |
-| rev :             | 186   | 186 |
-| rev ;             | 187   | 187 |
-| rev <             | 188   | 188 |
-| rev =             | 189   | 189 |
-| rev >             | 190   | 190 |
-| rev ?             | 191   | 191 |
-| rev hline         | 192   | 0   |
-| rev spade         | 193   | 1   |
-| rev v block 4/8   | 194   | 2   |
-| rev h block 4/8   | 195   | 3   |
-| rev h block 3/8   | 196   | 4   |
-| rev h block 2/8   | 197   | 5   |
-| rev h block 6/8   | 198   | 6   |
-| rev v block 3/8   | 199   | 7   |
-| rev v block 6/8   | 200   | 8   |
-| rev arc dn-left   | 201   | 9   |
-| rev arc up-right  | 202   | 10  |
-| rev arc up-left   | 203   | 11  |
-| rev left+low 1/8  | 204   | 12  |
-| rev diag ul-lr    | 205   | 13  |
-| rev diag ur-ll    | 206   | 14  |
-| rev left+up 1/8   | 207   | 15  |
-| rev right+up 1/8  | 208   | 16  |
-| rev solid circle  | 209   | 17  |
-| rev h block 7/8   | 210   | 18  |
-| rev heart         | 211   | 19  |
-| rev v block 2/8   | 212   | 20  |
-| rev arc dn-right  | 213   | 21  |
-| rev diagonal x    | 214   | 22  |
-| rev circle        | 215   | 23  |
-| rev club          | 216   | 24  |
-| rev v block 7/8   | 217   | 25  |
-| rev diamond       | 218   | 26  |
-| rev box cross     | 219   | 27  |
-| rev l half shade  | 220   | 28  |
-| rev vline         | 221   | 29  |
-| rev pi            | 222   | 30  |
-| rev tri up-right  | 223   | 31  |
-| rev chr\$(160)    | 224   | 32  |
-| rev chr\$(161)    | 225   | 33  |
-| rev chr\$(162)    | 226   | 34  |
-| rev chr\$(163)    | 227   | 35  |
-| rev chr\$(164)    | 228   | 36  |
-| rev chr\$(165)    | 229   | 37  |
-| rev chr\$(166)    | 230   | 38  |
-| rev chr\$(167)    | 231   | 39  |
-| rev chr\$(168)    | 232   | 40  |
-| rev chr\$(169)    | 233   | 41  |
-| rev chr\$(170)    | 234   | 42  |
-| rev chr\$(171)    | 235   | 43  |
-| rev chr\$(172)    | 236   | 44  |
-| rev chr\$(173)    | 237   | 45  |
-| rev chr\$(174)    | 238   | 46  |
-| rev chr\$(175)    | 239   | 47  |
-| rev chr\$(176)    | 240   | 48  |
-| rev chr\$(177)    | 241   | 49  |
-| rev chr\$(178)    | 242   | 50  |
-| rev chr\$(179)    | 243   | 51  |
-| rev chr\$(180)    | 244   | 52  |
-| rev chr\$(181)    | 245   | 53  |
-| rev chr\$(182)    | 246   | 54  |
-| rev chr\$(183)    | 247   | 55  |
-| rev chr\$(184)    | 248   | 56  |
-| rev chr\$(185)    | 249   | 57  |
-| rev chr\$(186)    | 250   | 58  |
-| rev chr\$(187)    | 251   | 59  |
-| rev chr\$(188)    | 252   | 60  |
-| rev chr\$(189)    | 253   | 61  |
-| rev chr\$(190)    | 254   | 62  |
-| rev chr\$(191)    | 255   | 63  |
+| character                             | index | ASC |
+| ------------------------------------- | ----- | --- |
+| pipe-bottom-left                      | 0     | 64  |
+| A                                     | 1     | 65  |
+| B                                     | 2     | 66  |
+| C                                     | 3     | 67  |
+| D                                     | 4     | 68  |
+| E                                     | 5     | 69  |
+| F                                     | 6     | 70  |
+| G                                     | 7     | 71  |
+| H                                     | 8     | 72  |
+| I                                     | 9     | 73  |
+| J                                     | 10    | 74  |
+| K                                     | 11    | 75  |
+| L                                     | 12    | 76  |
+| M                                     | 13    | 77  |
+| N                                     | 14    | 78  |
+| O                                     | 15    | 79  |
+| P                                     | 16    | 80  |
+| Q                                     | 17    | 81  |
+| R                                     | 18    | 82  |
+| S                                     | 19    | 83  |
+| T                                     | 20    | 84  |
+| U                                     | 21    | 85  |
+| V                                     | 22    | 86  |
+| W                                     | 23    | 87  |
+| X                                     | 24    | 88  |
+| Y                                     | 25    | 89  |
+| Z                                     | 26    | 90  |
+| next 1                                | 27    | 91  |
+| next 2                                | 28    | 92  |
+| next 3                                | 29    | 93  |
+| next 4                                | 30    | 94  |
+| next 5                                | 31    | 95  |
+| space                                 | 32    | 32  |
+| !                                     | 33    | 33  |
+| "                                     | 34    | 34  |
+| pipe-horizontal                       | 35    | 35  |
+| pipe-vertical                         | 36    | 36  |
+| pipe-top-right                        | 37    | 37  |
+| pipe-top-left                         | 38    | 38  |
+| pipe-bottom-right                     | 39    | 39  |
+| (                                     | 40    | 40  |
+| )                                     | 41    | 41  |
+| down arrow                            | 42    | 42  |
+| handle center 1                       | 43    | 43  |
+| handle bottom 2                       | 44    | 44  |
+| -                                     | 45    | 45  |
+| .                                     | 46    | 46  |
+| /                                     | 47    | 47  |
+| 0                                     | 48    | 48  |
+| 1                                     | 49    | 49  |
+| 2                                     | 50    | 50  |
+| 3                                     | 51    | 51  |
+| 4                                     | 52    | 52  |
+| 5                                     | 53    | 53  |
+| 6                                     | 54    | 54  |
+| 7                                     | 55    | 55  |
+| 8                                     | 56    | 56  |
+| 9                                     | 57    | 57  |
+| axe top 2                             | 58    | 58  |
+| axe top 3                             | 59    | 59  |
+| handle center 2                       | 60    | 60  |
+| pick top 1                            | 61    | 61  |
+| pick top 2                            | 62    | 62  |
+| pick top 3                            | 63    | 63  |
+| hline                                 | 64    | 128 |
+| spade                                 | 65    | 129 |
+| v block 4/8                           | 66    | 130 |
+| h block 4/8                           | 67    | 131 |
+| h block 3/8                           | 68    | 132 |
+|                                       | 69    | 133 |
+| h block 6/8                           | 70    | 134 |
+| v block 3/8                           | 71    | 135 |
+| v block 6/8                           | 72    | 136 |
+| arc dn-left                           | 73    | 137 |
+| arc up-right                          | 74    | 138 |
+| arc up-left                           | 75    | 139 |
+| left+low 1/8                          | 76    | 140 |
+| diag ul-lr                            | 77    | 141 |
+| diag ur-ll                            | 78    | 142 |
+| left+up 1/8                           | 79    | 143 |
+| right+up 1/8                          | 80    | 144 |
+| solid circle                          | 81    | 145 |
+| h block 7/8                           | 82    | 146 |
+| heart                                 | 83    | 147 |
+| v block 2/8                           | 84    | 148 |
+| arc dn-right                          | 85    | 149 |
+| diagonal x                            | 86    | 150 |
+| circle                                | 87    | 151 |
+| club                                  | 88    | 152 |
+| v block 7/8                           | 89    | 153 |
+| diamond                               | 90    | 154 |
+| box cross                             | 91    | 155 |
+| l half shade                          | 92    | 156 |
+| vline                                 | 93    | 157 |
+| pi                                    | 94    | 158 |
+| tri up-right                          | 95    | 159 |
+| chr\$(160)                            | 96    | 160 |
+| chr\$(161)                            | 97    | 161 |
+| chr\$(162)                            | 98    | 162 |
+| chr\$(163)                            | 99    | 163 |
+| chr\$(164)                            | 100   | 164 |
+| chr\$(165)                            | 101   | 165 |
+| chr\$(166)                            | 102   | 166 |
+| chr\$(167)                            | 103   | 167 |
+| chr\$(168)                            | 104   | 168 |
+| chr\$(169)                            | 105   | 169 |
+| chr\$(170)                            | 106   | 170 |
+| chr\$(171)                            | 107   | 171 |
+| chr\$(172)                            | 108   | 172 |
+| chr\$(173)                            | 109   | 173 |
+| chr\$(174)                            | 110   | 174 |
+| chr\$(175)                            | 111   | 175 |
+| baby tree                             | 112   | 176 |
+| match top 3                           | 113   | 177 |
+| dynamite bottom 1                     | 114   | 178 |
+| dynamite middle 2                     | 115   | 179 |
+| dynamite bottom 2/top left corner     | 116   | 180 |
+| dynamite middle 1/bottom right corner | 117   | 181 |
+| dynamite top 3                        | 118   | 182 |
+| axe center 3                          | 119   | 183 |
+| thick bottom line                     | 120   | 184 |
+| alert 1                               | 121   | 185 |
+| alert 2                               | 122   | 186 |
+| alert 3                               | 123   | 187 |
+| alert 4                               | 124   | 188 |
+| alert 5                               | 125   | 189 |
+| thick top line                        | 126   | 190 |
+| top right corner                      | 127   | 191 |
+|                                       | 128   | 192 |
+| tree-2                                | 129   | 193 |
+| tree-3                                | 130   | 194 |
+| cow-1                                 | 131   | 195 |
+| cow-2                                 | 132   | 196 |
+| window border                         | 133   | 197 |
+| rock-1                                | 134   | 198 |
+| rock-2                                | 135   | 199 |
+| rock-3                                | 136   | 200 |
+| giddy up top 1                        | 137   | 201 |
+| giddy up top 2                        | 138   | 202 |
+| giddy up top 3                        | 139   | 203 |
+| rotate top 1/3                        | 140   | 204 |
+| rotate top 1/3                        | 141   | 205 |
+| rotate top 1/3                        | 142   | 206 |
+| pick center 3                         | 143   | 207 |
+| tree-4                                | 144   | 208 |
+| tree-5                                | 145   | 209 |
+| tree-6                                | 146   | 210 |
+| cow-4                                 | 147   | 211 |
+| cow-5                                 | 148   | 212 |
+| cow-6                                 | 149   | 213 |
+| rock-4                                | 150   | 214 |
+| rock-5                                | 151   | 215 |
+| rock-6                                | 152   | 216 |
+| giddy up center 1                     | 153   | 217 |
+| giddy up center 2                     | 154   | 218 |
+| giddy up center 3                     | 155   | 219 |
+| rotate down                           | 156   | 220 |
+| pipe down right                       | 157   | 221 |
+| rotate up                             | 158   | 222 |
+| pick bottom 3                         | 159   | 223 |
+| tree-7                                | 160   | 160 |
+| tree-8                                | 161   | 161 |
+| tree-9                                | 162   | 162 |
+| cow-7                                 | 163   | 163 |
+| cow-8                                 | 164   | 164 |
+| cow-9                                 | 165   | 165 |
+| rock-7                                | 166   | 166 |
+| rock-8                                | 167   | 167 |
+| rock-9                                | 168   | 168 |
+| empty                                 | 169   | 169 |
+| giddy up bottom 2                     | 170   | 170 |
+| giddy up bottom 3                     | 171   | 171 |
+| rotate bottom 1/3                     | 172   | 172 |
+| rotate bottom 1/3                     | 173   | 173 |
+| rotate bottom 1/3                     | 174   | 174 |
+| handle bottom 1                       | 175   | 175 |
+| rev 0                                 | 176   | 176 |
+| rev 1                                 | 177   | 177 |
+| rev 2                                 | 178   | 178 |
+| rev 3                                 | 179   | 179 |
+| rev 4                                 | 180   | 180 |
+| rev 5                                 | 181   | 181 |
+| rev 6                                 | 182   | 182 |
+| rev 7                                 | 183   | 183 |
+| rev 8                                 | 184   | 184 |
+| rev 9                                 | 185   | 185 |
+| rev :                                 | 186   | 186 |
+| rev ;                                 | 187   | 187 |
+| rev <                                 | 188   | 188 |
+| rev =                                 | 189   | 189 |
+| rev >                                 | 190   | 190 |
+| rev ?                                 | 191   | 191 |
+| rev hline                             | 192   | 0   |
+| rev spade                             | 193   | 1   |
+| rev v block 4/8                       | 194   | 2   |
+| rev h block 4/8                       | 195   | 3   |
+| rev h block 3/8                       | 196   | 4   |
+| rev h block 2/8                       | 197   | 5   |
+| rev h block 6/8                       | 198   | 6   |
+| rev v block 3/8                       | 199   | 7   |
+| rev v block 6/8                       | 200   | 8   |
+| rev arc dn-left                       | 201   | 9   |
+| rev arc up-right                      | 202   | 10  |
+| rev arc up-left                       | 203   | 11  |
+| rev left+low 1/8                      | 204   | 12  |
+| rev diag ul-lr                        | 205   | 13  |
+| rev diag ur-ll                        | 206   | 14  |
+| rev left+up 1/8                       | 207   | 15  |
+| rev right+up 1/8                      | 208   | 16  |
+| rev solid circle                      | 209   | 17  |
+| rev h block 7/8                       | 210   | 18  |
+| rev heart                             | 211   | 19  |
+| rev v block 2/8                       | 212   | 20  |
+| rev arc dn-right                      | 213   | 21  |
+| rev diagonal x                        | 214   | 22  |
+| rev circle                            | 215   | 23  |
+| rev club                              | 216   | 24  |
+| rev v block 7/8                       | 217   | 25  |
+| rev diamond                           | 218   | 26  |
+| rev box cross                         | 219   | 27  |
+| rev l half shade                      | 220   | 28  |
+| rev vline                             | 221   | 29  |
+| rev pi                                | 222   | 30  |
+| rev tri up-right                      | 223   | 31  |
+| rev chr\$(160)                        | 224   | 32  |
+| rev chr\$(161)                        | 225   | 33  |
+| rev chr\$(162)                        | 226   | 34  |
+| rev chr\$(163)                        | 227   | 35  |
+| rev chr\$(164)                        | 228   | 36  |
+| rev chr\$(165)                        | 229   | 37  |
+| rev chr\$(166)                        | 230   | 38  |
+| rev chr\$(167)                        | 231   | 39  |
+| rev chr\$(168)                        | 232   | 40  |
+| rev chr\$(169)                        | 233   | 41  |
+| rev chr\$(170)                        | 234   | 42  |
+| rev chr\$(171)                        | 235   | 43  |
+| rev chr\$(172)                        | 236   | 44  |
+| rev chr\$(173)                        | 237   | 45  |
+| rev chr\$(174)                        | 238   | 46  |
+| rev chr\$(175)                        | 239   | 47  |
+| rev chr\$(176)                        | 240   | 48  |
+| rev chr\$(177)                        | 241   | 49  |
+| rev chr\$(178)                        | 242   | 50  |
+| rev chr\$(179)                        | 243   | 51  |
+| rev chr\$(180)                        | 244   | 52  |
+| rev chr\$(181)                        | 245   | 53  |
+| rev chr\$(182)                        | 246   | 54  |
+| rev chr\$(183)                        | 247   | 55  |
+| rev chr\$(184)                        | 248   | 56  |
+| rev chr\$(185)                        | 249   | 57  |
+| rev chr\$(186)                        | 250   | 58  |
+| rev chr\$(187)                        | 251   | 59  |
+| rev chr\$(188)                        | 252   | 60  |
+| rev chr\$(189)                        | 253   | 61  |
+| rev chr\$(190)                        | 254   | 62  |
+| rev chr\$(191)                        | 255   | 63  |
 
 ## Levels
 
