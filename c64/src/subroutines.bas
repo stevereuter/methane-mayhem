@@ -88,6 +88,9 @@ playerSelectItemHandlerSub:
     if @keyInput$ = "3" then poke @spriteRegY + 4, 146 : @selectedSidebarIndex = 2
     # 52 or 136
     if @keyInput$ = "4" then poke @spriteRegY + 4, 170 : @selectedSidebarIndex = 3
+    # update the play sprite here
+    @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
+    poke @spriteReg + 1, @selectorSpritePointer(@selectedItemKey)
 return
 
 # board selector handler
@@ -152,6 +155,7 @@ placeItemHandlerSub:
         if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         feedNextItemHandler:
         gosub nextItemHandlerSub
+        gosub playerSelectItemHandlerSub
         goto placeItemHandlerDone
 
     # utility handler

@@ -22,6 +22,7 @@ poke @spritesEnabled, peek(@spritesEnabled) or 6
 @timeDifference = TI
 @currentPlayerPostision = 0
 @selectedSidebarIndex = 0
+gosub playerSelectItemHandlerSub
 
 @gameState = @gameState and @gameStateChallengeMode
 # main game loop, use for loop as it's faster than goto

@@ -162,6 +162,22 @@ dim @levelTools(7)
 @colorPulse(4) = 12
 @colorPulse(5) = 15
 
+dim @selectorSpritePointer(19)
+@selectorSpritePointer(1) = @spriteSelector + 16
+@selectorSpritePointer(2) = @spriteSelector + 17
+@selectorSpritePointer(3) = @spriteSelector + 18
+@selectorSpritePointer(4) = @spriteSelector + 19
+@selectorSpritePointer(5) = @spriteSelector + 20
+@selectorSpritePointer(6) = @spriteSelector + 21
+@selectorSpritePointer(10) = @spriteSelector + 22
+@selectorSpritePointer(11) = @spriteSelector + 23
+@selectorSpritePointer(12) = @spriteSelector + 24
+@selectorSpritePointer(15) = @spriteSelector + 25
+@selectorSpritePointer(16) = @spriteSelector + 26
+@selectorSpritePointer(18) = @spriteSelector + 27
+@selectorSpritePointer(19) = @spriteSelector + 28
+
+
 # all item images
 # empty
     @itemTiles$(0) = "   {down}{3 left}   {down}{3 left}   "
