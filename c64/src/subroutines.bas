@@ -290,6 +290,7 @@ moveCowSub:
     # add the new cow in the new position from @drawTo to @nextValue
     moveItemToNewPositionHandler:
         @nextKey = 8 : @animationColor = 1
+        if (@previousItem and @invincible) <> @invincible then @ufoTarget = @nextValue
         if (@previousItem and @invincible) = @invincible then @nextKey = 20 : @animationColor = 4
         @clearTo = @drawTo
         poke @spriteColor + 5, @animationColor
@@ -447,6 +448,7 @@ randomGameEventsHandlerSub:
     a = 8 * r : b = 1 * r : @ufoTarget = -1
     for i = . to 56
         @previousItem = @gameBoard(i)
+        if (@previousItem and @invincible) <> @invincible then if (@previousItem and @cow) = @cow then @ufoTarget = i
         # skip past last moved to prevent double move
         if i <= @moved then randomGameEventsHandlerEnd
         if (@previousItem and @cow) <> @cow then randomGameEventsHandlerEnd
@@ -466,9 +468,8 @@ randomGameEventsHandlerSub:
         if @previousItem = @tree + @destroy then poke @spritesEnabled, peek(@spritesEnabled) and not 128 : gosub removeGameBoardItem
         # update burning trees to be destroyed
         if @previousItem = @tree + @burning then @gameBoard(i) = @tree + @destroy
-        # if cow and is abduction, set UFO target
-        if fn @checkGameState(@gameStateUfoAbduction) then if @previousItem = @cow then @ufoTarget = i
     next
+    # if no cow could be abducted, change to alien invasion
     if fn @checkGameState(@gameStateUfoAbduction) then if @ufoTarget = -1 then @gameState = fn @removeGameState(@gameStateUfoAbduction) : @gameState = fn @addGameState(@gameStateAlienInvasion)
 return
 
