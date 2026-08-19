@@ -134,7 +134,7 @@ placeItemHandlerSub:
     if @keyInputAsc <> 13 then placeItemHandlerSkip
     
     poke 53280, 11
-    poke @spritesEnabled, peek(@spritesEnabled) and not 6
+    poke @spritesEnabled, peek(@spritesEnabled) and 121
 
     @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
     @selectedItem = @itemValues(@selectedItemKey)
@@ -246,6 +246,7 @@ placeItemHandlerSub:
     placeItemHandlerSkip:
     poke 53280, 9
     poke @spritesEnabled, peek(@spritesEnabled) or 6
+    gosub startFireAnimationSub
 return
 
 moveCowSub:
@@ -346,6 +347,17 @@ addFireToBoardSub:
             poke 55296 + b + (a * 40), c
         next
     next
+    @fireIndex = @currentPlayerPostision
+    @printText$ = "cows are panicking" : gosub writeLogSub
+    @gameState = fn @addGameState(@gameStatePanicking)
+
+    addFireToBoardEnd:
+return
+
+startFireAnimationSub:
+    if @fireIndex < 0 then startFireAnimationEnd
+
+    @drawTo = @fireIndex
     # set sprite position
     @currentSprite = 7
     gosub setSpritePositionByTileSub
@@ -353,10 +365,9 @@ addFireToBoardSub:
     poke @spritesEnabled, peek(@spritesEnabled) or 128
     poke @spriteReg + @currentSprite, @spriteFire
     @burnAnimation = 1
-    @printText$ = "cows are panicking" : gosub writeLogSub
-    @gameState = fn @addGameState(@gameStatePanicking)
+    @fireIndex = -1
 
-    addFireToBoardEnd:
+    startFireAnimationEnd:
 return
 
 addExplosionToBoardSub:
@@ -465,7 +476,7 @@ randomGameEventsHandlerSub:
         if @previousItem = @tree + @growing then gosub growTreeHandlerSub
         # remove burning trees
         @animationColor = 0
-        if @previousItem = @tree + @destroy then poke @spritesEnabled, peek(@spritesEnabled) and not 128 : gosub removeGameBoardItem
+        if @previousItem = @tree + @destroy then gosub removeGameBoardItem
         # update burning trees to be destroyed
         if @previousItem = @tree + @burning then @gameBoard(i) = @tree + @destroy
     next
@@ -713,16 +724,18 @@ catastrophicEventHandlerSub:
     @printText$ = "incoming danger!" : gosub writeLogSub
     @printText$ = "{red}{5 184}{down}{5 left}{185}{186}e{188}{189}{down}{5 left}{5 190}"
     x = 34 : y = 20 : gosub writeTextSub
-    for i = . to 3
-            poke 53280, 7
-            for r = . to 80 : next
-            poke 53280, 8
-            for r = . to 80 : next
-            poke 53280, 2
-    next
-            poke 53280, 11
+    gosub showWarningSub
 
     catastrophicEventHandlerEnd:
+return
+
+showWarningSub:
+    for i = . to 1
+        poke 53280, 2
+        for r = . to 200 : next
+        poke 53280, 11
+        for r = . to 200 : next
+    next
 return
 
 generateLevelSub:

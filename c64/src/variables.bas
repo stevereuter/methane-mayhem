@@ -86,6 +86,7 @@ let @animateToY = .
 let @diffX = .
 let @diffY = .
 let @nextKey = .
+let @fireIndex = -1
 # starting registers for sprite 0
 let @spriteReg = 53240
 let @spriteRegX = 53248
