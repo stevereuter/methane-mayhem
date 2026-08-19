@@ -1,6 +1,6 @@
 {
     "name": "Commodore BASIC Template",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "binaries": [
         {
             "name": "Custom Characters",
