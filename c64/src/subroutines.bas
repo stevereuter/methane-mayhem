@@ -1,5 +1,36 @@
 # subroutines.bas
 
+joystickInputHandlerSub:
+    @joystickInput = peek(@port2Register)
+
+    @joystickIdle = (@joystickInput and 31) = 31
+    if @joystickIdle then joystickInputHandlerEnd
+    
+    @fireOn = (@joystickInput and 16) = 0
+
+    @noDirection = (@joystickInput and 15) = 15
+    if @noDirection then joystickInputHandlerEnd
+
+    @directionUp = (@joystickInput and 1) = 0
+    @directionDown = (@joystickInput and 2) = 0
+    @directionLeft = (@joystickInput and 4) = 0
+    @directionRight = (@joystickInput and 8) = 0
+
+    joystickInputHandlerEnd:
+return
+
+keyboardHandlerSub:
+    get @keyInput$
+    if @keyInput$ = "" then keyboardHandlerEnd
+
+    r = val(@keyInput$) - 1
+    if r < 0 then r = 0
+    if r > 3 then r = 3
+    @selectedSidebarIndex = r
+
+    keyboardHandlerEnd:
+return
+
 # write @selectedItemKey to game board convert @drawTo to x,y
 writeGameBoardTileSub:
     gosub boardIndexToCharacterXYSub
@@ -71,57 +102,56 @@ animateSelectorSub:
     @colorPulsePointer = @colorPulsePointer + 1
     @timeDifference = TI
     if @colorPulsePointer > 5 then @colorPulsePointer = 0
-    poke @spriteColor + 1, @colorPulse(@colorPulsePointer)
-    poke @spriteColor + 2, @colorPulse(@colorPulsePointer)
+    poke @selectorSpriteColor, @colorPulse(@colorPulsePointer)
     animateSelectorDone:
 return
 
 # item selector handler
 playerSelectItemHandlerSub:
     # selecting a tool to use
-    # TODO: need to add function keys for selecting the @gameSidebar too
-    # 49 or 133
-    if @keyInput$ = "1" then poke @spriteRegY + 4, 98 : @selectedSidebarIndex = 0
-    # 50 or 134
-    if @keyInput$ = "2" then poke @spriteRegY + 4, 122 : @selectedSidebarIndex = 1
-    # 51 or 135
-    if @keyInput$ = "3" then poke @spriteRegY + 4, 146 : @selectedSidebarIndex = 2
-    # 52 or 136
-    if @keyInput$ = "4" then poke @spriteRegY + 4, 170 : @selectedSidebarIndex = 3
+    if not @joystickIdle then playerSelectItemHandlerEnd
+    c = @selectedSidebarIndex
+    gosub keyboardHandlerSub
+    if @selectedSidebarIndex = c then playerSelectItemHandlerEnd
+
+    gosub setToolSelectorPositionSub
     # update the play sprite here
+    gosub setSelectorFrameSub
+    playerSelectItemHandlerEnd:
+return
+
+setToolSelectorPositionSub:
+    if @selectedSidebarIndex = 0 then poke @spriteRegY + 4, 98
+    if @selectedSidebarIndex = 1 then poke @spriteRegY + 4, 122
+    if @selectedSidebarIndex = 2 then poke @spriteRegY + 4, 146
+    if @selectedSidebarIndex = 3 then poke @spriteRegY + 4, 170
+return
+
+setSelectorFrameSub:
     @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
     poke @spriteReg + 1, @selectorSpritePointer(@selectedItemKey)
 return
 
 # board selector handler
 playerMoveHandlerSub:
+    if @noDirection then boardSelectorHandlerDone
     # play area positioning, 24x24 cells in an 8x7 grid
-    @newPositionX = @positionX
-    @newPositionY = @positionY
-    # TODO: we should try to wire up the joystick to see if it is responsive enough
     # direction
-    @direction = 0
-    if @keyInput$ = "w" then @newPositionY = @newPositionY - 24 : @direction = -8
-    if @keyInput$ = "s" then @newPositionY = @newPositionY + 24 : @direction = 8
-    if @keyInput$ = "a" then @newPositionX = @newPositionX - 24 : @direction = -1
-    if @keyInput$ = "d" then @newPositionX = @newPositionX + 24 : @direction = 1
+    @drawTo = @currentPlayerPostision
+    c = fn @getColumn(@currentPlayerPostision)
+    if @directionUp then @drawTo = @drawTo - 8
+    if @directionDown then @drawTo = @drawTo + 8
+    if c > 0 then if @directionLeft then @drawTo = @drawTo - 1
+    if c < 7 then if @directionRight then @drawTo = @drawTo + 1
 
-    if @newPositionX < 88 then boardSelectorHandlerDone
-    if @newPositionY < 66 then boardSelectorHandlerDone
-    if @newPositionX > 256 then boardSelectorHandlerDone
-    if @newPositionY > 210 then boardSelectorHandlerDone
+    if @drawTo < 0 then boardSelectorHandlerDone
+    if @drawTo > 55 then boardSelectorHandlerDone
 
     # update board index based on direction
-    @currentPlayerPostision = @currentPlayerPostision + @direction
-    @positionX = @newPositionX
-    if @positionX > 255 then @sidebarX = @positionX - 256
-    @positionY = @newPositionY
+    @currentPlayerPostision = @drawTo
+    @currentSprite = 1
+    gosub setSpritePositionByTileSub
 
-    # Set X position
-    if @positionX < 256 then poke @spriteRegX + 2, @positionX : poke @spriteScreenRight, peek(@spriteScreenRight) and 253
-    if @positionX > 255 then poke @spriteRegX + 2, @sidebarX : poke @spriteScreenRight, peek(@spriteScreenRight) or 2
-    # Set Y position
-    poke @spriteRegY + 2, @positionY
     boardSelectorHandlerDone:
 return
 
@@ -131,13 +161,16 @@ placeItemHandlerSub:
     @drawTo = @currentPlayerPostision
     @clearTo = @drawTo
 
-    if @keyInputAsc <> 13 then placeItemHandlerSkip
+    if not @fireOn then placeItemHandlerSkip
     
-    poke 53280, 11
-    poke @spritesEnabled, peek(@spritesEnabled) and 121
-
     @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
     @selectedItem = @itemValues(@selectedItemKey)
+
+    if @selectedItem = @empty then placeItemHandlerSkip
+
+    poke @borderColor, 11
+    poke @spritesEnabled, peek(@spritesEnabled) and 121
+
     @previousItem = @gameBoard(@currentPlayerPostision)
 
     if @selectedSidebarIndex <> . then utilityHandler
@@ -158,7 +191,7 @@ placeItemHandlerSub:
         if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         feedNextItemHandler:
         gosub nextItemHandlerSub
-        gosub playerSelectItemHandlerSub
+        gosub setSelectorFrameSub
         goto placeItemHandlerDone
 
     # utility handler
@@ -216,8 +249,9 @@ placeItemHandlerSub:
         @printText$ = @itemTiles$(@empty)
         gosub writeItemSub
         # reset to first item in sidebar
-        @keyInput$ = "1"
-        gosub playerSelectItemHandlerSub
+        @selectedSidebarIndex = 0
+        gosub setToolSelectorPositionSub
+        gosub setSelectorFrameSub
         @toolCount = @toolCount - 1
         if @toolCount < 1 then gosub replenishToolsSub
     
@@ -244,7 +278,7 @@ placeItemHandlerSub:
     gosub updateTimerHandlerSub
 
     placeItemHandlerSkip:
-    poke 53280, 9
+    poke @borderColor, 9
     poke @spritesEnabled, peek(@spritesEnabled) or 6
     gosub startFireAnimationSub
 return
@@ -463,7 +497,7 @@ randomGameEventsHandlerSub:
         # skip past last moved to prevent double move
         if i <= @moved then randomGameEventsHandlerEnd
         if (@previousItem and @cow) <> @cow then randomGameEventsHandlerEnd
-        r = .7 : if @checkGameState(@gameStatePanicking) then r = -1
+        r = @cowMovePercent : if @checkGameState(@gameStatePanicking) then r = .
         if rnd(1) > r then randomGameEventsHandlerEnd
         # move cow
         @drawTo = i
@@ -509,7 +543,7 @@ growTreeHandlerSub:
 return
 
 treeSpawnHandlerSub:
-    if rnd(1) > .5 then treeSpawnHandlerEnd
+    if rnd(1) > @treeGrowPercent then treeSpawnHandlerEnd
     # spawn a tree in a random position on the game board
     @drawTo = int(rnd(1) * 56)
     if @gameBoard(@drawTo) <> @empty then treeSpawnHandlerEnd
@@ -697,13 +731,13 @@ meteorStrikeHandlerSub:
 return
 
 catastrophicEventHandlerSub:
-    if @level < 7 then catastrophicEventHandlerEnd
+    if @level < 2 then catastrophicEventHandlerEnd
     if fn @checkGameState(@gameStateAlienInvasion) then catastrophicEventHandlerEnd
-    c = (9 - (@level - 7)) / 10
-    if rnd(1) < c then catastrophicEventHandlerEnd
+    if rnd(1) > @catastrophePercent then catastrophicEventHandlerEnd
 
-    c = 1 : if @level > 7 then c = c + 1 : if @level > 8 then c = c + 1
+    c = @level - 1
     c = int(rnd(1) * c) + 1
+    if c > 3 then c = 3
 
     on c goto triggerMeteorEvent, triggerUfoAbductionEvent, triggerAlienInvasionEvent
 
@@ -731,9 +765,9 @@ return
 
 showWarningSub:
     for i = . to 1
-        poke 53280, 2
+        poke @borderColor, 2
         for r = . to 200 : next
-        poke 53280, 11
+        poke @borderColor, 11
         for r = . to 200 : next
     next
 return
@@ -752,7 +786,7 @@ generateLevelSub:
     # draw tree, cow, and rock
     c = 2
     if @level > 1 then c = c + 1
-    if @level > 9 then c = c + 1
+    if @level > 4 then c = c + 1
     for i = 0 to @level + 9
         @selectedItemKey = @levelItems(int(rnd(1) * c))
         @drawTo = INT(rnd(1) * 56)
@@ -779,11 +813,11 @@ return
 # replenish tools
 replenishToolsSub:
     c = 7
-    if @level < 5 then c = @level + 3
+    if @level = 1 then c = 5
     for @selectedSidebarIndex = 3 to 1 step -1
         @selectedItemKey = @levelTools(int(rnd(1) * c))
-        if @level > 4 then if @selectedItemKey = 12 then @selectedItemKey = 18
-        if @level > 5 then if @selectedItemKey = 11 then @selectedItemKey = 19
+        if @level > 2 then if @selectedItemKey = 12 then @selectedItemKey = 18
+        if @level > 3 then if @selectedItemKey = 11 then @selectedItemKey = 19
         @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
         @printText$ = @itemTiles$(@selectedItemKey)
         gosub writeItemSub
@@ -846,7 +880,7 @@ generateSeedSub:
     if @seed = 0 then @seed = int(rnd(.) * -9000)
     if @seed > 0 then @seed = @seed * -1
     @seed = rnd(@seed)
-    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(1) * 10) + 1
+    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(1) * 5) + 1
 return
 
 drawGameBoardSub:

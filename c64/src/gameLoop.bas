@@ -16,13 +16,15 @@ poke @spriteRegY + 2, @positionY
 poke @spriteScreenRight, peek(@spriteScreenRight) or 4
 poke @spriteRegX + 4, 48
 poke @spriteRegY + 4, 98
+poke @selectorSpriteColor, 1
+poke @spriteColor + 2, 1
 # turn on sprites
 poke @spritesEnabled, peek(@spritesEnabled) or 6
 # time difference 0-9, is reset at 10 giffies
 @timeDifference = TI
 @currentPlayerPostision = 0
 @selectedSidebarIndex = 0
-gosub playerSelectItemHandlerSub
+gosub setSelectorFrameSub
 
 @gameState = @gameState and @gameStateChallengeMode
 # main game loop, use for loop as it's faster than goto
@@ -32,12 +34,11 @@ for @gameLoop=. to @loopMax
     @burnAnimation = @burnAnimation + 1
     if @burnAnimation = 2 then @burnAnimation = 0
 
-    # TODO: may have to convert this to ASC as we will need enter and function keys
-    get @keyInput$
-    if @keyInput$ = "" then gameLoopSkip
-    @keyInputAsc = ASC(@keyInput$)
+    gosub joystickInputHandlerSub
     # selecting a tool to use
     gosub playerSelectItemHandlerSub
+
+    if @joystickIdle then gameLoopSkip
     # selecting a cell on the board
     gosub playerMoveHandlerSub
     gosub placeItemHandlerSub
@@ -55,6 +56,7 @@ next
 if fn @checkGameState(@gameStateChallengeMode) then gameStateCompleteCheckEnd
 if not fn @checkGameState(@gameStateComplete) then gameStateCompleteCheckEnd
     @level = @level + 1
+    @catastrophePercent = @level / 10
     for i = . to 3000 : next
     goto gameStart
 gameStateCompleteCheckEnd:

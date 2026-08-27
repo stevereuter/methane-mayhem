@@ -18,3 +18,5 @@ for i = . to 2000
     if i >=2000 then i = .
     introLoopDone:
 next
+
+if not fn @checkGameState(@gameStateChallengeMode) then @level = 1 : @catastrophePercent = @level / 10

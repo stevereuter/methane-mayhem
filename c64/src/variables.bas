@@ -43,6 +43,16 @@ let @selectedItemKey = .
 let @selectedItem = .
 let @previousItem = .
 let @newItem = .
+let @joystickInput = 31
+let @port2Register = 56320
+let @fireOn = .
+let @directionUp = .
+let @directionDown = .
+let @directionLeft = .
+let @directionRight = .
+let @joystickIdle = -1
+let @noDirection = -1
+let @keyInput$ = ""
 
 let @gameLoop = .
 let @currentPlayerPostision = .
@@ -60,6 +70,7 @@ let @ufoTarget = -1
 let @toolCount = .
 let @startX = 88
 let @startY = 66
+let @borderColor = 53280
 
 # game states
 let @level = 1
@@ -87,12 +98,16 @@ let @diffX = .
 let @diffY = .
 let @nextKey = .
 let @fireIndex = -1
+let @cowMovePercent = .7
+let @treeGrowPercent = .5
+let @catastrophePercent = .
 # starting registers for sprite 0
 let @spriteReg = 53240
 let @spriteRegX = 53248
 let @spriteRegY = 53249
 let @spriteColor = 53287
 let @currentSprite = .
+let @selectorSpriteColor = @spriteColor + 1
 let @isMeteor = .
 # sprite flags, bit for each sprite
 let @spritesEnabled = 53269
@@ -147,13 +162,13 @@ dim @levelTools(7)
 @levelTools(1) = 16
 # giddy up
 @levelTools(2) = 10
-# axe (level 1, remove on level 5)
+# axe
 @levelTools(3) = 12
-# pick axe (level 2, remove on level 6)
-@levelTools(4) = 11
-# match (level 3)
-@levelTools(5) = 18
-# dynamite (level 4)
+# match (level 1)
+@levelTools(4) = 18
+# pick axe (level 2)
+@levelTools(5) = 11
+# dynamite 
 @levelTools(6) = 19
 
 @colorPulse(0) = 1
@@ -164,6 +179,7 @@ dim @levelTools(7)
 @colorPulse(5) = 15
 
 dim @selectorSpritePointer(19)
+@selectorSpritePointer(0) = @spriteSelector
 @selectorSpritePointer(1) = @spriteSelector + 16
 @selectorSpritePointer(2) = @spriteSelector + 17
 @selectorSpritePointer(3) = @spriteSelector + 18

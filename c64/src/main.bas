@@ -6,15 +6,13 @@
 # light green background
     poke 53281, 13
 # brown border
-    poke 53280, 9
+    poke @borderColor, 9
 
 goto start
 # putting this up top so that the main loop is closest to the subroutines
 gameOver:
 # game over
 #include "gameOver.bas"
-
-goto start
 
 start:
 #include "intro.bas"
