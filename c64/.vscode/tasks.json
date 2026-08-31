@@ -11,12 +11,12 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "label": "build project (versioned)"
+            "label": "build project"
         },
         {
             "type": "vs64",
             "action": "build",
-            "label": "build project (vs64 raw)"
+            "label": "build project (vs64 default)"
         }
     ]
 }

@@ -6,6 +6,6 @@
     "build": "release",
     "definitions": [],
     "includes": [],
-    "args": [],
+    "args": ["--aliases"],
     "compiler": ""
 }
