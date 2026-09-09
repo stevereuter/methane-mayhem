@@ -51,8 +51,8 @@ let @directionDown = .
 let @directionLeft = .
 let @directionRight = .
 let @joystickIdle = -1
-let @noDirection = -1
 let @keyInput$ = ""
+let @isSidebar = .
 
 let @gameLoop = .
 let @currentPlayerPostision = .

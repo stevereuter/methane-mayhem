@@ -4,31 +4,13 @@ joystickInputHandlerSub:
     @joystickInput = peek(@port2Register)
 
     @joystickIdle = (@joystickInput and 31) = 31
-    if @joystickIdle then joystickInputHandlerEnd
-    
     @fireOn = (@joystickInput and 16) = 0
-
-    @noDirection = (@joystickInput and 15) = 15
-    if @noDirection then joystickInputHandlerEnd
-
     @directionUp = (@joystickInput and 1) = 0
     @directionDown = (@joystickInput and 2) = 0
     @directionLeft = (@joystickInput and 4) = 0
     @directionRight = (@joystickInput and 8) = 0
 
     joystickInputHandlerEnd:
-return
-
-keyboardHandlerSub:
-    get @keyInput$
-    if @keyInput$ = "" then keyboardHandlerEnd
-
-    r = val(@keyInput$) - 1
-    if r < 0 then r = 0
-    if r > 3 then r = 3
-    @selectedSidebarIndex = r
-
-    keyboardHandlerEnd:
 return
 
 # write @selectedItemKey to game board convert @drawTo to x,y
@@ -102,17 +84,24 @@ animateSelectorSub:
     @colorPulsePointer = @colorPulsePointer + 1
     @timeDifference = TI
     if @colorPulsePointer > 5 then @colorPulsePointer = 0
-    poke @selectorSpriteColor, @colorPulse(@colorPulsePointer)
+    poke @spriteColor + 2 + not @isSidebar, @colorPulse(@colorPulsePointer)
     animateSelectorDone:
 return
 
 # item selector handler
 playerSelectItemHandlerSub:
     # selecting a tool to use
-    if not @joystickIdle then playerSelectItemHandlerEnd
+    if @joystickIdle then playerSelectItemHandlerEnd
+    if @directionLeft then @isSidebar = . : goto playerSelectItemHandlerEnd
+
     c = @selectedSidebarIndex
-    gosub keyboardHandlerSub
+    if @directionUp then c = c - 1
+    if @directionDown then c = c + 1
+    if c < 0 then c = 3
+    if c > 3 then c = 0
     if @selectedSidebarIndex = c then playerSelectItemHandlerEnd
+
+    @selectedSidebarIndex = c
 
     gosub setToolSelectorPositionSub
     # update the play sprite here
@@ -134,11 +123,11 @@ return
 
 # board selector handler
 playerMoveHandlerSub:
-    if @noDirection then boardSelectorHandlerDone
     # play area positioning, 24x24 cells in an 8x7 grid
     # direction
     @drawTo = @currentPlayerPostision
     c = fn @getColumn(@currentPlayerPostision)
+    if c = 7 then if @directionRight then @isSidebar = -1 : goto boardSelectorHandlerDone
     if @directionUp then @drawTo = @drawTo - 8
     if @directionDown then @drawTo = @drawTo + 8
     if c > 0 then if @directionLeft then @drawTo = @drawTo - 1
@@ -169,6 +158,7 @@ placeItemHandlerSub:
     if @selectedItem = @empty then placeItemHandlerSkip
 
     poke @borderColor, 11
+    # turn off selectors
     poke @spritesEnabled, peek(@spritesEnabled) and 121
 
     @previousItem = @gameBoard(@currentPlayerPostision)
@@ -279,6 +269,7 @@ placeItemHandlerSub:
 
     placeItemHandlerSkip:
     poke @borderColor, 9
+    # turn on selectors
     poke @spritesEnabled, peek(@spritesEnabled) or 6
     gosub startFireAnimationSub
 return

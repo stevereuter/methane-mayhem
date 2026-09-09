@@ -1,12 +1,13 @@
 # sprite data is loaded into memory from disc
-# 0: meteor/UFO (movement, multi color)
-# 1: tool selector (on board, color cycle)
-# 2: player position (on board, color cycle)
-# 3: UFO beam/tree grow (2 frame)
-# 4: removal poof (2 frame)
-# 5: cow (movement)
-# 6: methane leak (on board, 2 frame)
-# 7: fire (on board, 2 frame)
+# | id | bit | value | description
+# | 0  | 1   | 1   | meteor/UFO (movement, multi color)
+# | 1  | 2   | 2   | tool selector (on board, color cycle)
+# | 2  | 3   | 4   | player position (on board, color cycle)
+# | 3  | 4   | 8   | UFO beam/tree grow (2 frame)
+# | 4  | 5   | 16   | removal poof (2 frame)
+# | 5  | 6   | 32   | cow (movement)
+# | 6  | 7   | 64   | methane leak (on board, 2 frame)
+# | 7  | 8   | 128  | fire (on board, 2 frame)
 # Sprite number from 1 to 7
 for sn = 1 to 2
     # Sprite 0 pointer is at screen_base+1016 (52224+1016=53240).
