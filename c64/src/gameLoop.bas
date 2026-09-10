@@ -38,10 +38,10 @@ for @gameLoop=. to @loopMax
     if @joystickIdle then gameLoopSkip
     # selecting a tool to use
     if @isSidebar then gosub playerSelectItemHandlerSub : goto gameLoopSkip
-
-    # selecting a cell on the board
-    if @fireOn then gosub placeItemHandlerSub : goto gameLoopSkip
-    gosub playerMoveHandlerSub
+    # move the player
+    if not @fireOn then gosub playerMoveHandlerSub : goto gameLoopSkip
+    # player takes an action
+    gosub placeItemHandlerSub
 
     # if game over, set loop to max to end game
     if fn @checkGameState(@gameStateOver) then @gameLoop = @loopMax : goto gameLoopDone
