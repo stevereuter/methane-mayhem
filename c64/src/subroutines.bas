@@ -77,15 +77,10 @@ return
 
 # animate selectors
 animateSelectorSub:
-    # TODO: we may be able to use the game index here if it has no other use
     # pulse color of main sprites
-    @timeDifference= TI - @timeDifference
-    if @timeDifference <= 5 then animateSelectorDone
     @colorPulsePointer = @colorPulsePointer + 1
-    @timeDifference = TI
     if @colorPulsePointer > 5 then @colorPulsePointer = 0
     poke @spriteColor + 2 + not @isSidebar, @colorPulse(@colorPulsePointer)
-    animateSelectorDone:
 return
 
 # item selector handler
@@ -301,9 +296,11 @@ moveCowSub:
         if @nextValue >=54 then retryHandler
         @column = fn @getColumn(@drawTo)
         if @column = 0 then if fn @getColumn(@nextValue) > 2 then retryHandler
+        if fn @checkGameState(@gameStatePanicking) then if @column = 1 then if fn @getColumn(@nextValue) > 3 then retryHandler
         if @column = 7 then if fn @getColumn(@nextValue) < 5 then retryHandler
-        if (@previousItem and @invincible) = @invincible then if (@nextValue and @cow) <> @com then moveItemToNewPositionHandler
+        if fn @checkGameState(@gameStatePanicking) then if @column = 6 then if fn @getColumn(@nextValue) < 4 then retryHandler
         @newItem = @gameBoard(@nextValue)
+        if (@previousItem and @invincible) = @invincible then if (@newItem and @cow) <> @cow then moveItemToNewPositionHandler
         if @newItem = @empty then moveItemToNewPositionHandler
 
     retryHandler:
@@ -353,8 +350,7 @@ moveCowSub:
         gosub writeGameBoardTileSub
         # remove sprite
         poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
-        # moo
-        @printText$ = "Moo!" : gosub writeLogSub
+        # TODO: add moo sound
         @moved = @nextValue
 
     tryMoveItemHandlerSkip:
@@ -447,7 +443,7 @@ checkPipeConnectionHandlerSub:
     # loop from begining to see if we reach the end
     @requiredConnection = @pipeLeft
     @checkIndex = @connectionStartPosition
-    @printText$ = "Checking connections..." : gosub writeLogSub
+    @printText$ = "checking connections..." : gosub writeLogSub
     for i =. to 55
         @checkTile = @gameBoard(@checkIndex)
         
@@ -558,7 +554,7 @@ updateTimerHandlerSub:
     updateTimerLeak:
         y = 18 + @timer
         @printText$ = "{rvon}{grn}   {rvof}"
-        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : @printText$ = "Time is up!" : gosub writeLogSub
+        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : @printText$ = "time is up!" : gosub writeLogSub
 
     updateTimerDraw:
         gosub writeTextSub
@@ -577,7 +573,7 @@ endPanicHandlerSub:
     if rnd(1) > .5 then endPanicHandlerEnd
 
     @gameState = fn @removeGameState(@gameStatePanicking)
-    @printText$ = "cows have calmed down" : gosub writeLogSub
+    @printText$ = "the cows have settled down" : gosub writeLogSub
     
     endPanicHandlerEnd:
 return
@@ -866,9 +862,10 @@ fillFeederSub:
     next
 return
 
+# 6 9 13 level 1, 15 level 2,4 7 10 12 level 3, 11 14 level 4, 2-3 5 8 level 5
 generateSeedSub:
+    @seed = int(rnd(.) * -9000)
     if fn @checkGameState(@gameStateChallengeMode) then input "enter a number for the challenge mode seed"; @seed
-    if @seed = 0 then @seed = int(rnd(.) * -9000)
     if @seed > 0 then @seed = @seed * -1
     @seed = rnd(@seed)
     if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(1) * 5) + 1

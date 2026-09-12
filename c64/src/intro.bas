@@ -14,9 +14,11 @@ print "press fire to begin"
 for i = . to 2000
     gosub joystickInputHandlerSub
     if @fireOn then i = 2000 : goto introLoopDone
-    if @directionRight then @gameState = fn @addGameState(@gameStateChallengeMode) : gosub generateSeedSub : i = 2000 : goto introLoopDone
+    if @directionRight then @gameState = fn @addGameState(@gameStateChallengeMode) : i = 2000 : goto introLoopDone
     if i >=2000 then i = .
     introLoopDone:
 next
 
-if not fn @checkGameState(@gameStateChallengeMode) then @level = 1 : @catastrophePercent = @level / 10
+@level = 1
+gosub generateSeedSub
+@catastrophePercent = @level / 10
