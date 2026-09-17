@@ -32,7 +32,7 @@ let @explosion = @destroy + @large
 
 let i = .
 let r = .
-let @checkIndex = .
+let @pipeExit = .
 let @nextIndex = .
 let @checkTile = .
 let @requiredConnection = .
@@ -55,7 +55,7 @@ let @keyInput$ = ""
 let @isSidebar = .
 
 let @gameLoop = .
-let @currentPlayerPostision = .
+let @currentPlayerPosition = .
 let @selectedSidebarIndex = .
 let @direction = .
 let @nextItemKey = .
@@ -83,6 +83,7 @@ let @gameStateAlienInvasion = 16
 let @gameStateComplete = 32
 let @gameStateOver = 64
 let @gameStateChallengeMode = 128
+let @gameStateLeakExplosion = 256
 
 let @printText$ = ""
 let @loopMax = 100
@@ -132,7 +133,7 @@ let @spriteGas = @spriteSelector + 13
 #let @spriteGas2 = @spriteSelector + 14
 let @spriteCow = @spriteSelector + 15
 # animation variables
-let @burnAnimation = .
+let @twoFrameAnimation = .
 
 # arrays
 dim @colorPulse(6)

@@ -20,19 +20,14 @@ poke @selectorSpriteColor, 1
 poke @spriteColor + 2, 1
 # turn on sprites
 poke @spritesEnabled, peek(@spritesEnabled) or 6
-# time difference 0-9, is reset at 10 giffies
-@timeDifference = TI
-@currentPlayerPostision = 0
+@currentPlayerPosition = 0
 @selectedSidebarIndex = 0
 gosub setSelectorFrameSub
 
 @gameState = @gameState and @gameStateChallengeMode
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
-    gosub animateSelectorSub
-    poke @spriteReg + 7, @spriteFire + @burnAnimation
-    @burnAnimation = @burnAnimation + 1
-    if @burnAnimation = 2 then @burnAnimation = 0
+    gosub mainLoopAnimationSub
 
     gosub joystickInputHandlerSub
     if @joystickIdle then gameLoopSkip
@@ -53,6 +48,8 @@ for @gameLoop=. to @loopMax
     if @gameLoop = 5 then @gameLoop = -1
     gameLoopDone:
 next
+# hide sprites
+poke @spritesEnabled, peek(@spritesEnabled) and not 198
 if fn @checkGameState(@gameStateChallengeMode) then gameStateCompleteCheckEnd
 if not fn @checkGameState(@gameStateComplete) then gameStateCompleteCheckEnd
     @level = @level + 1

@@ -76,11 +76,15 @@ locateCursorSub:
 return
 
 # animate selectors
-animateSelectorSub:
+mainLoopAnimationSub:
     # pulse color of main sprites
     @colorPulsePointer = @colorPulsePointer + 1
     if @colorPulsePointer > 5 then @colorPulsePointer = 0
     poke @spriteColor + 2 + not @isSidebar, @colorPulse(@colorPulsePointer)
+
+    poke @spriteReg + 6, @spriteGas + @twoFrameAnimation
+    poke @spriteReg + 7, @spriteFire + @twoFrameAnimation
+    @twoFrameAnimation = 1 - @twoFrameAnimation
 return
 
 # item selector handler
@@ -120,8 +124,8 @@ return
 playerMoveHandlerSub:
     # play area positioning, 24x24 cells in an 8x7 grid
     # direction
-    @drawTo = @currentPlayerPostision
-    c = fn @getColumn(@currentPlayerPostision)
+    @drawTo = @currentPlayerPosition
+    c = fn @getColumn(@currentPlayerPosition)
     if c = 7 then if @directionRight then @isSidebar = -1 : goto boardSelectorHandlerDone
     if @directionUp then @drawTo = @drawTo - 8
     if @directionDown then @drawTo = @drawTo + 8
@@ -132,7 +136,7 @@ playerMoveHandlerSub:
     if @drawTo > 55 then boardSelectorHandlerDone
 
     # update board index based on direction
-    @currentPlayerPostision = @drawTo
+    @currentPlayerPosition = @drawTo
     @currentSprite = 1
     gosub setSpritePositionByTileSub
 
@@ -142,7 +146,7 @@ return
 # place item handler
 placeItemHandlerSub:
     gosub clearLogSub
-    @drawTo = @currentPlayerPostision
+    @drawTo = @currentPlayerPosition
     @clearTo = @drawTo
 
     if not @fireOn then placeItemHandlerSkip
@@ -156,7 +160,7 @@ placeItemHandlerSub:
     # turn off selectors
     poke @spritesEnabled, peek(@spritesEnabled) and 121
 
-    @previousItem = @gameBoard(@currentPlayerPostision)
+    @previousItem = @gameBoard(@currentPlayerPosition)
 
     if @selectedSidebarIndex <> . then utilityHandler
     if @selectedItem = @previousItem then feedNextItemHandler
@@ -183,7 +187,7 @@ placeItemHandlerSub:
     utilityHandler:
         if @previousItem = @empty then placeItemHandlerSkip
         if (@selectedItem and @rotate) = @rotate then rotateItemHandler
-        if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPostision : gosub moveCowSub : if @moved > -1 then goto removeGameBoardItemDone : if @moved < 0 then placeItemHandlerDone
+        if (@selectedItem and @move) = @move then a = 9 : b = 7 : @drawTo = @currentPlayerPosition : gosub moveCowSub : if @moved > -1 then goto removeGameBoardItemDone : if @moved < 0 then placeItemHandlerDone
         # fire and explotions
         if (@previousItem and @cow) = @cow then placeItemHandlerSkip
         if (@selectedItem and @burning) = @burning then if (@previousItem and @tree) = @tree then gosub addFireToBoardSub : goto removeGameBoardItemDone
@@ -220,7 +224,7 @@ placeItemHandlerSub:
 
         rotateItemDraw:
             @selectedItem = @itemValues(@selectedItemKey)
-            @drawTo = @currentPlayerPostision
+            @drawTo = @currentPlayerPosition
             @gameBoard(@drawTo) = @selectedItem
             gosub writeGameBoardTileSub
             gosub checkPipeConnectionHandlerSub
@@ -257,6 +261,8 @@ placeItemHandlerSub:
     if fn @checkGameState(@gameStateUfoAbduction) then gosub ufoAbductionHandlerSub
     # meteor strike
     if fn @checkGameState(@gameStateMeteor) then gosub meteorStrikeHandlerSub
+    # leak explosion
+    if fn @checkGameState(@gameStateLeakExplosion) then gosub leakExplosionHandlerSub
 
     gosub catastrophicEventHandlerSub
 
@@ -358,18 +364,20 @@ moveCowSub:
 return
 
 addFireToBoardSub:
-    @gameBoard(@currentPlayerPostision) = @previousItem + @burning
+    @gameBoard(@currentPlayerPosition) = @previousItem + @burning
 
     gosub boardIndexToCharacterXYSub
     c = 2
+    # turn tree red
     for a=y to y+2
         if a = y+2 then c = 10
         for b=x to x+2
             poke 55296 + b + (a * 40), c
         next
     next
-    @fireIndex = @currentPlayerPostision
     @printText$ = "cows are panicking" : gosub writeLogSub
+    if fn @checkGameState(@gameStateLeaking) then if @currentPlayerPosition = @pipeExit then @gameState = fn @addGameState(@gameStateLeakExplosion) : goto addFireToBoardEnd
+    @fireIndex = @currentPlayerPosition
     @gameState = fn @addGameState(@gameStatePanicking)
 
     addFireToBoardEnd:
@@ -385,30 +393,32 @@ startFireAnimationSub:
     # enable sprite
     poke @spritesEnabled, peek(@spritesEnabled) or 128
     poke @spriteReg + @currentSprite, @spriteFire
-    @burnAnimation = 1
     @fireIndex = -1
 
     startFireAnimationEnd:
 return
 
 addExplosionToBoardSub:
-    @column = fn @getColumn(@currentPlayerPostision)
-    @explosionPositions(0) = @currentPlayerPostision
-    @explosionPositions(1) = @currentPlayerPostision - 8
-    @explosionPositions(2) = @currentPlayerPostision + 8
+    @column = fn @getColumn(@currentPlayerPosition)
+    @explosionPositions(0) = @currentPlayerPosition
+    @explosionPositions(1) = @currentPlayerPosition - 8
+    @explosionPositions(2) = @currentPlayerPosition + 8
     @explosionPositions(3) = -1
     @explosionPositions(4) = -1
-    if @column > 0 then @explosionPositions(3) = @currentPlayerPostision - 1
-    if @column < 7 then @explosionPositions(4) = @currentPlayerPostision + 1
+    if @column > 0 then @explosionPositions(3) = @currentPlayerPosition - 1
+    if @column < 7 then @explosionPositions(4) = @currentPlayerPosition + 1
     
     @animationColor = 2
     for i=. to 4
-        if @explosionPositions(i) < 0 then addExplosionToBoardLoopEnd
-        if @explosionPositions(i) > 55 then addExplosionToBoardLoopEnd
-
         @drawTo = @explosionPositions(i)
+
+        if @drawTo < 0 then addExplosionToBoardLoopEnd
+        if @drawTo > 55 then addExplosionToBoardLoopEnd
+
         gosub removeGameBoardItem
         if @isMeteor then @selectedItemKey = 9 : gosub writeGameBoardTileSub : poke @spritesEnabled, peek(@spritesEnabled) and 254 : @isMeteor = .
+
+        if fn @checkGameState(@gameStateLeaking) then if @drawTo = @pipeExit then @gameState = fn @addGameState(@gameStateLeakExplosion)
 
         addExplosionToBoardLoopEnd:
     next
@@ -442,36 +452,41 @@ return
 checkPipeConnectionHandlerSub:
     # loop from begining to see if we reach the end
     @requiredConnection = @pipeLeft
-    @checkIndex = @connectionStartPosition
+    @pipeExit = @connectionStartPosition
     @printText$ = "checking connections..." : gosub writeLogSub
     for i =. to 55
-        @checkTile = @gameBoard(@checkIndex)
+        @checkTile = @gameBoard(@pipeExit)
         
         # check if not connect
         if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if @checkIndex = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
+        if @pipeExit = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
 
         # get next required connection
-        if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @checkIndex - 8 : goto validateGameBoardBounds
-        if (@checkTile and @pipeDown) = @pipeDown then if (@requiredConnection and @pipeDown) = . then @requiredConnection = @pipeUp : @nextIndex = @checkIndex + 8 : goto validateGameBoardBounds
-        if (@checkTile and @pipeLeft) = @pipeLeft then if (@requiredConnection and @pipeLeft) = . then @requiredConnection = @pipeRight : @nextIndex = @checkIndex - 1 : goto validateGameBoardBounds
-        if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeLeft : @nextIndex = @checkIndex + 1
+        if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @pipeExit - 8 : goto validateGameBoardBounds
+        if (@checkTile and @pipeDown) = @pipeDown then if (@requiredConnection and @pipeDown) = . then @requiredConnection = @pipeUp : @nextIndex = @pipeExit + 8 : goto validateGameBoardBounds
+        if (@checkTile and @pipeLeft) = @pipeLeft then if (@requiredConnection and @pipeLeft) = . then @requiredConnection = @pipeRight : @nextIndex = @pipeExit - 1 : goto validateGameBoardBounds
+        if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeLeft : @nextIndex = @pipeExit + 1
 
         validateGameBoardBounds:
             if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
             if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
-            @column = fn @getColumn(@checkIndex)
-            if @column = 0 then if @nextIndex = @checkIndex - 1 then i = 55 : goto endValidateGameBoardBounds
-            if @column = 7 then if @nextIndex = @checkIndex + 1 then i = 55 : goto endValidateGameBoardBounds
+            @column = fn @getColumn(@pipeExit)
+            if @column = 0 then if @nextIndex = @pipeExit - 1 then i = 55 : goto endValidateGameBoardBounds
+            if @column = 7 then if @nextIndex = @pipeExit + 1 then i = 55 : goto endValidateGameBoardBounds
 
-        @checkIndex = @nextIndex
+        @pipeExit = @nextIndex
         endValidateGameBoardBounds:
-        # TODO: check if leaking and move animation to @checkIndex
     next
     gosub clearLogSub
 
     if fn @checkGameState(@gameStateComplete) then @printText$ = "connection complete!" : gosub writeLogSub
+
+    # update leaking animation position
+    @currentSprite = 6
+    @drawTo = @pipeExit
+    gosub setSpritePositionByTileSub
+    poke @spriteReg + @currentSprite, @spriteGas
 return
 
 randomGameEventsHandlerSub:
@@ -558,6 +573,20 @@ updateTimerHandlerSub:
 
     updateTimerDraw:
         gosub writeTextSub
+
+    # start leak
+    if @timer = -1 then gosub startLeakSub
+return
+
+startLeakSub:
+    # set game state
+    @gameState = fn @addGameState(@gameStateLeaking)
+    # enable sprite
+    @currentSprite = 6
+    poke @spriteReg + @currentSprite, @spriteGas
+    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+    @printText$ = "methane is leaking!" : gosub writeLogSub
+    gosub showWarningSub
 return
 
 # feed item handler, move item from feeder to sidebar and replace
@@ -669,15 +698,15 @@ return
 
 # meteor strike
 meteorStrikeHandlerSub:
-    @newItem = @currentPlayerPostision
+    @newItem = @currentPlayerPosition
     # used for explosion
-    @currentPlayerPostision = int(rnd(1) * 56)
+    @currentPlayerPosition = int(rnd(1) * 56)
     @printText$ = "meteor strike!" : gosub writeLogSub
 
     # setup meteor sprite
         @currentSprite = 0
         poke @spriteReg, @spriteMeteor
-        @drawTo = @currentPlayerPostision
+        @drawTo = @currentPlayerPosition
         gosub boardIndexToCharacterXYSub
         gosub updatePositionForSprite
         # ending position
@@ -704,7 +733,7 @@ meteorStrikeHandlerSub:
     @isMeteor = -1
     gosub addExplosionToBoardSub
     # add rock
-    @drawTo = @currentPlayerPostision
+    @drawTo = @currentPlayerPosition
     @selectedItemKey = 9
     gosub writeGameBoardTileSub
     # remove sprite
@@ -714,7 +743,7 @@ meteorStrikeHandlerSub:
     gosub hideAlertHandlerSub
 
     meteorStrikeHandlerEnd:
-    @currentPlayerPostision = @newItem
+    @currentPlayerPosition = @newItem
 return
 
 catastrophicEventHandlerSub:
@@ -748,6 +777,21 @@ catastrophicEventHandlerSub:
     gosub showWarningSub
 
     catastrophicEventHandlerEnd:
+return
+
+leakExplosionHandlerSub:
+    @printText$ = "methane explosion!" : gosub writeLogSub
+    gosub showWarningSub
+    # run the remove sub
+    @isMeteor = 0 : @currentPlayerPosition = @pipeExit
+    gosub addExplosionToBoardSub
+    # remove sprite
+    @currentSprite = 6
+    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+    @gameState = fn @removeGameState(@gameStateLeakExplosion)
+    # run the connection check sub
+    gosub checkPipeConnectionHandlerSub
+    poke @spritesEnabled,  peek(@spritesEnabled) or (2 ^ @currentSprite)
 return
 
 showWarningSub:

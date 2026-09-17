@@ -27,6 +27,7 @@ next
 poke @spriteColor + 7, 7
 poke @spriteColor + 5, 1
 poke @spriteColor, 2
+poke @spriteColor + 6, 6
 # set sprites 0 and 5 to multi-color mode
 poke 53276, 33
 
