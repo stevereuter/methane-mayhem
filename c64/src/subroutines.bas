@@ -571,8 +571,8 @@ updateTimerHandlerSub:
 
     updateTimerLeak:
         y = 18 + @timer
-        @printText$ = "{rvon}{grn}   {rvof}"
-        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : @printText$ = "time is up!" : gosub writeLogSub
+        @printText$ = "{rvon}{blue}   {rvof}"
+        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : @printText$ = "time is up!" : gosub writeLogSub : goto updateTimerHandlerEnd
 
     updateTimerDraw:
         gosub writeTextSub
@@ -618,8 +618,12 @@ return
 
 # alien invasion handler
 alienInvasionHandlerSub:
-    @drawTo = int(rnd(1) * 56)
-    @previousItem = @gameBoard(@drawTo)
+    for i = . to 3
+        @drawTo = int(rnd(1) * 56)
+        @previousItem = @gameBoard(@drawTo)
+        a = (@previousItem and @cow) <> @cow
+        if a then i = 3
+    next
 
     # show UFO
     gosub showUfoHandlerSub
@@ -636,7 +640,7 @@ alienInvasionHandlerSub:
     # remove ufo and beam
     gosub hideUfoHandlerSub
 
-    if (@previousItem and @cow) <> @cow then @gameState = fn @removeGameState(@gameStateAlienInvasion)
+    if a then @gameState = fn @removeGameState(@gameStateAlienInvasion)
     @printText$ = "alien invasion!" : gosub writeLogSub
     gosub hideAlertHandlerSub
 
