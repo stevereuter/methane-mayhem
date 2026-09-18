@@ -27,10 +27,8 @@ gosub setSelectorFrameSub
 @gameState = @gameState and @gameStateChallengeMode
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
-    gosub mainLoopAnimationSub
-
     gosub joystickInputHandlerSub
-    if @joystickIdle then gameLoopSkip
+    if @joystickIdle then gosub mainLoopAnimationSub : goto gameLoopSkip
     # selecting a tool to use
     if @isSidebar then gosub playerSelectItemHandlerSub : goto gameLoopSkip
     # move the player

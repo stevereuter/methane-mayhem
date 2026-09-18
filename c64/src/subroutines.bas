@@ -176,6 +176,7 @@ placeItemHandlerSub:
     placePipeHandler:
         gosub writeGameBoardTileSub
         @gameBoard(@drawTo) = @selectedItem
+        @printText$ = "checking connections..." : gosub writeLogSub
         gosub checkPipeConnectionHandlerSub
         if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         feedNextItemHandler:
@@ -227,6 +228,7 @@ placeItemHandlerSub:
             @drawTo = @currentPlayerPosition
             @gameBoard(@drawTo) = @selectedItem
             gosub writeGameBoardTileSub
+            @printText$ = "checking connections..." : gosub writeLogSub
             gosub checkPipeConnectionHandlerSub
             if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         goto removeSideBarItem
@@ -263,6 +265,8 @@ placeItemHandlerSub:
     if fn @checkGameState(@gameStateMeteor) then gosub meteorStrikeHandlerSub
     # leak explosion
     if fn @checkGameState(@gameStateLeakExplosion) then gosub leakExplosionHandlerSub
+    # run the connection check sub
+    gosub checkPipeConnectionHandlerSub
 
     gosub catastrophicEventHandlerSub
 
@@ -453,7 +457,6 @@ checkPipeConnectionHandlerSub:
     # loop from begining to see if we reach the end
     @requiredConnection = @pipeLeft
     @pipeExit = @connectionStartPosition
-    @printText$ = "checking connections..." : gosub writeLogSub
     for i =. to 55
         @checkTile = @gameBoard(@pipeExit)
         
@@ -576,6 +579,12 @@ updateTimerHandlerSub:
 
     # start leak
     if @timer = -1 then gosub startLeakSub
+    if @timer > -14 then updateTimerHandlerEnd
+        @PrintText$ = "warning!" + str$(17 + @timer) + " turns left"
+        if @timer = -16 then @PrintText$ = "warning! last turn"
+        gosub writeLogSub
+        gosub showWarningSub
+    updateTimerHandlerEnd:
 return
 
 startLeakSub:
@@ -783,15 +792,14 @@ leakExplosionHandlerSub:
     @printText$ = "methane explosion!" : gosub writeLogSub
     gosub showWarningSub
     # run the remove sub
-    @isMeteor = 0 : @currentPlayerPosition = @pipeExit
+    @isMeteor = 0 : a = @currentPlayerPosition : @currentPlayerPosition = @pipeExit
     gosub addExplosionToBoardSub
     # remove sprite
     @currentSprite = 6
     poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
     @gameState = fn @removeGameState(@gameStateLeakExplosion)
-    # run the connection check sub
-    gosub checkPipeConnectionHandlerSub
     poke @spritesEnabled,  peek(@spritesEnabled) or (2 ^ @currentSprite)
+    @currentPlayerPosition = a
 return
 
 showWarningSub:
