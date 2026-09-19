@@ -168,16 +168,17 @@ placeItemHandlerSub:
     if @previousItem < @growing then placePipeHandler
     if (@previousItem and @growing) = @growing then placePipeHandler
 
-    @printText$ = "blocked"
-    gosub writeLogSub
+    
+    gosub clearLogSub : print "blocked";
     goto placeItemHandlerSkip
 
     # pipe handler
     placePipeHandler:
         gosub writeGameBoardTileSub
         @gameBoard(@drawTo) = @selectedItem
-        @printText$ = "checking connections..." : gosub writeLogSub
+        gosub clearLogSub : print "checking connections...";
         gosub checkPipeConnectionHandlerSub
+        gosub clearLogSub
         if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         feedNextItemHandler:
         gosub nextItemHandlerSub
@@ -228,8 +229,9 @@ placeItemHandlerSub:
             @drawTo = @currentPlayerPosition
             @gameBoard(@drawTo) = @selectedItem
             gosub writeGameBoardTileSub
-            @printText$ = "checking connections..." : gosub writeLogSub
+            gosub clearLogSub : print "checking connections...";
             gosub checkPipeConnectionHandlerSub
+            gosub clearLogSub
             if fn @checkGameState(@gameStateComplete) then placeItemHandlerSkip
         goto removeSideBarItem
 
@@ -364,7 +366,7 @@ moveCowSub:
         @moved = @nextValue
 
     tryMoveItemHandlerSkip:
-    if @moved < 0 then if a = 9 then @printText$ = "Can't move" : gosub writeLogSub
+    if @moved < 0 then if a = 9 then gosub clearLogSub : print "Can't move";
 return
 
 addFireToBoardSub:
@@ -379,7 +381,7 @@ addFireToBoardSub:
             poke 55296 + b + (a * 40), c
         next
     next
-    @printText$ = "cows are panicking" : gosub writeLogSub
+    gosub clearLogSub : print "cows are panicking";
     if fn @checkGameState(@gameStateLeaking) then if @currentPlayerPosition = @pipeExit then @gameState = fn @addGameState(@gameStateLeakExplosion) : goto addFireToBoardEnd
     @fireIndex = @currentPlayerPosition
     @gameState = fn @addGameState(@gameStatePanicking)
@@ -427,7 +429,7 @@ addExplosionToBoardSub:
         addExplosionToBoardLoopEnd:
     next
 
-    @printText$ = "cows are panicking" : gosub writeLogSub
+    gosub clearLogSub : print "cows are panicking";
     @gameState = fn @addGameState(@gameStatePanicking)
     
 return
@@ -481,9 +483,8 @@ checkPipeConnectionHandlerSub:
         @pipeExit = @nextIndex
         endValidateGameBoardBounds:
     next
-    gosub clearLogSub
 
-    if fn @checkGameState(@gameStateComplete) then @printText$ = "connection complete!" : gosub writeLogSub
+    if fn @checkGameState(@gameStateComplete) then gosub clearLogSub : print "connection complete!";
 
     # update leaking animation position
     @currentSprite = 6
@@ -555,7 +556,6 @@ treeSpawnHandlerSub:
 
     @selectedItemKey = 17
     gosub writeGameBoardTileSub
-    @printText$="a tree is growing!" : gosub writeLogSub
 
     treeSpawnHandlerEnd:
 return
@@ -571,8 +571,8 @@ updateTimerHandlerSub:
 
     updateTimerLeak:
         y = 18 + @timer
-        @printText$ = "{rvon}{blue}   {rvof}"
-        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : @printText$ = "time is up!" : gosub writeLogSub : goto updateTimerHandlerEnd
+        @printText$ = "{rvon}{pink}   {rvof}"
+        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : gosub clearLogSub : print "time is up!"; : goto updateTimerHandlerEnd
 
     updateTimerDraw:
         gosub writeTextSub
@@ -580,9 +580,9 @@ updateTimerHandlerSub:
     # start leak
     if @timer = -1 then gosub startLeakSub
     if @timer > -14 then updateTimerHandlerEnd
-        @PrintText$ = "warning!" + str$(17 + @timer) + " turns left"
-        if @timer = -16 then @PrintText$ = "warning! last turn"
-        gosub writeLogSub
+        if @timer = -16 then gosub clearLogSub : print "warning! last turn"; : goto updateTimerHandlerShowWarning
+        gosub clearLogSub : print "warning!"; 17 + @timer; "turns left";
+        updateTimerHandlerShowWarning:
         gosub showWarningSub
     updateTimerHandlerEnd:
 return
@@ -594,7 +594,7 @@ startLeakSub:
     @currentSprite = 6
     poke @spriteReg + @currentSprite, @spriteGas
     poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-    @printText$ = "methane is leaking!" : gosub writeLogSub
+    gosub clearLogSub : print "methane is leaking!";
     gosub showWarningSub
 return
 
@@ -611,13 +611,14 @@ endPanicHandlerSub:
     if rnd(1) > .5 then endPanicHandlerEnd
 
     @gameState = fn @removeGameState(@gameStatePanicking)
-    @printText$ = "the cows have settled down" : gosub writeLogSub
+    gosub clearLogSub : print "the cows have settled down";
     
     endPanicHandlerEnd:
 return
 
 # alien invasion handler
 alienInvasionHandlerSub:
+    gosub clearLogSub : print "alien invasion!";
     for i = . to 3
         @drawTo = int(rnd(1) * 56)
         @previousItem = @gameBoard(@drawTo)
@@ -641,14 +642,14 @@ alienInvasionHandlerSub:
     gosub hideUfoHandlerSub
 
     if a then @gameState = fn @removeGameState(@gameStateAlienInvasion)
-    @printText$ = "alien invasion!" : gosub writeLogSub
     gosub hideAlertHandlerSub
 
-    alienInvasionHandlerEnd:
+    gosub clearLogSub
 return
 
 # UFO abduction
 ufoAbductionHandlerSub:
+    gosub clearLogSub : print "alien abduction!";
     @drawTo = @ufoTarget
     @animationColor = -1
     # show UFO
@@ -665,13 +666,12 @@ ufoAbductionHandlerSub:
         next
     # remove ufo and beam
     gosub hideUfoHandlerSub
-    @printText$ = "alien abduction!" : gosub writeLogSub
     @ufoTarget = -1
     @gameState = fn @removeGameState(@gameStateUfoAbduction)
     @gameState = fn @addGameState(@gameStateAlienInvasion)
     gosub hideAlertHandlerSub
 
-    ufoAbductionHandlerEnd:
+    gosub clearLogSub
 return
 
 showUfoHandlerSub:
@@ -711,10 +711,10 @@ return
 
 # meteor strike
 meteorStrikeHandlerSub:
+    gosub clearLogSub : print "meteor strike!";
     @newItem = @currentPlayerPosition
     # used for explosion
     @currentPlayerPosition = int(rnd(1) * 56)
-    @printText$ = "meteor strike!" : gosub writeLogSub
 
     # setup meteor sprite
         @currentSprite = 0
@@ -752,11 +752,10 @@ meteorStrikeHandlerSub:
     # remove sprite
     poke @spritesEnabled, peek(@spritesEnabled) and 254
     @gameState = fn @removeGameState(@gameStateMeteor)
-
     gosub hideAlertHandlerSub
 
-    meteorStrikeHandlerEnd:
     @currentPlayerPosition = @newItem
+    gosub clearLogSub
 return
 
 catastrophicEventHandlerSub:
@@ -784,7 +783,7 @@ catastrophicEventHandlerSub:
 
     setEventTriggerState:
     @gameState = fn @addGameState(c)
-    @printText$ = "incoming danger!" : gosub writeLogSub
+    gosub clearLogSub : print "incoming danger!";
     @printText$ = "{red}{5 184}{down}{5 left}{185}{186}e{188}{189}{down}{5 left}{5 190}"
     x = 34 : y = 20 : gosub writeTextSub
     gosub showWarningSub
@@ -793,7 +792,7 @@ catastrophicEventHandlerSub:
 return
 
 leakExplosionHandlerSub:
-    @printText$ = "methane explosion!" : gosub writeLogSub
+    gosub clearLogSub : print "methane explosion!";
     gosub showWarningSub
     # run the remove sub
     @isMeteor = 0 : a = @currentPlayerPosition : @currentPlayerPosition = @pipeExit
@@ -850,7 +849,7 @@ generateLevelSub:
 
     gosub drawBoardItemsSub
 
-    @printText$ = "level " + str$(@level) : gosub writeLogSub
+    gosub clearLogSub : print "level"; @level;
 return
 
 # replenish tools
@@ -866,7 +865,7 @@ replenishToolsSub:
         gosub writeItemSub
     next
     @toolCount = 3
-    @printText$ = "tools replenished" : gosub writeLogSub
+    gosub clearLogSub : print "tools replenished";
 return
 
 # draw board item
@@ -899,15 +898,10 @@ generateNextPipeSub:
     gosub writeTextSub
 return
 
-writeLogSub:
-    gosub clearLogSub
-    gosub locateCursorSub
-    print @printText$;
-return
-
 clearLogSub:
     x=7 : y=24 : gosub locateCursorSub
     print "{black}                          ";
+    gosub locateCursorSub
 return
 
 fillFeederSub:
@@ -958,7 +952,7 @@ return
 initializeTimerSub:
     # fill the timer
     @timer = 0
-    @printText$ = "{rvon}{yellow}   {rvof}"
+    @printText$ = "{rvon}{grn}   {rvof}"
     x = 2
     for y = 17 to 2 step -1
         gosub writeTextSub
