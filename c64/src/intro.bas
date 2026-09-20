@@ -10,7 +10,7 @@ print "press right to use the challenge mode   then enter a seed value" : print
 print "press fire to begin"
 
 @gameState = fn @removeGameState(@gameStateChallengeMode)
-
+gosub joystickResetSub
 for i = . to 2000
     gosub joystickInputHandlerSub
     if @fireOn then i = 2000 : goto introLoopDone

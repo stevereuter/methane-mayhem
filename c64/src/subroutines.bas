@@ -1,9 +1,10 @@
-# subroutines.bas
-
+# ---------------------> main loop subs
+# animate selectors
 joystickInputHandlerSub:
     @joystickInput = peek(@port2Register)
 
     @joystickIdle = (@joystickInput and 31) = 31
+    if @joystickIdle then goto joystickInputHandlerEnd
     @fireOn = (@joystickInput and 16) = 0
     @directionUp = (@joystickInput and 1) = 0
     @directionDown = (@joystickInput and 2) = 0
@@ -13,69 +14,6 @@ joystickInputHandlerSub:
     joystickInputHandlerEnd:
 return
 
-# write @selectedItemKey to game board convert @drawTo to x,y
-writeGameBoardTileSub:
-    gosub boardIndexToCharacterXYSub
-    @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
-    gosub locateCursorSub
-    print @itemTiles$(@selectedItemKey);
-return
-
-# set sprite position for @currentSprite at @drawTo
-setSpritePositionByTileSub:
-    gosub getSpritePositionByTileSub
-    gosub updateSpritePositionSub
-return
-
-getSpritePositionByTileSub:
-    gosub boardIndexToCharacterXYSub
-    gosub updatePositionForSprite
-    gosub setSpriteRightPositionSub
-return
-
-updatePositionForSprite:
-    x = 24 + x * 8
-    y = 50 + y * 8
-return
-
-setSpriteRightPositionSub:
-    r = . : if x > 255 then x = x - 256 : r = -1
-return
-
-updateSpritePositionSub:
-    if not r then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
-    if r then poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
-    poke @spriteRegX + @currentSprite * 2, x
-    poke @spriteRegY + @currentSprite * 2, y
-return
-
-# convert board index to x,y coordinates
-boardIndexToCharacterXYSub:
-    x = 8 + fn @getColumn(@drawTo) * 3
-    y = 2 + int(@drawTo / 8) * 3
-return
-
-# write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
-writeItemSub:
-    x = 35
-    y = 6 + @selectedSidebarIndex * 3
-    gosub writeTextSub
-return
-
-# write @printText$ to x,y
-writeTextSub:
-    gosub locateCursorSub
-    print @printText$;
-return
-
-# set cursor position to x,y
-locateCursorSub:
-    poke 211, x
-    poke 214, y
-    sys 58732
-return
-
-# animate selectors
 mainLoopAnimationSub:
     # pulse color of main sprites
     @colorPulsePointer = @colorPulsePointer + 1
@@ -90,7 +28,6 @@ return
 # item selector handler
 playerSelectItemHandlerSub:
     # selecting a tool to use
-    if @joystickIdle then playerSelectItemHandlerEnd
     if @directionLeft then @isSidebar = . : goto playerSelectItemHandlerEnd
 
     c = @selectedSidebarIndex
@@ -106,18 +43,6 @@ playerSelectItemHandlerSub:
     # update the play sprite here
     gosub setSelectorFrameSub
     playerSelectItemHandlerEnd:
-return
-
-setToolSelectorPositionSub:
-    if @selectedSidebarIndex = 0 then poke @spriteRegY + 4, 98
-    if @selectedSidebarIndex = 1 then poke @spriteRegY + 4, 122
-    if @selectedSidebarIndex = 2 then poke @spriteRegY + 4, 146
-    if @selectedSidebarIndex = 3 then poke @spriteRegY + 4, 170
-return
-
-setSelectorFrameSub:
-    @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
-    poke @spriteReg + 1, @selectorSpritePointer(@selectedItemKey)
 return
 
 # board selector handler
@@ -239,8 +164,7 @@ placeItemHandlerSub:
 
     removeSideBarItem:
         @gameSidebar(@selectedSidebarIndex) = @empty
-        @printText$ = @itemTiles$(@empty)
-        gosub writeItemSub
+        gosub locateItemSub : print @itemTiles$(@empty)
         # reset to first item in sidebar
         @selectedSidebarIndex = 0
         gosub setToolSelectorPositionSub
@@ -281,11 +205,79 @@ placeItemHandlerSub:
     gosub startFireAnimationSub
 return
 
+# --------------------->
+
+# write @selectedItemKey to game board convert @drawTo to x,y
+writeGameBoardTileSub:
+    gosub boardIndexToCharacterXYSub
+    @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
+    gosub locateCursorSub
+    print @itemTiles$(@selectedItemKey);
+return
+
+# set sprite position for @currentSprite at @drawTo
+setSpritePositionByTileSub:
+    gosub getSpritePositionByTileSub
+    gosub updateSpritePositionSub
+return
+
+getSpritePositionByTileSub:
+    gosub boardIndexToCharacterXYSub
+    gosub updatePositionForSprite
+    gosub setSpriteRightPositionSub
+return
+
+updatePositionForSprite:
+    x = 24 + x * 8
+    y = 50 + y * 8
+return
+
+setSpriteRightPositionSub:
+    r = . : if x > 255 then x = x - 256 : r = -1
+return
+
+updateSpritePositionSub:
+    if not r then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
+    if r then poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
+    poke @spriteRegX + @currentSprite * 2, x
+    poke @spriteRegY + @currentSprite * 2, y
+return
+
+# convert board index to x,y coordinates
+boardIndexToCharacterXYSub:
+    x = 8 + fn @getColumn(@drawTo) * 3
+    y = 2 + int(@drawTo / 8) * 3
+return
+
+# write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
+locateItemSub:
+    x = 35
+    y = 6 + @selectedSidebarIndex * 3
+    gosub locateCursorSub
+return
+
+# set cursor position to x,y
+locateCursorSub:
+    poke 211, x
+    poke 214, y
+    sys 58732
+return
+
+setToolSelectorPositionSub:
+    if @selectedSidebarIndex = 0 then poke @spriteRegY + 4, 98
+    if @selectedSidebarIndex = 1 then poke @spriteRegY + 4, 122
+    if @selectedSidebarIndex = 2 then poke @spriteRegY + 4, 146
+    if @selectedSidebarIndex = 3 then poke @spriteRegY + 4, 170
+return
+
+setSelectorFrameSub:
+    @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
+    poke @spriteReg + 1, @selectorSpritePointer(@selectedItemKey)
+return
+
 moveCowSub:
     # move cow
-    @moved = -1
-    c = 0 : @clearTo = @drawTo
-    r = int(rnd(1) * 4) + 1
+    @moved = -1 : c = 0 : @clearTo = @drawTo : r = int(rnd(1) * 4) + 1
     getNewPositionHandler:
         c = c + 1
         on r goto moveUpLeft, moveUpRight, moveDownLeft, moveDownRight
@@ -311,6 +303,7 @@ moveCowSub:
         if fn @checkGameState(@gameStatePanicking) then if @column = 1 then if fn @getColumn(@nextValue) > 3 then retryHandler
         if @column = 7 then if fn @getColumn(@nextValue) < 5 then retryHandler
         if fn @checkGameState(@gameStatePanicking) then if @column = 6 then if fn @getColumn(@nextValue) < 4 then retryHandler
+        
         @newItem = @gameBoard(@nextValue)
         if (@previousItem and @invincible) = @invincible then if (@newItem and @cow) <> @cow then moveItemToNewPositionHandler
         if @newItem = @empty then moveItemToNewPositionHandler
@@ -510,15 +503,16 @@ randomGameEventsHandlerSub:
         gosub moveCowSub
         
         randomGameEventsHandlerEnd:
-
-        @drawTo = i
-        # grow trees
-        if @previousItem = @tree + @growing then gosub growTreeHandlerSub
-        # remove burning trees
-        @animationColor = 0
-        if @previousItem = @tree + @destroy then gosub removeGameBoardItem
-        # update burning trees to be destroyed
-        if @previousItem = @tree + @burning then @gameBoard(i) = @tree + @destroy
+        if (@previousItem and @tree) <> @tree then treeEventHandlerEnd
+            @drawTo = i
+            # grow trees
+            if (@previousItem and @growing) = @growing then gosub growTreeHandlerSub
+            # remove burning trees
+            @animationColor = 0
+            if (@previousItem and @destroy) = @destroy then gosub removeGameBoardItem
+            # update burning trees to be destroyed
+            if (@previousItem and @burning) = @burning then @gameBoard(i) = @tree + @destroy
+        treeEventHandlerEnd:
     next
     # if no cow could be abducted, change to alien invasion
     if fn @checkGameState(@gameStateUfoAbduction) then if @ufoTarget = -1 then @gameState = fn @removeGameState(@gameStateUfoAbduction) : @gameState = fn @addGameState(@gameStateAlienInvasion)
@@ -565,17 +559,15 @@ updateTimerHandlerSub:
     if @timer < 0 then updateTimerLeak
     
     # update time lower
-        @printText$ = "   "
-        y = 17 - @timer
-        goto updateTimerDraw
+        y = 17 - @timer : gosub locateCursorSub : print "   "
+        goto updateTimerDrawDone
 
     updateTimerLeak:
         y = 18 + @timer
-        @printText$ = "{rvon}{pink}   {rvof}"
+        gosub locateCursorSub : print  "{rvon}{pink}   {rvof}"
         if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : gosub clearLogSub : print "time is up!"; : goto updateTimerHandlerEnd
 
-    updateTimerDraw:
-        gosub writeTextSub
+    updateTimerDrawDone:
 
     # start leak
     if @timer = -1 then gosub startLeakSub
@@ -601,8 +593,7 @@ return
 # feed item handler, move item from feeder to sidebar and replace
 nextItemHandlerSub:
     @gameSidebar(0) = @nextItemKey
-    @printText$ = @itemTiles$(@nextItemKey)
-    gosub writeItemSub
+    gosub locateItemSub : print @itemTiles$(@nextItemKey)
     gosub generateNextPipeSub
 return
 
@@ -705,8 +696,7 @@ hideUfoHandlerSub:
 return
 
 hideAlertHandlerSub:
-    @printText$ = "     {down}{5 left}     {down}{5 left}     "
-    x = 34 : y = 20 : gosub writeTextSub
+    x = 34 : y = 20 : gosub locateCursorSub : print "     {down}{5 left}     {down}{5 left}     "
 return
 
 # meteor strike
@@ -784,8 +774,7 @@ catastrophicEventHandlerSub:
     setEventTriggerState:
     @gameState = fn @addGameState(c)
     gosub clearLogSub : print "incoming danger!";
-    @printText$ = "{red}{5 184}{down}{5 left}{185}{186}e{188}{189}{down}{5 left}{5 190}"
-    x = 34 : y = 20 : gosub writeTextSub
+    x = 34 : y = 20 : gosub locateCursorSub : print "{red}{5 184}{down}{5 left}{185}{186}e{188}{189}{down}{5 left}{5 190}"
     gosub showWarningSub
 
     catastrophicEventHandlerEnd:
@@ -811,6 +800,64 @@ showWarningSub:
         for r = . to 200 : next
         poke @borderColor, 11
         for r = . to 200 : next
+    next
+return
+
+# replenish tools
+replenishToolsSub:
+    c = 7
+    if @level = 1 then c = 5
+    for @selectedSidebarIndex = 3 to 1 step -1
+        @selectedItemKey = @levelTools(int(rnd(1) * c))
+        if @level > 2 then if @selectedItemKey = 12 then @selectedItemKey = 18
+        if @level > 3 then if @selectedItemKey = 11 then @selectedItemKey = 19
+        @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
+        gosub locateItemSub : print @itemTiles$(@selectedItemKey)
+    next
+    @toolCount = 3
+    gosub clearLogSub : print "tools replenished";
+return
+
+# draw board item
+drawBoardItemsSub:
+    for @drawTo = 0 to 55
+        c = @gameBoard(@drawTo)
+
+        if c = @empty then drawBoardItemEnd
+        if c = @cow + @invincible then @selectedItemKey = 20 : goto drawBoardItemSkip
+        if c = @cow then @selectedItemKey = 8 : goto drawBoardItemSkip
+        if c = @tree + @growing then @selectedItemKey = 17 : goto drawBoardItemSkip
+        if c = @tree then @selectedItemKey = 7 : goto drawBoardItemSkip
+        if c = @rock then @selectedItemKey = 9 : goto drawBoardItemSkip
+
+        drawBoardItemSkip:
+        gosub writeGameBoardTileSub
+        drawBoardItemEnd:
+    next
+return
+
+# write feeder handler, select random item and write to feeder area
+generateNextPipeSub:
+    i = len(@feeder$)
+    if i < 1 then gosub fillFeederSub : i = len(@feeder$)
+    r = int(rnd(1) * i) + 1
+    @nextItemKey = val(mid$(@feeder$, r , 1))
+    @feeder$ = left$(@feeder$, r - 1) + mid$(@feeder$, r + 1)
+    x = 35 : y = 2
+    gosub locateCursorSub : print @itemTiles$(@nextItemKey)
+return
+
+clearLogSub:
+    x=7 : y=24 : gosub locateCursorSub
+    print "{black}                          ";
+    gosub locateCursorSub
+return
+
+fillFeederSub:
+    for c = 1 to 6
+        for i = . to 1
+            @feeder$ = @feeder$ + right$(str$(c), 1)
+        next
     next
 return
 
@@ -852,73 +899,11 @@ generateLevelSub:
     gosub clearLogSub : print "level"; @level;
 return
 
-# replenish tools
-replenishToolsSub:
-    c = 7
-    if @level = 1 then c = 5
-    for @selectedSidebarIndex = 3 to 1 step -1
-        @selectedItemKey = @levelTools(int(rnd(1) * c))
-        if @level > 2 then if @selectedItemKey = 12 then @selectedItemKey = 18
-        if @level > 3 then if @selectedItemKey = 11 then @selectedItemKey = 19
-        @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
-        @printText$ = @itemTiles$(@selectedItemKey)
-        gosub writeItemSub
-    next
-    @toolCount = 3
-    gosub clearLogSub : print "tools replenished";
-return
-
-# draw board item
-drawBoardItemsSub:
-    for @drawTo = 0 to 55
-        c = @gameBoard(@drawTo)
-
-        if c = @empty then drawBoardItemEnd
-        if c = @cow + @invincible then @selectedItemKey = 20 : goto drawBoardItemSkip
-        if c = @cow then @selectedItemKey = 8 : goto drawBoardItemSkip
-        if c = @tree + @growing then @selectedItemKey = 17 : goto drawBoardItemSkip
-        if c = @tree then @selectedItemKey = 7 : goto drawBoardItemSkip
-        if c = @rock then @selectedItemKey = 9 : goto drawBoardItemSkip
-
-        drawBoardItemSkip:
-        gosub writeGameBoardTileSub
-        drawBoardItemEnd:
-    next
-return
-
-# write feeder handler, select random item and write to feeder area
-generateNextPipeSub:
-    i = len(@feeder$)
-    if i < 1 then gosub fillFeederSub : i = len(@feeder$)
-    r = int(rnd(1) * i) + 1
-    @nextItemKey = val(mid$(@feeder$, r , 1))
-    @feeder$ = left$(@feeder$, r - 1) + mid$(@feeder$, r + 1)
-    x = 35 : y = 2
-    @printText$ = @itemTiles$(@nextItemKey)
-    gosub writeTextSub
-return
-
-clearLogSub:
-    x=7 : y=24 : gosub locateCursorSub
-    print "{black}                          ";
-    gosub locateCursorSub
-return
-
-fillFeederSub:
-    for c = 1 to 6
-        for i = . to 1
-            @feeder$ = @feeder$ + right$(str$(c), 1)
-        next
-    next
-return
-
 # 6 9 13 level 1, 15 level 2,4 7 10 12 level 3, 11 14 level 4, 2-3 5 8 level 5
 generateSeedSub:
-    @seed = int(rnd(.) * -9000)
+    @seed = int(rnd(.) * 9000)
     if fn @checkGameState(@gameStateChallengeMode) then input "enter a number for the challenge mode seed"; @seed
-    if @seed > 0 then @seed = @seed * -1
-    @seed = rnd(@seed)
-    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(1) * 5) + 1
+    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(-@seed) * 5) + 1
 return
 
 drawGameBoardSub:
@@ -952,10 +937,18 @@ return
 initializeTimerSub:
     # fill the timer
     @timer = 0
-    @printText$ = "{rvon}{grn}   {rvof}"
     x = 2
     for y = 17 to 2 step -1
-        gosub writeTextSub
+        gosub locateCursorSub : print "{rvon}{grn}   {rvof}"
         @timer = @timer + 1
     next
+return
+
+joystickResetSub:
+    @joystickIdle = -1
+    @fireOn = 0
+    @directionUp = 0
+    @directionDown = 0
+    @directionLeft = 0
+    @directionRight = 0
 return

@@ -23,7 +23,7 @@ poke @spritesEnabled, peek(@spritesEnabled) or 6
 @currentPlayerPosition = 0
 @selectedSidebarIndex = 0
 gosub setSelectorFrameSub
-
+gosub joystickResetSub
 @gameState = @gameState and @gameStateChallengeMode
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
@@ -43,7 +43,7 @@ for @gameLoop=. to @loopMax
     gameLoopSkip:
     # best to set it back to 0 (use -1 as next will increment) once reached to prevent the game from ending
     # TODO: need to determine if we are going to use the index for anything
-    if @gameLoop = 5 then @gameLoop = -1
+    if @gameLoop = @loopMax then @gameLoop = -1
     gameLoopDone:
 next
 # hide sprites

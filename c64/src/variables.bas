@@ -85,8 +85,7 @@ let @gameStateOver = 64
 let @gameStateChallengeMode = 128
 let @gameStateLeakExplosion = 256
 
-let @printText$ = ""
-let @loopMax = 100
+let @loopMax = 60000
 let @feeder$ = ""
 let @timer = 15
 let @seed = .
