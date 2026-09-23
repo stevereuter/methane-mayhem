@@ -564,8 +564,8 @@ updateTimerHandlerSub:
 
     updateTimerLeak:
         y = 18 + @timer
-        gosub locateCursorSub : print  "{rvon}{pink}   {rvof}"
         if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : gosub clearLogSub : print "time is up!"; : goto updateTimerHandlerEnd
+        gosub locateCursorSub : print  "{rvon}{pink}   {rvof}"
 
     updateTimerDrawDone:
 
@@ -901,9 +901,9 @@ return
 
 # 6 9 13 level 1, 15 level 2,4 7 10 12 level 3, 11 14 level 4, 2-3 5 8 level 5
 generateSeedSub:
-    @seed = int(rnd(.) * 9000)
-    if fn @checkGameState(@gameStateChallengeMode) then input "enter a number for the challenge mode seed"; @seed
-    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(-@seed) * 5) + 1
+    @seed = rnd(.)
+    if fn @checkGameState(@gameStateChallengeMode) then input "enter a number for the challenge mode seed"; @seed : @seed = rnd(-@seed)
+    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(1) * 5) + 1
 return
 
 drawGameBoardSub:
