@@ -505,13 +505,13 @@ randomGameEventsHandlerSub:
         randomGameEventsHandlerEnd:
         if (@previousItem and @tree) <> @tree then treeEventHandlerEnd
             @drawTo = i
-            # grow trees
-            if (@previousItem and @growing) = @growing then gosub growTreeHandlerSub
             # remove burning trees
             @animationColor = 0
-            if (@previousItem and @destroy) = @destroy then gosub removeGameBoardItem
+            if (@previousItem and @destroy) = @destroy then gosub removeGameBoardItem : goto treeEventHandlerEnd
+            # grow trees
+            if (@previousItem and @growing) = @growing then gosub growTreeHandlerSub
             # update burning trees to be destroyed
-            if (@previousItem and @burning) = @burning then @gameBoard(i) = @tree + @destroy
+            if (@previousItem and @burning) = @burning then @gameBoard(i) = ((@previousItem and not @burning) or @destroy)
         treeEventHandlerEnd:
     next
     # if no cow could be abducted, change to alien invasion
@@ -519,16 +519,18 @@ randomGameEventsHandlerSub:
 return
 
 growTreeHandlerSub:
-    @gameBoard(@drawTo) = @tree
-    @selectedItemKey = 7
+    r = (@gameBoard(@drawTo) and @burning)
+    @gameBoard(@drawTo) = @tree or r
     # sprite 3
     @currentSprite = 3
-    poke @spriteColor + @currentSprite, 5
+    c = 5 : b = 7
+    if r then c = 2 : b = 21
+    @selectedItemKey = b
     gosub setSpritePositionByTileSub
     # set first frame
     poke @spriteReg + @currentSprite, @spriteTreeGrow
     # set color
-    poke @spriteColor + @currentSprite, 5
+    poke @spriteColor + @currentSprite, c
     # enable
     poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
     # pause

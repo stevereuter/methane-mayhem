@@ -140,9 +140,9 @@ dim @colorPulse(6)
 dim @gameBoard(56)
 dim @gameSidebar(4)
 # items
-dim @itemValues(20)
+dim @itemValues(21)
 # board tiles
-dim @itemTiles$(20)
+dim @itemTiles$(21)
 # explotion positions
 dim @explosionPositions(5)
 
@@ -259,3 +259,6 @@ dim @selectorSpritePointer(19)
 # alien cow
     @itemTiles$(20) = "{grey}{195}{196}{32}{down}{3 left}{211}{212}{213}{down}{3 left}{blk}{163}{grey}{164}{165}"
     @itemValues(20) = @cow + @invincible
+# burning tree
+    @itemTiles$(21) = "{red}{192}{193}{194}{down}{3 left}{208}{209}{210}{down}{3 left}{pink}{160}{161}{162}"
+    @itemValues(21) = @tree + @burning
