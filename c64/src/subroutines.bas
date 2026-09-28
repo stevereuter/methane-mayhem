@@ -205,63 +205,7 @@ placeItemHandlerSub:
     gosub startFireAnimationSub
 return
 
-# --------------------->
-
-# write @selectedItemKey to game board convert @drawTo to x,y
-writeGameBoardTileSub:
-    gosub boardIndexToCharacterXYSub
-    @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
-    gosub locateCursorSub
-    print @itemTiles$(@selectedItemKey);
-return
-
-# set sprite position for @currentSprite at @drawTo
-setSpritePositionByTileSub:
-    gosub getSpritePositionByTileSub
-    gosub updateSpritePositionSub
-return
-
-getSpritePositionByTileSub:
-    gosub boardIndexToCharacterXYSub
-    gosub updatePositionForSprite
-    gosub setSpriteRightPositionSub
-return
-
-updatePositionForSprite:
-    x = 24 + x * 8
-    y = 50 + y * 8
-return
-
-setSpriteRightPositionSub:
-    r = . : if x > 255 then x = x - 256 : r = -1
-return
-
-updateSpritePositionSub:
-    if not r then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
-    if r then poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
-    poke @spriteRegX + @currentSprite * 2, x
-    poke @spriteRegY + @currentSprite * 2, y
-return
-
-# convert board index to x,y coordinates
-boardIndexToCharacterXYSub:
-    x = 8 + fn @getColumn(@drawTo) * 3
-    y = 2 + int(@drawTo / 8) * 3
-return
-
-# write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
-locateItemSub:
-    x = 35
-    y = 6 + @selectedSidebarIndex * 3
-    gosub locateCursorSub
-return
-
-# set cursor position to x,y
-locateCursorSub:
-    poke 211, x
-    poke 214, y
-    sys 58732
-return
+# ---------------------> level 2 loop subs
 
 setToolSelectorPositionSub:
     if @selectedSidebarIndex = 0 then poke @spriteRegY + 4, 98
@@ -274,6 +218,325 @@ setSelectorFrameSub:
     @selectedItemKey = @gameSidebar(@selectedSidebarIndex)
     poke @spriteReg + 1, @selectorSpritePointer(@selectedItemKey)
 return
+
+# pipe connection handler
+checkPipeConnectionHandlerSub:
+    # loop from begining to see if we reach the end
+    @requiredConnection = @pipeLeft
+    @pipeExit = @connectionStartPosition
+    for i =. to 55
+        @checkTile = @gameBoard(@pipeExit)
+        
+        # check if not connect
+        if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
+        # check if complete
+        if @pipeExit = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
+
+        # get next required connection
+        if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @pipeExit - 8 : goto validateGameBoardBounds
+        if (@checkTile and @pipeDown) = @pipeDown then if (@requiredConnection and @pipeDown) = . then @requiredConnection = @pipeUp : @nextIndex = @pipeExit + 8 : goto validateGameBoardBounds
+        if (@checkTile and @pipeLeft) = @pipeLeft then if (@requiredConnection and @pipeLeft) = . then @requiredConnection = @pipeRight : @nextIndex = @pipeExit - 1 : goto validateGameBoardBounds
+        if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeLeft : @nextIndex = @pipeExit + 1
+
+        validateGameBoardBounds:
+            if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
+            if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
+            @column = fn @getColumn(@pipeExit)
+            if @column = 0 then if @nextIndex = @pipeExit - 1 then i = 55 : goto endValidateGameBoardBounds
+            if @column = 7 then if @nextIndex = @pipeExit + 1 then i = 55 : goto endValidateGameBoardBounds
+
+        @pipeExit = @nextIndex
+        endValidateGameBoardBounds:
+    next
+
+    if fn @checkGameState(@gameStateComplete) then gosub clearLogSub : print "connection complete!";
+
+    # update leaking animation position
+    @currentSprite = 6
+    @drawTo = @pipeExit
+    gosub setSpritePositionByTileSub
+    poke @spriteReg + @currentSprite, @spriteGas
+return
+
+addFireToBoardSub:
+    @gameBoard(@currentPlayerPosition) = @previousItem + @burning
+
+    gosub boardIndexToCharacterXYSub
+    c = 2
+    # turn tree red
+    for a=y to y+2
+        if a = y+2 then c = 10
+        for b=x to x+2
+            poke 55296 + b + (a * 40), c
+        next
+    next
+    gosub clearLogSub : print "cows are panicking";
+    if fn @checkGameState(@gameStateLeaking) then if @currentPlayerPosition = @pipeExit then @gameState = fn @addGameState(@gameStateLeakExplosion) : goto addFireToBoardEnd
+    @fireIndex = @currentPlayerPosition
+    @gameState = fn @addGameState(@gameStatePanicking)
+
+    addFireToBoardEnd:
+return
+
+randomGameEventsHandlerSub:
+    @moved = -1
+    r = 1 : if fn @checkGameState(@gameStatePanicking) then r = 2
+    a = 8 * r : b = 1 * r : @ufoTarget = -1
+    for i = . to 56
+        @previousItem = @gameBoard(i)
+        if (@previousItem and @invincible) <> @invincible then if (@previousItem and @cow) = @cow then @ufoTarget = i
+        # skip past last moved to prevent double move
+        if i <= @moved then randomGameEventsHandlerEnd
+        if (@previousItem and @cow) <> @cow then randomGameEventsHandlerEnd
+        r = @cowMovePercent : if @checkGameState(@gameStatePanicking) then r = .
+        if rnd(1) > r then randomGameEventsHandlerEnd
+        # move cow
+        @drawTo = i
+        gosub moveCowSub
+        
+        randomGameEventsHandlerEnd:
+        if (@previousItem and @tree) <> @tree then treeEventHandlerEnd
+            @drawTo = i
+            # remove burning trees
+            @animationColor = 0
+            if (@previousItem and @destroy) = @destroy then gosub removeGameBoardItem : goto treeEventHandlerEnd
+            # grow trees
+            if (@previousItem and @growing) = @growing then gosub growTreeHandlerSub
+            # update burning trees to be destroyed
+            if (@previousItem and @burning) = @burning then @gameBoard(i) = ((@previousItem and not @burning) or @destroy)
+        treeEventHandlerEnd:
+    next
+    # if no cow could be abducted, change to alien invasion
+    if fn @checkGameState(@gameStateUfoAbduction) then if @ufoTarget = -1 then @gameState = fn @removeGameState(@gameStateUfoAbduction) : @gameState = fn @addGameState(@gameStateAlienInvasion)
+return
+
+endPanicHandlerSub:
+    if not fn @checkGameState(@gameStatePanicking) then endPanicHandlerEnd
+    if rnd(1) > .5 then endPanicHandlerEnd
+
+    @gameState = fn @removeGameState(@gameStatePanicking)
+    gosub clearLogSub : print "the cows have settled down";
+    
+    endPanicHandlerEnd:
+return
+
+treeSpawnHandlerSub:
+    if rnd(1) > @treeGrowPercent then treeSpawnHandlerEnd
+    # spawn a tree in a random position on the game board
+    @drawTo = int(rnd(1) * 56)
+    if @gameBoard(@drawTo) <> @empty then treeSpawnHandlerEnd
+
+    @selectedItemKey = 17
+    gosub writeGameBoardTileSub
+
+    treeSpawnHandlerEnd:
+return
+
+# alien invasion handler
+alienInvasionHandlerSub:
+    gosub clearLogSub : print "alien invasion!";
+    for i = . to 3
+        @drawTo = int(rnd(1) * 56)
+        @previousItem = @gameBoard(@drawTo)
+        a = (@previousItem and @cow) <> @cow
+        if a then i = 3
+    next
+
+    # show UFO
+    gosub showUfoHandlerSub
+    # animate bean and show alien cow
+        @selectedItemKey = 20
+        gosub boardIndexToCharacterXYSub
+        for i = . to 20
+            r = (i / 2 - int(i / 2)) * 2
+            poke @spriteReg + @currentSprite, @spriteBeam + r
+            if i = 15 then gosub writeGameBoardTileSub : goto showAlienCowLoopEnd
+            for r = . to 50 : next
+            showAlienCowLoopEnd:
+        next
+    # remove ufo and beam
+    gosub hideUfoHandlerSub
+
+    if a then @gameState = fn @removeGameState(@gameStateAlienInvasion)
+    gosub hideAlertHandlerSub
+
+    gosub clearLogSub
+return
+
+# UFO abduction
+ufoAbductionHandlerSub:
+    gosub clearLogSub : print "alien abduction!";
+    @drawTo = @ufoTarget
+    @animationColor = -1
+    # show UFO
+    gosub showUfoHandlerSub
+    # animate bean and show alien cow
+        @selectedItemKey = 20
+        gosub boardIndexToCharacterXYSub
+        for i = . to 20
+            r = (i / 2 - int(i / 2)) * 2
+            poke @spriteReg + @currentSprite, @spriteBeam + r
+            if i = 15 then gosub removeGameBoardItem : goto hideAlienCowLoopEnd
+            for r = . to 50 : next
+            hideAlienCowLoopEnd:
+        next
+    # remove ufo and beam
+    gosub hideUfoHandlerSub
+    @ufoTarget = -1
+    @gameState = fn @removeGameState(@gameStateUfoAbduction)
+    @gameState = fn @addGameState(@gameStateAlienInvasion)
+    gosub hideAlertHandlerSub
+
+    gosub clearLogSub
+return
+
+# meteor strike
+meteorStrikeHandlerSub:
+    gosub clearLogSub : print "meteor strike!";
+    @newItem = @currentPlayerPosition
+    # used for explosion
+    @currentPlayerPosition = int(rnd(1) * 56)
+
+    # setup meteor sprite
+        @currentSprite = 0
+        poke @spriteReg, @spriteMeteor
+        @drawTo = @currentPlayerPosition
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        # ending position
+        @animateToX = x : @animateToY = y
+        # starting position
+        x = x + 24 : y = y - 24
+        @animationX = x  : @animationY = y
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+
+    # animation
+        @diffX = 4
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+        for c = . to 5
+            poke @spriteReg, @spriteMeteor + (c / 2 - int(c / 2)) * 2
+            @animationX = @animationX - @diffX : @animationY = @animationY + @diffX
+            x = @animationX : y = @animationY
+            gosub setSpriteRightPositionSub
+            gosub updateSpritePositionSub
+        next
+
+
+    # preform explotion
+    @isMeteor = -1
+    gosub addExplosionToBoardSub
+    # add rock
+    @drawTo = @currentPlayerPosition
+    @selectedItemKey = 9
+    gosub writeGameBoardTileSub
+    # remove sprite
+    poke @spritesEnabled, peek(@spritesEnabled) and 254
+    @gameState = fn @removeGameState(@gameStateMeteor)
+    gosub hideAlertHandlerSub
+
+    @currentPlayerPosition = @newItem
+    gosub clearLogSub
+return
+
+leakExplosionHandlerSub:
+    gosub clearLogSub : print "methane explosion!";
+    gosub showWarningSub
+    # run the remove sub
+    @isMeteor = 0 : a = @currentPlayerPosition : @currentPlayerPosition = @pipeExit
+    gosub addExplosionToBoardSub
+    # remove sprite
+    @currentSprite = 6
+    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+    @gameState = fn @removeGameState(@gameStateLeakExplosion)
+    poke @spritesEnabled,  peek(@spritesEnabled) or (2 ^ @currentSprite)
+    @currentPlayerPosition = a
+return
+
+catastrophicEventHandlerSub:
+    if @level < 2 then catastrophicEventHandlerEnd
+    if fn @checkGameState(@gameStateAlienInvasion) then catastrophicEventHandlerEnd
+    if rnd(1) > @catastrophePercent then catastrophicEventHandlerEnd
+
+    c = @level - 1
+    c = int(rnd(1) * c) + 1
+    if c > 3 then c = 3
+
+    on c goto triggerMeteorEvent, triggerUfoAbductionEvent, triggerAlienInvasionEvent
+
+    triggerMeteorEvent:
+    c = @gameStateMeteor
+    goto setEventTriggerState
+
+    triggerUfoAbductionEvent:
+    c = @gameStateUfoAbduction
+    goto setEventTriggerState
+
+    triggerAlienInvasionEvent:
+    c = @gameStateAlienInvasion
+    # pass through
+
+    setEventTriggerState:
+    @gameState = fn @addGameState(c)
+    gosub clearLogSub : print "incoming danger!";
+    x = 34 : y = 20 : gosub locateCursorSub : print "{red}{5 184}{down}{5 left}{185}{186}e{188}{189}{down}{5 left}{5 190}"
+    gosub showWarningSub
+
+    catastrophicEventHandlerEnd:
+return
+
+updateTimerHandlerSub:
+    @timer = @timer - 1 : x = 2
+    if @timer < 0 then updateTimerLeak
+    
+    # update time lower
+        y = 17 - @timer : gosub locateCursorSub : print "   "
+        goto updateTimerDrawDone
+
+    updateTimerLeak:
+        y = 18 + @timer
+        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : gosub clearLogSub : print "time is up!"; : goto updateTimerHandlerEnd
+        gosub locateCursorSub : print  "{rvon}{pink}   {rvof}"
+
+    updateTimerDrawDone:
+
+    # start leak
+    if @timer = -1 then gosub startLeakSub
+    if @timer > -14 then updateTimerHandlerEnd
+        if @timer = -16 then gosub clearLogSub : print "warning! last turn"; : goto updateTimerHandlerShowWarning
+        gosub clearLogSub : print "warning!"; 17 + @timer; "turns left";
+        updateTimerHandlerShowWarning:
+        gosub showWarningSub
+    updateTimerHandlerEnd:
+return
+
+growTreeHandlerSub:
+    r = (@gameBoard(@drawTo) and @burning)
+    @gameBoard(@drawTo) = @tree or r
+    # sprite 3
+    @currentSprite = 3
+    c = 5 : b = 7
+    if r then c = 2 : b = 21
+    @selectedItemKey = b
+    gosub setSpritePositionByTileSub
+    # set first frame
+    poke @spriteReg + @currentSprite, @spriteTreeGrow
+    # set color
+    poke @spriteColor + @currentSprite, c
+    # enable
+    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+    # pause
+    for c = . to 100 : next
+    # show second frame
+    poke @spriteReg + @currentSprite, @spriteTreeGrow + 1
+    # pause
+    for c = . to 100 : next
+    gosub writeGameBoardTileSub
+    # disable
+    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+return
+
+# ---------------------> shared subs
 
 moveCowSub:
     # move cow
@@ -362,26 +625,6 @@ moveCowSub:
     if @moved < 0 then if a = 9 then gosub clearLogSub : print "Can't move";
 return
 
-addFireToBoardSub:
-    @gameBoard(@currentPlayerPosition) = @previousItem + @burning
-
-    gosub boardIndexToCharacterXYSub
-    c = 2
-    # turn tree red
-    for a=y to y+2
-        if a = y+2 then c = 10
-        for b=x to x+2
-            poke 55296 + b + (a * 40), c
-        next
-    next
-    gosub clearLogSub : print "cows are panicking";
-    if fn @checkGameState(@gameStateLeaking) then if @currentPlayerPosition = @pipeExit then @gameState = fn @addGameState(@gameStateLeakExplosion) : goto addFireToBoardEnd
-    @fireIndex = @currentPlayerPosition
-    @gameState = fn @addGameState(@gameStatePanicking)
-
-    addFireToBoardEnd:
-return
-
 startFireAnimationSub:
     if @fireIndex < 0 then startFireAnimationEnd
 
@@ -395,6 +638,51 @@ startFireAnimationSub:
     @fireIndex = -1
 
     startFireAnimationEnd:
+return
+
+startLeakSub:
+    # set game state
+    @gameState = fn @addGameState(@gameStateLeaking)
+    # enable sprite
+    @currentSprite = 6
+    poke @spriteReg + @currentSprite, @spriteGas
+    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+    gosub clearLogSub : print "methane is leaking!";
+    gosub showWarningSub
+return
+
+showUfoHandlerSub:
+    # show UFO sprite
+        @currentSprite = 0
+        poke @spriteReg, @spriteUFO
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        y = y - 24
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+        for i = . to 300 : next
+    # show UFO beam sprite
+        @currentSprite = 3
+        gosub boardIndexToCharacterXYSub
+        gosub updatePositionForSprite
+        gosub setSpriteRightPositionSub
+        gosub updateSpritePositionSub
+        poke @spriteReg + @currentSprite, @spriteBeam
+        poke @spriteColor + @currentSprite, 7
+        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
+return
+
+hideUfoHandlerSub:
+    # remove beam
+        poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+    # remove UFO
+        for i = . to 300 : next
+        poke @spritesEnabled, peek(@spritesEnabled) and 254
+return
+
+hideAlertHandlerSub:
+    x = 34 : y = 20 : gosub locateCursorSub : print "     {down}{5 left}     {down}{5 left}     "
 return
 
 addExplosionToBoardSub:
@@ -447,353 +735,32 @@ removeGameBoardItem:
     removeGameBoardItemEnd:
 return
 
-# pipe connection handler
-checkPipeConnectionHandlerSub:
-    # loop from begining to see if we reach the end
-    @requiredConnection = @pipeLeft
-    @pipeExit = @connectionStartPosition
-    for i =. to 55
-        @checkTile = @gameBoard(@pipeExit)
-        
-        # check if not connect
-        if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
-        # check if complete
-        if @pipeExit = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
-
-        # get next required connection
-        if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @pipeExit - 8 : goto validateGameBoardBounds
-        if (@checkTile and @pipeDown) = @pipeDown then if (@requiredConnection and @pipeDown) = . then @requiredConnection = @pipeUp : @nextIndex = @pipeExit + 8 : goto validateGameBoardBounds
-        if (@checkTile and @pipeLeft) = @pipeLeft then if (@requiredConnection and @pipeLeft) = . then @requiredConnection = @pipeRight : @nextIndex = @pipeExit - 1 : goto validateGameBoardBounds
-        if (@checkTile and @pipeRight) = @pipeRight then if (@requiredConnection and @pipeRight) = . then @requiredConnection = @pipeLeft : @nextIndex = @pipeExit + 1
-
-        validateGameBoardBounds:
-            if @nextIndex < 0 then i = 55 : goto endValidateGameBoardBounds
-            if @nextIndex > 55 then i = 55 : goto endValidateGameBoardBounds
-            @column = fn @getColumn(@pipeExit)
-            if @column = 0 then if @nextIndex = @pipeExit - 1 then i = 55 : goto endValidateGameBoardBounds
-            if @column = 7 then if @nextIndex = @pipeExit + 1 then i = 55 : goto endValidateGameBoardBounds
-
-        @pipeExit = @nextIndex
-        endValidateGameBoardBounds:
-    next
-
-    if fn @checkGameState(@gameStateComplete) then gosub clearLogSub : print "connection complete!";
-
-    # update leaking animation position
-    @currentSprite = 6
-    @drawTo = @pipeExit
-    gosub setSpritePositionByTileSub
-    poke @spriteReg + @currentSprite, @spriteGas
+# set sprite position for @currentSprite at @drawTo
+setSpritePositionByTileSub:
+    gosub getSpritePositionByTileSub
+    gosub updateSpritePositionSub
 return
 
-randomGameEventsHandlerSub:
-    @moved = -1
-    r = 1 : if fn @checkGameState(@gameStatePanicking) then r = 2
-    a = 8 * r : b = 1 * r : @ufoTarget = -1
-    for i = . to 56
-        @previousItem = @gameBoard(i)
-        if (@previousItem and @invincible) <> @invincible then if (@previousItem and @cow) = @cow then @ufoTarget = i
-        # skip past last moved to prevent double move
-        if i <= @moved then randomGameEventsHandlerEnd
-        if (@previousItem and @cow) <> @cow then randomGameEventsHandlerEnd
-        r = @cowMovePercent : if @checkGameState(@gameStatePanicking) then r = .
-        if rnd(1) > r then randomGameEventsHandlerEnd
-        # move cow
-        @drawTo = i
-        gosub moveCowSub
-        
-        randomGameEventsHandlerEnd:
-        if (@previousItem and @tree) <> @tree then treeEventHandlerEnd
-            @drawTo = i
-            # remove burning trees
-            @animationColor = 0
-            if (@previousItem and @destroy) = @destroy then gosub removeGameBoardItem : goto treeEventHandlerEnd
-            # grow trees
-            if (@previousItem and @growing) = @growing then gosub growTreeHandlerSub
-            # update burning trees to be destroyed
-            if (@previousItem and @burning) = @burning then @gameBoard(i) = ((@previousItem and not @burning) or @destroy)
-        treeEventHandlerEnd:
-    next
-    # if no cow could be abducted, change to alien invasion
-    if fn @checkGameState(@gameStateUfoAbduction) then if @ufoTarget = -1 then @gameState = fn @removeGameState(@gameStateUfoAbduction) : @gameState = fn @addGameState(@gameStateAlienInvasion)
+updateSpritePositionSub:
+    if not r then poke @spriteScreenRight, peek(@spriteScreenRight) and not (2 ^ @currentSprite)
+    if r then poke @spriteScreenRight, peek(@spriteScreenRight) or (2 ^ @currentSprite)
+    poke @spriteRegX + @currentSprite * 2, x
+    poke @spriteRegY + @currentSprite * 2, y
 return
 
-growTreeHandlerSub:
-    r = (@gameBoard(@drawTo) and @burning)
-    @gameBoard(@drawTo) = @tree or r
-    # sprite 3
-    @currentSprite = 3
-    c = 5 : b = 7
-    if r then c = 2 : b = 21
-    @selectedItemKey = b
-    gosub setSpritePositionByTileSub
-    # set first frame
-    poke @spriteReg + @currentSprite, @spriteTreeGrow
-    # set color
-    poke @spriteColor + @currentSprite, c
-    # enable
-    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-    # pause
-    for c = . to 100 : next
-    # show second frame
-    poke @spriteReg + @currentSprite, @spriteTreeGrow + 1
-    # pause
-    for c = . to 100 : next
-    gosub writeGameBoardTileSub
-    # disable
-    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
+getSpritePositionByTileSub:
+    gosub boardIndexToCharacterXYSub
+    gosub updatePositionForSprite
+    gosub setSpriteRightPositionSub
 return
 
-treeSpawnHandlerSub:
-    if rnd(1) > @treeGrowPercent then treeSpawnHandlerEnd
-    # spawn a tree in a random position on the game board
-    @drawTo = int(rnd(1) * 56)
-    if @gameBoard(@drawTo) <> @empty then treeSpawnHandlerEnd
-
-    @selectedItemKey = 17
-    gosub writeGameBoardTileSub
-
-    treeSpawnHandlerEnd:
+setSpriteRightPositionSub:
+    r = . : if x > 255 then x = x - 256 : r = -1
 return
 
-updateTimerHandlerSub:
-    @timer = @timer - 1 : x = 2
-    if @timer < 0 then updateTimerLeak
-    
-    # update time lower
-        y = 17 - @timer : gosub locateCursorSub : print "   "
-        goto updateTimerDrawDone
-
-    updateTimerLeak:
-        y = 18 + @timer
-        if @timer = -17 then @gameState = fn @addGameState(@gameStateOver) : gosub clearLogSub : print "time is up!"; : goto updateTimerHandlerEnd
-        gosub locateCursorSub : print  "{rvon}{pink}   {rvof}"
-
-    updateTimerDrawDone:
-
-    # start leak
-    if @timer = -1 then gosub startLeakSub
-    if @timer > -14 then updateTimerHandlerEnd
-        if @timer = -16 then gosub clearLogSub : print "warning! last turn"; : goto updateTimerHandlerShowWarning
-        gosub clearLogSub : print "warning!"; 17 + @timer; "turns left";
-        updateTimerHandlerShowWarning:
-        gosub showWarningSub
-    updateTimerHandlerEnd:
-return
-
-startLeakSub:
-    # set game state
-    @gameState = fn @addGameState(@gameStateLeaking)
-    # enable sprite
-    @currentSprite = 6
-    poke @spriteReg + @currentSprite, @spriteGas
-    poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-    gosub clearLogSub : print "methane is leaking!";
-    gosub showWarningSub
-return
-
-# feed item handler, move item from feeder to sidebar and replace
-nextItemHandlerSub:
-    @gameSidebar(0) = @nextItemKey
-    gosub locateItemSub : print @itemTiles$(@nextItemKey)
-    gosub generateNextPipeSub
-return
-
-endPanicHandlerSub:
-    if not fn @checkGameState(@gameStatePanicking) then endPanicHandlerEnd
-    if rnd(1) > .5 then endPanicHandlerEnd
-
-    @gameState = fn @removeGameState(@gameStatePanicking)
-    gosub clearLogSub : print "the cows have settled down";
-    
-    endPanicHandlerEnd:
-return
-
-# alien invasion handler
-alienInvasionHandlerSub:
-    gosub clearLogSub : print "alien invasion!";
-    for i = . to 3
-        @drawTo = int(rnd(1) * 56)
-        @previousItem = @gameBoard(@drawTo)
-        a = (@previousItem and @cow) <> @cow
-        if a then i = 3
-    next
-
-    # show UFO
-    gosub showUfoHandlerSub
-    # animate bean and show alien cow
-        @selectedItemKey = 20
-        gosub boardIndexToCharacterXYSub
-        for i = . to 20
-            r = (i / 2 - int(i / 2)) * 2
-            poke @spriteReg + @currentSprite, @spriteBeam + r
-            if i = 15 then gosub writeGameBoardTileSub : goto showAlienCowLoopEnd
-            for r = . to 50 : next
-            showAlienCowLoopEnd:
-        next
-    # remove ufo and beam
-    gosub hideUfoHandlerSub
-
-    if a then @gameState = fn @removeGameState(@gameStateAlienInvasion)
-    gosub hideAlertHandlerSub
-
-    gosub clearLogSub
-return
-
-# UFO abduction
-ufoAbductionHandlerSub:
-    gosub clearLogSub : print "alien abduction!";
-    @drawTo = @ufoTarget
-    @animationColor = -1
-    # show UFO
-    gosub showUfoHandlerSub
-    # animate bean and show alien cow
-        @selectedItemKey = 20
-        gosub boardIndexToCharacterXYSub
-        for i = . to 20
-            r = (i / 2 - int(i / 2)) * 2
-            poke @spriteReg + @currentSprite, @spriteBeam + r
-            if i = 15 then gosub removeGameBoardItem : goto hideAlienCowLoopEnd
-            for r = . to 50 : next
-            hideAlienCowLoopEnd:
-        next
-    # remove ufo and beam
-    gosub hideUfoHandlerSub
-    @ufoTarget = -1
-    @gameState = fn @removeGameState(@gameStateUfoAbduction)
-    @gameState = fn @addGameState(@gameStateAlienInvasion)
-    gosub hideAlertHandlerSub
-
-    gosub clearLogSub
-return
-
-showUfoHandlerSub:
-    # show UFO sprite
-        @currentSprite = 0
-        poke @spriteReg, @spriteUFO
-        gosub boardIndexToCharacterXYSub
-        gosub updatePositionForSprite
-        y = y - 24
-        gosub setSpriteRightPositionSub
-        gosub updateSpritePositionSub
-        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-        for i = . to 300 : next
-    # show UFO beam sprite
-        @currentSprite = 3
-        gosub boardIndexToCharacterXYSub
-        gosub updatePositionForSprite
-        gosub setSpriteRightPositionSub
-        gosub updateSpritePositionSub
-        poke @spriteReg + @currentSprite, @spriteBeam
-        poke @spriteColor + @currentSprite, 7
-        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-return
-
-hideUfoHandlerSub:
-    # remove beam
-        poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
-    # remove UFO
-        for i = . to 300 : next
-        poke @spritesEnabled, peek(@spritesEnabled) and 254
-return
-
-hideAlertHandlerSub:
-    x = 34 : y = 20 : gosub locateCursorSub : print "     {down}{5 left}     {down}{5 left}     "
-return
-
-# meteor strike
-meteorStrikeHandlerSub:
-    gosub clearLogSub : print "meteor strike!";
-    @newItem = @currentPlayerPosition
-    # used for explosion
-    @currentPlayerPosition = int(rnd(1) * 56)
-
-    # setup meteor sprite
-        @currentSprite = 0
-        poke @spriteReg, @spriteMeteor
-        @drawTo = @currentPlayerPosition
-        gosub boardIndexToCharacterXYSub
-        gosub updatePositionForSprite
-        # ending position
-        @animateToX = x : @animateToY = y
-        # starting position
-        x = x + 24 : y = y - 24
-        @animationX = x  : @animationY = y
-        gosub setSpriteRightPositionSub
-        gosub updateSpritePositionSub
-
-    # animation
-        @diffX = 4
-        poke @spritesEnabled, peek(@spritesEnabled) or (2 ^ @currentSprite)
-        for c = . to 5
-            poke @spriteReg, @spriteMeteor + (c / 2 - int(c / 2)) * 2
-            @animationX = @animationX - @diffX : @animationY = @animationY + @diffX
-            x = @animationX : y = @animationY
-            gosub setSpriteRightPositionSub
-            gosub updateSpritePositionSub
-        next
-
-
-    # preform explotion
-    @isMeteor = -1
-    gosub addExplosionToBoardSub
-    # add rock
-    @drawTo = @currentPlayerPosition
-    @selectedItemKey = 9
-    gosub writeGameBoardTileSub
-    # remove sprite
-    poke @spritesEnabled, peek(@spritesEnabled) and 254
-    @gameState = fn @removeGameState(@gameStateMeteor)
-    gosub hideAlertHandlerSub
-
-    @currentPlayerPosition = @newItem
-    gosub clearLogSub
-return
-
-catastrophicEventHandlerSub:
-    if @level < 2 then catastrophicEventHandlerEnd
-    if fn @checkGameState(@gameStateAlienInvasion) then catastrophicEventHandlerEnd
-    if rnd(1) > @catastrophePercent then catastrophicEventHandlerEnd
-
-    c = @level - 1
-    c = int(rnd(1) * c) + 1
-    if c > 3 then c = 3
-
-    on c goto triggerMeteorEvent, triggerUfoAbductionEvent, triggerAlienInvasionEvent
-
-    triggerMeteorEvent:
-    c = @gameStateMeteor
-    goto setEventTriggerState
-
-    triggerUfoAbductionEvent:
-    c = @gameStateUfoAbduction
-    goto setEventTriggerState
-
-    triggerAlienInvasionEvent:
-    c = @gameStateAlienInvasion
-    # pass through
-
-    setEventTriggerState:
-    @gameState = fn @addGameState(c)
-    gosub clearLogSub : print "incoming danger!";
-    x = 34 : y = 20 : gosub locateCursorSub : print "{red}{5 184}{down}{5 left}{185}{186}e{188}{189}{down}{5 left}{5 190}"
-    gosub showWarningSub
-
-    catastrophicEventHandlerEnd:
-return
-
-leakExplosionHandlerSub:
-    gosub clearLogSub : print "methane explosion!";
-    gosub showWarningSub
-    # run the remove sub
-    @isMeteor = 0 : a = @currentPlayerPosition : @currentPlayerPosition = @pipeExit
-    gosub addExplosionToBoardSub
-    # remove sprite
-    @currentSprite = 6
-    poke @spritesEnabled, peek(@spritesEnabled) and not (2 ^ @currentSprite)
-    @gameState = fn @removeGameState(@gameStateLeakExplosion)
-    poke @spritesEnabled,  peek(@spritesEnabled) or (2 ^ @currentSprite)
-    @currentPlayerPosition = a
+updatePositionForSprite:
+    x = 24 + x * 8
+    y = 50 + y * 8
 return
 
 showWarningSub:
@@ -802,64 +769,6 @@ showWarningSub:
         for r = . to 200 : next
         poke @borderColor, 11
         for r = . to 200 : next
-    next
-return
-
-# replenish tools
-replenishToolsSub:
-    c = 7
-    if @level = 1 then c = 5
-    for @selectedSidebarIndex = 3 to 1 step -1
-        @selectedItemKey = @levelTools(int(rnd(1) * c))
-        if @level > 2 then if @selectedItemKey = 12 then @selectedItemKey = 18
-        if @level > 3 then if @selectedItemKey = 11 then @selectedItemKey = 19
-        @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
-        gosub locateItemSub : print @itemTiles$(@selectedItemKey)
-    next
-    @toolCount = 3
-    gosub clearLogSub : print "tools replenished";
-return
-
-# draw board item
-drawBoardItemsSub:
-    for @drawTo = 0 to 55
-        c = @gameBoard(@drawTo)
-
-        if c = @empty then drawBoardItemEnd
-        if c = @cow + @invincible then @selectedItemKey = 20 : goto drawBoardItemSkip
-        if c = @cow then @selectedItemKey = 8 : goto drawBoardItemSkip
-        if c = @tree + @growing then @selectedItemKey = 17 : goto drawBoardItemSkip
-        if c = @tree then @selectedItemKey = 7 : goto drawBoardItemSkip
-        if c = @rock then @selectedItemKey = 9 : goto drawBoardItemSkip
-
-        drawBoardItemSkip:
-        gosub writeGameBoardTileSub
-        drawBoardItemEnd:
-    next
-return
-
-# write feeder handler, select random item and write to feeder area
-generateNextPipeSub:
-    i = len(@feeder$)
-    if i < 1 then gosub fillFeederSub : i = len(@feeder$)
-    r = int(rnd(1) * i) + 1
-    @nextItemKey = val(mid$(@feeder$, r , 1))
-    @feeder$ = left$(@feeder$, r - 1) + mid$(@feeder$, r + 1)
-    x = 35 : y = 2
-    gosub locateCursorSub : print @itemTiles$(@nextItemKey)
-return
-
-clearLogSub:
-    x=7 : y=24 : gosub locateCursorSub
-    print "{black}                          ";
-    gosub locateCursorSub
-return
-
-fillFeederSub:
-    for c = 1 to 6
-        for i = . to 1
-            @feeder$ = @feeder$ + right$(str$(c), 1)
-        next
     next
 return
 
@@ -901,6 +810,94 @@ generateLevelSub:
     gosub clearLogSub : print "level"; @level;
 return
 
+# draw board item
+drawBoardItemsSub:
+    for @drawTo = 0 to 55
+        c = @gameBoard(@drawTo)
+
+        if c = @empty then drawBoardItemEnd
+        if c = @cow + @invincible then @selectedItemKey = 20 : goto drawBoardItemSkip
+        if c = @cow then @selectedItemKey = 8 : goto drawBoardItemSkip
+        if c = @tree + @growing then @selectedItemKey = 17 : goto drawBoardItemSkip
+        if c = @tree then @selectedItemKey = 7 : goto drawBoardItemSkip
+        if c = @rock then @selectedItemKey = 9 : goto drawBoardItemSkip
+
+        drawBoardItemSkip:
+        gosub writeGameBoardTileSub
+        drawBoardItemEnd:
+    next
+return
+
+# replenish tools
+replenishToolsSub:
+    c = 7
+    if @level = 1 then c = 5
+    for @selectedSidebarIndex = 3 to 1 step -1
+        @selectedItemKey = @levelTools(int(rnd(1) * c))
+        if @level > 2 then if @selectedItemKey = 12 then @selectedItemKey = 18
+        if @level > 3 then if @selectedItemKey = 11 then @selectedItemKey = 19
+        @gameSidebar(@selectedSidebarIndex) = @selectedItemKey
+        gosub locateItemSub : print @itemTiles$(@selectedItemKey)
+    next
+    @toolCount = 3
+    gosub clearLogSub : print "tools replenished";
+return
+
+# feed item handler, move item from feeder to sidebar and replace
+nextItemHandlerSub:
+    @gameSidebar(0) = @nextItemKey
+    gosub locateItemSub : print @itemTiles$(@nextItemKey)
+    gosub generateNextPipeSub
+return
+
+# write feeder handler, select random item and write to feeder area
+generateNextPipeSub:
+    i = len(@feeder$)
+    if i < 1 then gosub fillFeederSub : i = len(@feeder$)
+    r = int(rnd(1) * i) + 1
+    @nextItemKey = val(mid$(@feeder$, r , 1))
+    @feeder$ = left$(@feeder$, r - 1) + mid$(@feeder$, r + 1)
+    x = 35 : y = 2
+    gosub locateCursorSub : print @itemTiles$(@nextItemKey)
+return
+
+fillFeederSub:
+    for c = 1 to 6
+        for i = . to 1
+            @feeder$ = @feeder$ + right$(str$(c), 1)
+        next
+    next
+return
+
+# write to @gameSidebar sidebar, convert location (@selectedSidebarIndex selected item) (0,1,2,3) to x,y
+locateItemSub:
+    x = 35
+    y = 6 + @selectedSidebarIndex * 3
+    gosub locateCursorSub
+return
+
+# write @selectedItemKey to game board convert @drawTo to x,y
+writeGameBoardTileSub:
+    gosub boardIndexToCharacterXYSub
+    @gameBoard(@drawTo) = @itemValues(@selectedItemKey)
+    gosub locateCursorSub
+    print @itemTiles$(@selectedItemKey);
+return
+
+# convert board index to x,y coordinates
+boardIndexToCharacterXYSub:
+    x = 8 + fn @getColumn(@drawTo) * 3
+    y = 2 + int(@drawTo / 8) * 3
+return
+
+# ---------------------> non loop and shared
+
+clearLogSub:
+    x=7 : y=24 : gosub locateCursorSub
+    print "{black}                          ";
+    gosub locateCursorSub
+return
+
 # 6 9 13 level 1, 15 level 2,4 7 10 12 level 3, 11 14 level 4, 2-3 5 8 level 5
 generateSeedSub:
     @seed = rnd(.)
@@ -910,30 +907,24 @@ return
 
 drawGameBoardSub:
     # draw main game board
-    r1$=" {rvon}     {rvof} {rvon}                          {rvof} {91}{92}{93}{94}{95}"
-    r2$="       {rvon} {rvof}                        {rvon} {rvof}"
-    r3$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
-    r4$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
-    r5$="       {rvon}                          {rvof}"
-    r6$="       {rvon}                          {rvof}"
-    r7$=" {rvon}     {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
-
     print "{clr}{blk}             methane mayhem"
-    print r1$
+    print " {rvon}     {rvof} {rvon}                          {rvof} {91}{92}{93}{94}{95}"
+    
+    @keyInput$=" {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}   {rvon} {rvof}"
 
     for i=. to 2
-        print r4$
+        print @keyInput$
     next
-    print r3$
+    print " {rvon} {rvof}   {rvon} {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon} {rvof}{42}{42}{42}{rvon} {rvof}"
     for i=. to 11
-        print r4$
+        print @keyInput$
     next
-    print r7$
+    print " {rvon}     {rvof} {rvon} {rvof}                        {rvon} {rvof} {rvon}     {rvof}"
     for i=. to 3
-        print r2$
+        print "       {rvon} {rvof}                        {rvon} {rvof}"
     next
 
-    print r6$;
+    print "       {rvon}                          {rvof}";
 return
 
 initializeTimerSub:
@@ -944,6 +935,13 @@ initializeTimerSub:
         gosub locateCursorSub : print "{rvon}{grn}   {rvof}"
         @timer = @timer + 1
     next
+return
+
+# set cursor position to x,y
+locateCursorSub:
+    poke 211, x
+    poke 214, y
+    sys 58732
 return
 
 joystickResetSub:

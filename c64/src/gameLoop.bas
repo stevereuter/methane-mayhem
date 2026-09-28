@@ -19,7 +19,7 @@ poke @spriteRegY + 4, 98
 poke @selectorSpriteColor, 1
 poke @spriteColor + 2, 1
 # turn on sprites
-poke @spritesEnabled, peek(@spritesEnabled) or 6
+poke @spritesEnabled, 6
 @currentPlayerPosition = 0
 @selectedSidebarIndex = 0
 gosub setSelectorFrameSub
@@ -47,7 +47,7 @@ for @gameLoop=. to @loopMax
     gameLoopDone:
 next
 # hide sprites
-poke @spritesEnabled, peek(@spritesEnabled) and not 198
+poke @spritesEnabled, 0
 if fn @checkGameState(@gameStateChallengeMode) then gameStateCompleteCheckEnd
 if not fn @checkGameState(@gameStateComplete) then gameStateCompleteCheckEnd
     @level = @level + 1
