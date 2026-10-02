@@ -136,6 +136,13 @@ let @twoFrameAnimation = .
 
 # arrays
 dim @colorPulse(6)
+    @colorPulse(0) = 1
+    @colorPulse(1) = 15
+    @colorPulse(2) = 12
+    @colorPulse(3) = 11
+    @colorPulse(4) = 12
+    @colorPulse(5) = 15
+
 # game board, 8x7 grid for 56 total cells
 dim @gameBoard(56)
 dim @gameSidebar(4)
@@ -147,53 +154,54 @@ dim @itemTiles$(21)
 dim @explosionPositions(5)
 
 dim @levelItems(4)
-# cow
-@levelItems(0) = 8
-# tree
-@levelItems(1) = 7
-# rock
-@levelItems(2) = 9
-# alien cow
-@levelItems(3) = 20
+    # cow
+    @levelItems(0) = 8
+    # tree
+    @levelItems(1) = 7
+    # rock
+    @levelItems(2) = 9
+    # alien cow
+    @levelItems(3) = 20
 
 dim @levelTools(7)
-#rotate
-@levelTools(0) = 15
-@levelTools(1) = 16
-# giddy up
-@levelTools(2) = 10
-# axe
-@levelTools(3) = 12
-# match (level 1)
-@levelTools(4) = 18
-# pick axe (level 2)
-@levelTools(5) = 11
-# dynamite 
-@levelTools(6) = 19
+    #rotate
+    @levelTools(0) = 15
+    @levelTools(1) = 16
+    # giddy up
+    @levelTools(2) = 10
+    # axe
+    @levelTools(3) = 12
+    # match (level 1)
+    @levelTools(4) = 18
+    # pick axe (level 2)
+    @levelTools(5) = 11
+    # dynamite 
+    @levelTools(6) = 19
 
-@colorPulse(0) = 1
-@colorPulse(1) = 15
-@colorPulse(2) = 12
-@colorPulse(3) = 11
-@colorPulse(4) = 12
-@colorPulse(5) = 15
 
 dim @selectorSpritePointer(19)
-@selectorSpritePointer(0) = @spriteSelector
-@selectorSpritePointer(1) = @spriteSelector + 16
-@selectorSpritePointer(2) = @spriteSelector + 17
-@selectorSpritePointer(3) = @spriteSelector + 18
-@selectorSpritePointer(4) = @spriteSelector + 19
-@selectorSpritePointer(5) = @spriteSelector + 20
-@selectorSpritePointer(6) = @spriteSelector + 21
-@selectorSpritePointer(10) = @spriteSelector + 22
-@selectorSpritePointer(11) = @spriteSelector + 23
-@selectorSpritePointer(12) = @spriteSelector + 24
-@selectorSpritePointer(15) = @spriteSelector + 25
-@selectorSpritePointer(16) = @spriteSelector + 26
-@selectorSpritePointer(18) = @spriteSelector + 27
-@selectorSpritePointer(19) = @spriteSelector + 28
+    @selectorSpritePointer(0) = @spriteSelector
+    @selectorSpritePointer(1) = @spriteSelector + 16
+    @selectorSpritePointer(2) = @spriteSelector + 17
+    @selectorSpritePointer(3) = @spriteSelector + 18
+    @selectorSpritePointer(4) = @spriteSelector + 19
+    @selectorSpritePointer(5) = @spriteSelector + 20
+    @selectorSpritePointer(6) = @spriteSelector + 21
+    @selectorSpritePointer(10) = @spriteSelector + 22
+    @selectorSpritePointer(11) = @spriteSelector + 23
+    @selectorSpritePointer(12) = @spriteSelector + 24
+    @selectorSpritePointer(15) = @spriteSelector + 25
+    @selectorSpritePointer(16) = @spriteSelector + 26
+    @selectorSpritePointer(18) = @spriteSelector + 27
+    @selectorSpritePointer(19) = @spriteSelector + 28
 
+dim @gameStats%(6)
+    # 0 score
+    # 1 pipes placed
+    # 2 starting cows
+    # 3 starting trees
+    # 4 starting rocks
+    # 5 pipes connected
 
 # all item images
 # empty

@@ -48,10 +48,3 @@ for @gameLoop=. to @loopMax
 next
 # hide sprites
 poke @spritesEnabled, 0
-if fn @checkGameState(@gameStateChallengeMode) then gameStateCompleteCheckEnd
-if not fn @checkGameState(@gameStateComplete) then gameStateCompleteCheckEnd
-    @level = @level + 1
-    @catastrophePercent = @level / 10
-    for i = . to 3000 : next
-    goto gameStart
-gameStateCompleteCheckEnd:

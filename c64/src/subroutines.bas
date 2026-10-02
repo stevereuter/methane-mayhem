@@ -101,6 +101,7 @@ placeItemHandlerSub:
     placePipeHandler:
         gosub writeGameBoardTileSub
         @gameBoard(@drawTo) = @selectedItem
+        @gameStats%(1) = @gameStats%(1) + 1
         gosub clearLogSub : print "checking connections...";
         gosub checkPipeConnectionHandlerSub
         gosub clearLogSub
@@ -230,7 +231,7 @@ checkPipeConnectionHandlerSub:
         # check if not connect
         if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if @pipeExit = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : i = 55 : goto endValidateGameBoardBounds
+        if @pipeExit = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : @gameStats%(5) = i : i = 55 : goto endValidateGameBoardBounds
 
         # get next required connection
         if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @pipeExit - 8 : goto validateGameBoardBounds
@@ -812,15 +813,20 @@ return
 
 # draw board item
 drawBoardItemsSub:
+    @gameStats%(1) = .
+    @gameStats%(2) = .
+    @gameStats%(3) = .
+    @gameStats%(4) = .
+    @gameStats%(5) = .
     for @drawTo = 0 to 55
         c = @gameBoard(@drawTo)
 
         if c = @empty then drawBoardItemEnd
-        if c = @cow + @invincible then @selectedItemKey = 20 : goto drawBoardItemSkip
-        if c = @cow then @selectedItemKey = 8 : goto drawBoardItemSkip
-        if c = @tree + @growing then @selectedItemKey = 17 : goto drawBoardItemSkip
-        if c = @tree then @selectedItemKey = 7 : goto drawBoardItemSkip
-        if c = @rock then @selectedItemKey = 9 : goto drawBoardItemSkip
+        if c = @cow + @invincible then @selectedItemKey = 20 : @gameStats%(2) = @gameStats%(2) + 1 : goto drawBoardItemSkip
+        if c = @cow then @selectedItemKey = 8 : @gameStats%(2) = @gameStats%(2) + 1 : goto drawBoardItemSkip
+        # if c = @tree + @growing then @selectedItemKey = 17 : goto drawBoardItemSkip
+        if c = @tree then @selectedItemKey = 7 : @gameStats%(3) = @gameStats%(3) + 1 : goto drawBoardItemSkip
+        if c = @rock then @selectedItemKey = 9 : @gameStats%(4) = @gameStats%(4) + 1 : goto drawBoardItemSkip
 
         drawBoardItemSkip:
         gosub writeGameBoardTileSub
@@ -899,10 +905,10 @@ clearLogSub:
 return
 
 # 6 9 13 level 1, 15 level 2,4 7 10 12 level 3, 11 14 level 4, 2-3 5 8 level 5
-generateSeedSub:
-    @seed = rnd(.)
-    if fn @checkGameState(@gameStateChallengeMode) then input "enter a number for the challenge mode seed"; @seed : @seed = rnd(-@seed)
-    if fn @checkGameState(@gameStateChallengeMode) then @level = int(rnd(1) * 5) + 1
+generateChallengeSeedSub:
+    input "enter a number for the challenge mode seed"; @seed
+    @seed = rnd(-@seed)
+    @level = int(rnd(1) * 5)
 return
 
 drawGameBoardSub:

@@ -18,7 +18,3 @@ for i = . to 2000
     if i >=2000 then i = .
     introLoopDone:
 next
-
-@level = 1
-gosub generateSeedSub
-@catastrophePercent = @level / 10
