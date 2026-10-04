@@ -5,3 +5,5 @@ gosub drawGameBoardSub
 gosub generateLevelSub
 
 gosub initializeTimerSub
+
+gosub drawScoreSub

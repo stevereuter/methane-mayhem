@@ -943,6 +943,14 @@ initializeTimerSub:
     next
 return
 
+drawScoreSub:
+    x = 1 : y = 21 : gosub locateCursorSub
+    print "{blk}score"
+    @keyInput$ = str$(@gameStats%(0))
+    x = 6 - len(@keyInput$) : y = 22 : gosub locateCursorSub
+    print @keyInput$
+return
+
 # set cursor position to x,y
 locateCursorSub:
     poke 211, x

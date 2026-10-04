@@ -24,7 +24,8 @@ goto gameStart
 
 start:
 #include "intro.bas"
-@level = 0
+@level = .
+@gameStats%(0) = .
 @seed = -rnd(.)
 
 gameStart:
