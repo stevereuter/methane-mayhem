@@ -14,12 +14,12 @@ gameOver:
 # game over
 #include "gameOver.bas"
 
-# TODO: retry and continue branch
 # continue connected level, go to next level
 # continue on game over or challenge mode, end game go to title
 # retry, restart current level
 if fn @checkGameState(@gameStateChallengeMode) then start
 if not fn @checkGameState(@gameStateComplete) then start
+if @level = 5 then start
 goto gameStart
 
 start:

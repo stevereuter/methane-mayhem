@@ -231,7 +231,7 @@ checkPipeConnectionHandlerSub:
         # check if not connect
         if (@checkTile and @requiredConnection) = . then i = 55 : goto endValidateGameBoardBounds
         # check if complete
-        if @pipeExit = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : @gameStats%(5) = i : i = 55 : goto endValidateGameBoardBounds
+        if @pipeExit = @connectionEndPosition then if (@checkTile and @pipeRight) = @pipeRight then @gameState = fn @addGameState(@gameStateComplete) : @gameStats%(5) = i + 1 : i = 55 : goto endValidateGameBoardBounds
 
         # get next required connection
         if (@checkTile and @pipeUp) = @pipeUp then if (@requiredConnection and @pipeUp) = . then @requiredConnection = @pipeDown : @nextIndex = @pipeExit - 8 : goto validateGameBoardBounds
@@ -906,9 +906,10 @@ return
 
 # 6 9 13 level 1, 15 level 2,4 7 10 12 level 3, 11 14 level 4, 2-3 5 8 level 5
 generateChallengeSeedSub:
-    input "enter a number for the challenge mode seed"; @seed
+    x = 4 : y = 20 : gosub locateCursorSub
+    input "enter challenge value"; @seed
     @seed = rnd(-@seed)
-    @level = int(rnd(1) * 5)
+    @level = int(rnd(1) * 5) + 1
 return
 
 drawGameBoardSub:

@@ -79,6 +79,23 @@ Custom characters and sprites are authored in Aseprite and exported as JSON (see
 - `c64/tools/add_config_binaries.py` reads each entry's `path`, `type` (`characters` or `sprites`), and `loadAddress`, converts the Aseprite JSON into a raw binary at that load address, and adds it to the built D64 image under the entry's `discName` (e.g. `chars`, `sprites`)
 - These PRGs are separate from the main program PRG — they're loaded from disk at runtime rather than compiled into `Methane Mayhem.prg`
 
+`asepriteColorMap` defines the global palette. Each binary entry can optionally
+include a `colors` array using the same `{ "c64Index", "hex", "role" } format
+to assign its own `shared1`, `shared2`, and/or `background` colors. Each role
+and hex may appear only once in this array. An assigned role replaces that
+global shared slot for this asset only; unspecified slots keep their global
+defaults. Entries without `colors` retain the global mapping unchanged.
+Use identical assignments for a screen's `screen-map`, `screen-chars`, and
+`screen-colors` entries. For example, the splash uses dark grey (index 11)
+as `shared1` and white (index 1) as `shared2`, while the game charset uses
+black (index 0) as `shared2`.
+
+For screen exports, global `multicolor` palette entries become the per-tile
+character color, encoded as `11` in character data and with the multicolor
+flag in color RAM. Shared-color assignments affect pixel encoding, not VIC-II
+register initialization: the display code must still set the matching
+background, shared1, and shared2 registers when switching assets.
+
 At runtime, `c64/src/fileLoader.bas` performs the multi-file load: it steps through an `on x goto` state machine that issues sequential `load "chars", 8, 1` / `load "sprites", 8, 1` calls (each `load` reloads BASIC and resumes at the next state) until all configured binaries are loaded from disk.
 
 Output files are created in `c64/build/`.

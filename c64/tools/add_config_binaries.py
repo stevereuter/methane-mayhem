@@ -189,6 +189,40 @@ def parse_color_map(config: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     return by_hex
 
 
+def build_asset_color_map(
+    entry: dict[str, Any], by_hex: dict[str, list[dict[str, Any]]]
+) -> dict[str, list[dict[str, Any]]]:
+    if "colors" not in entry:
+        return by_hex
+
+    label = entry.get("name", entry.get("path", "<unknown>"))
+    colors = entry["colors"]
+    if not isinstance(colors, list):
+        fail(f"binaries entry '{label}' field 'colors' must be an array")
+
+    overrides = parse_color_map({"asepriteColorMap": colors})
+    roles: set[str] = set()
+    for rules in overrides.values():
+        if len(rules) != 1:
+            fail(f"binaries entry '{label}' colors must assign each hex to only one shared role")
+        for rule in rules:
+            role = str(rule["role"])
+            if role not in {"background", "shared1", "shared2"}:
+                fail(f"binaries entry '{label}' colors only supports background, shared1, shared2")
+            if role in roles:
+                fail(f"binaries entry '{label}' colors assigns role '{role}' more than once")
+            roles.add(role)
+
+    # Replace shared slots, but retain palette mappings for single-color hires detection.
+    effective = {
+        hex_key: [rule for rule in rules if rule["role"] not in roles]
+        for hex_key, rules in by_hex.items()
+    }
+    for hex_key, rules in overrides.items():
+        effective.setdefault(hex_key, []).extend(rules)
+    return {hex_key: rules for hex_key, rules in effective.items() if rules}
+
+
 def pick_preferred_rule(rules: list[dict[str, Any]]) -> dict[str, Any]:
     return sorted(rules, key=lambda rule: ROLE_PRIORITY.get(str(rule["role"]), 999))[0]
 
@@ -831,7 +865,8 @@ def generate_asset_bytes(
     if asset_type not in {"screen-map", "screen-chars", "screen-colors", "json", "mixed-charset-source", "mixed-charset", "sprites", "characters"}:
         fail(f"Unsupported binaries entry type '{asset_type}' for path {path}")
 
-    # For sprite data, we only need the JSON structure, not color mapping
+    by_hex = build_asset_color_map(entry, by_hex)
+
     if asset_type == "sprites":
         sprite_json = json_cache.get(source_file)
         if sprite_json is None:
@@ -854,6 +889,10 @@ def generate_asset_bytes(
 
     if asset_type == "screen-map":
         return generate_screen_map_bytes(screen_json)
+    if asset_type in {"screen-chars", "screen-colors"}:
+        for rule in raw_to_rule.values():
+            if rule["role"] == "multicolor":
+                rule["role"] = "character"
     if asset_type == "screen-chars":
         return generate_character_bytes(screen_json, raw_to_rule)
 

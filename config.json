@@ -1,20 +1,62 @@
 {
     "name": "Commodore BASIC Template",
-    "version": "0.6.0",
+    "version": "1.0.0",
     "binaries": [
         {
             "name": "Custom Characters",
             "path": "assets/c64-character-set_Character_Set_Main_mixed_charset_source.json",
             "type": "characters",
             "loadAddress": "00 C0",
-            "discName": "chars"
+            "discName": "chars",
+            "colors": [
+                { "c64Index": 11, "hex": "#626262FF", "role": "shared1" },
+                { "c64Index": 0, "hex": "#000000FF", "role": "shared2" }
+            ]
         },
         {
             "name": "Sprites",
             "path": "assets/c64-sprites_Sprites_sprites.json",
             "type": "sprites",
             "loadAddress": "00 E0",
-            "discName": "sprites"
+            "discName": "sprites",
+            "colors": [
+                { "c64Index": 11, "hex": "#626262FF", "role": "shared1" },
+                { "c64Index": 0, "hex": "#000000FF", "role": "shared2" }
+            ]
+        },
+        {
+            "name": "Splash Screen",
+            "path": "assets/splash_screenmap.json",
+            "type": "screen-map",
+            "loadAddress": "00 B4",
+            "discName": "screen",
+            "colors": [
+                { "c64Index": 11, "hex": "#626262FF", "role": "shared1" },
+                { "c64Index": 1, "hex": "#FFFFFFFF", "role": "shared2" }
+            ]
+        },
+        {
+            "name": "Splash Characters",
+            "path": "assets/splash_screenmap.json",
+            "type": "screen-chars",
+            "enabled": true,
+            "loadAddress": "00 B8",
+            "discName": "splash",
+            "colors": [
+                { "c64Index": 11, "hex": "#626262FF", "role": "shared1" },
+                { "c64Index": 1, "hex": "#FFFFFFFF", "role": "shared2" }
+            ]
+        },
+        {
+            "name": "Splash Colors",
+            "path": "assets/splash_screenmap.json",
+            "type": "screen-colors",
+            "loadAddress": "00 D8",
+            "discName": "color",
+            "colors": [
+                { "c64Index": 11, "hex": "#626262FF", "role": "shared1" },
+                { "c64Index": 1, "hex": "#FFFFFFFF", "role": "shared2" }
+            ]
         }
     ],
     "asepriteColorMap": [
@@ -34,8 +76,6 @@
         { "c64Index": 13, "hex": "#B7FF86FF", "role": "standard" },
         { "c64Index": 14, "hex": "#7385FFFF", "role": "standard" },
         { "c64Index": 15, "hex": "#CDCDCDFF", "role": "standard" },
-        { "c64Index": 11, "hex": "#626262FF", "role": "shared1" },
-        { "c64Index": 0, "hex": "#000000FF", "role": "shared2" },
         { "c64Index": 5, "hex": "#00000000", "role": "background" }
     ]
 }
