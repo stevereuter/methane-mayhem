@@ -73,4 +73,4 @@ for i = . to 2000
 next
 
 if r then retry
-@gameStats%(0) = c
+@gameStats%(0) = b
