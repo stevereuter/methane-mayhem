@@ -68,8 +68,6 @@ let b = .
 let c = .
 let @ufoTarget = -1
 let @toolCount = .
-let @startX = 88
-let @startY = 66
 let @borderColor = 53280
 
 # game states

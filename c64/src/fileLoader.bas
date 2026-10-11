@@ -4,6 +4,8 @@ on x goto loadSplashScreen, loadSplashScreenChars, loadSplashScreenColors, loadC
 
 # load splash screen memory
 loadSplashScreen:
+    print "{clr}loading methane mayhem"
+    print "by steviesaurus dev"
     load "screen", 8, 1
 
 # load splash screen characters

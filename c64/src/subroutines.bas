@@ -50,7 +50,7 @@ playerMoveHandlerSub:
     # play area positioning, 24x24 cells in an 8x7 grid
     # direction
     @drawTo = @currentPlayerPosition
-    c = fn @getColumn(@currentPlayerPosition)
+    c = fn @getColumn(@drawTo)
     if c = 7 then if @directionRight then @isSidebar = -1 : goto boardSelectorHandlerDone
     if @directionUp then @drawTo = @drawTo - 8
     if @directionDown then @drawTo = @drawTo + 8
@@ -85,7 +85,7 @@ placeItemHandlerSub:
     # turn off selectors
     poke @spritesEnabled, peek(@spritesEnabled) and 121
 
-    @previousItem = @gameBoard(@currentPlayerPosition)
+    @previousItem = @gameBoard(@drawTo)
 
     if @selectedSidebarIndex <> . then utilityHandler
     if @selectedItem = @previousItem then feedNextItemHandler

@@ -1,30 +1,26 @@
 # pointer color
 @colorPulsePointer = 0
-# x position
-@positionX = @startX
-# x right side
-@sidebarX = @positionX
-# y position
-@positionY = @startY
 # new x position
-@newPositionX = 0
+@newPositionX = .
 # new y position
-@newPositionY = 0
-poke @spriteRegX + 2, @positionX
-poke @spriteRegY + 2, @positionY
+@newPositionY = .
+# x position
+poke @spriteRegX + 2, 88
+# y position
+poke @spriteRegY + 2, 66
 # use right side for sprite 1
 poke @spriteScreenRight, peek(@spriteScreenRight) or 4
 poke @spriteRegX + 4, 48
 poke @spriteRegY + 4, 98
 poke @selectorSpriteColor, 1
 poke @spriteColor + 2, 1
-# turn on sprites
-poke @spritesEnabled, 6
-@currentPlayerPosition = 0
-@selectedSidebarIndex = 0
+@currentPlayerPosition = .
+@selectedSidebarIndex = .
 gosub setSelectorFrameSub
 gosub joystickResetSub
 @gameState = @gameState and @gameStateChallengeMode
+# turn on sprites
+poke @spritesEnabled, 6
 # main game loop, use for loop as it's faster than goto
 for @gameLoop=. to @loopMax
     gosub joystickInputHandlerSub
