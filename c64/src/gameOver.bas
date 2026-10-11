@@ -19,19 +19,21 @@ for i = . to 56
     if (@checkTile and @tree) = @tree then @gameStats%(3) = @gameStats%(3) - 1
     if (@checkTile and @rock) = @rock then @gameStats%(4) = @gameStats%(4) - 1
 next
-c = @gameStats%(0)
-if fn @checkGameState(@gameStateComplete) then c = c + 1000
+# level score
+c = 0
+if fn @checkGameState(@gameStateComplete) then c = 1000
+# waste
 a = (@gameStats%(5) - @gameStats%(1)) * 20
-c = a + c
+c = c + a
+y = 8 : gosub locateCursorSub : print "{blk}waste";
+if a < 0 then print "{red}";
+if a >= 0 then print "{grn}";
+x = 28 - len(str$(a)) : gosub locateCursorSub : print a
+
+# bonuses
 if @gameStats%(2) < 1 then c = c + 250
 if @gameStats%(3) < 1 then c = c + 50
 if @gameStats%(4) < 1 then c = c + 100
-b = @timer >= 0
-if b then c = c + 500
-
-# show stats and maybe reset game to create a pause before restarting
-y = 8 : gosub locateCursorSub : print "{blk}waste{red}";
-x = 28 - len(str$(a)) : gosub locateCursorSub : print a
 
 x = 12 : y = 9 : gosub locateCursorSub : print "{blk}tree hugger"
 if @gameStats%(3) > 0 then x = 27 : gosub locateCursorSub : print "{red}0"
@@ -45,10 +47,16 @@ x = 12 : y = 11 : gosub locateCursorSub : print "{blk}animal lover"
 if @gameStats%(2) > 0 then x = 27 : gosub locateCursorSub : print "{red}0"
 if @gameStats%(2) < 1 then x = 25 : gosub locateCursorSub : print "{grn}250"
 
+# timer
+b = @timer * 20
+if @timer >= 0 then b = 500 + @timer * 100
+c = c + b
 x = 12 : y = 12 : gosub locateCursorSub : print "{blk}clean air"
-if not b then x = 27 : gosub locateCursorSub : print "{red}0"
-if b then x = 25 : gosub locateCursorSub : print "{grn}500"
+if b < 0 then x = 27 : gosub locateCursorSub : print "{red}";
+if b >= 0 then x = 24 : gosub locateCursorSub : print "{grn}";
+x = 28 - len(str$(b)) : gosub locateCursorSub : print b
 
+# totals
 x = 12 : y = 14 : gosub locateCursorSub : print "{blk}total"
 y = 15 : gosub locateCursorSub : print "score"
 
